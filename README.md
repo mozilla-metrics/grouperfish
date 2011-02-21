@@ -31,11 +31,11 @@ Nevertheless, if you are interested in helping out or if you have your own ideas
 Components
 ----------
 
-* [grundle](http://github.com/michaelku/grundle) -- this project: Mainly a central place for docs like this and github tickets etc. Not much actual code.
+* [grundle](https://github.com/michaelku/grundle) -- this project: Mainly a central place for docs like this and github tickets etc. Not much actual code.
 
-* [grundle-rest](http://github.com/michaelku/grundle-rest) -- A node-service for REST clients. They add documents and retrieve clusters here, in JSON format. Documents and clusters are stored in [riak](https://github.com/basho/riak), one bucket per corpus.
+* [grundle-rest](https://github.com/michaelku/grundle-rest) -- A node-service for REST clients. They add documents and retrieve clusters here, in JSON format. Documents and clusters are stored in [riak](https://github.com/basho/riak), one bucket per corpus.
 
-* [grundle-worker](http://github.com/michaelku/grundle-worker) A java based clustering worker. Developed to run in a web container (tomcat, jetty...) to allow querying the status. Actual processing is triggered by subscribing to a [message queue](http://www.zeromq.org/). Java is used for painless integration with Mahout/Hadoop.
+* [grundle-worker](https://github.com/michaelku/grundle-worker) A java based clustering worker. Developed to run in a web container (tomcat, jetty...) to allow querying the status. Actual processing is triggered by subscribing to a [message queue](http://www.zeromq.org/). Java is used for painless integration with Mahout/Hadoop.
 
 
 Roadmap
@@ -50,7 +50,7 @@ Roadmap
 * Incremental building of clusters (using k-means), at least for big clusters
 (where mapreduce is used). At least full rebuilds for the others.
 * Serial processing, maybe worker threads (ugh).
-* Look at the [big picture](http://github.com/michaelku/grundle/doc/medium_sized_picture.pdf) 
+* Look at the [big picture](https://github.com/michaelku/grundle/blob/master/doc/medium_sized_picture.pdf) 
 for insight through lines, boxes and colored text.
 * Full (re-)build from a TSV dump of the form: collection-id, document-id, text
 
