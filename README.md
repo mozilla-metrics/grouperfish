@@ -35,32 +35,32 @@ Components
 
 * [grundle-rest](https://github.com/michaelku/grundle-rest) -- A node-service for REST clients. They add documents and retrieve clusters here, in JSON format. Documents and clusters are stored in [riak](https://github.com/basho/riak), one bucket per corpus.
 
-* [grundle-worker](https://github.com/michaelku/grundle-worker) A java based clustering worker. Developed to run in a web container (tomcat, jetty...) to allow querying the status. Actual processing is triggered by subscribing to a [message queue](http://www.zeromq.org/). Java is used for painless integration with Mahout/Hadoop.
+* [grundle-worker](https://github.com/michaelku/grundle-worker) -- A java based clustering worker. Developed to run in a web container (tomcat, jetty...) to allow querying the status. Actual processing is triggered by subscribing to a [message queue](http://www.zeromq.org/). Java is used for painless integration with Mahout/Hadoop.
 
 
 Roadmap
 -------
 
-### Backyard Stage (Feb 20, 2011)
+### 0.1 *(The Backyard Stage)* (Feb 20, 2011)
 * A REST service that takes your documents and throws them away.
 * It should return its favorite three clusters on every GET query.
 
-### Basement Level (March 15, 2011)
-* Working end-to-end process of storing docs and retrieving clusters.
-* Incremental building of clusters (using k-means), at least for big clusters
-(where mapreduce is used). At least full rebuilds for the others.
-* Serial processing, maybe worker threads (ugh).
+### 0.2 *(The Basement Level)* (March 15, 2011)
+* Working end-to-end process of storing docs and retrieving clusters: First implementation that can be used for input.
+* Building of clusters, using [Canopy Clustering](https://cwiki.apache.org/confluence/display/MAHOUT/Canopy+Clustering) and then [K-Means](https://cwiki.apache.org/confluence/display/MAHOUT/K-Means+Clustering)).
+* Incremental building (where mapreduce is used). At least full rebuilds for the others.
+* Serial processing.
 * Look at the [big picture](https://github.com/michaelku/grundle/blob/master/doc/medium_sized_picture.pdf) 
 for insight through lines, boxes and colored text.
 * Full (re-)build from a TSV dump of the form: collection-id, document-id, text
 
-### Garage Phase (Early April, 2011)
+### 0.3 *(Garage Phase)* (Early April, 2011)
 * Multihost worker scaling (using a lock service, maybe zookeeper).
-* Queue compaction. Or a multi-level queue. Or heapification. Or some other 
-vague term hinting on how to handle live updates to clusters of varying size.
-* More active collections (for input that means: latest version of Firefox, latest broken websites) need to be updated more quickly.
+* Queue compaction. Or a multi-level queue. Or heapification (or some other 
+vague term hinting on how to handle live updates to clusters of varying size).
+* The more active collections (for input that means: latest version of Firefox, latest broken websites) need to be updated more quickly.
 
-### Front Lawn Status (May - June 2011), aka v1.0
+### 1.0 *(Front Lawn Status)* (May - June 2011)
 * Web frontend for introspection of collections and clusters.
 * Public message push when clusters are updated (maybe AMQP).
 * Have a beer and BBQ in the sun.
