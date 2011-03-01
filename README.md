@@ -9,9 +9,9 @@ To clients, Grundle is an HTTP service exposing three REST API methods:
 
 #### *add document*
 
-    POST /<namespace>/<collection-key>
+    POST /collections/<namespace>/<collection-key>
     
-    {"id": <doc-id>, "document": <textToCluster>}
+    {"id": <doc-id>, "text": <textToCluster>}
 
 Queues a document for clustering. If documents with the same collection-key exist already, the new document is clustered together with them, and added to an existing cluster if appropriate. If the collection key does not exist yet, a new collection is created. The namespace serves as a general scope for collection key and document id. In later versions we’ll be able to manage permissions on this level, so that one Grundle installation can serve any number of clients.
 
