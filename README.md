@@ -1,11 +1,11 @@
-#Grundle
+#Grouperfish
 #### A scalable text clustering service for the web
 
-The nascent Grundle project aims to provide a simple, online, scalable text clustering solution as a REST/JSON service. Initially this service is needed to drive sites and themes for [Firefox Input](http://input.mozilla.com), as described in [bug 629019](https://bugzilla.mozilla.org/show_bug.cgi?id=629019). The backing library used for clustering is [Apache Mahout](http://mahout.apache.org/).
+The nascent Grouperfish project aims to provide a simple, online, scalable text clustering solution as a REST/JSON service. Initially this service is needed to drive sites and themes for [Firefox Input](http://input.mozilla.com), as described in [bug 629019](https://bugzilla.mozilla.org/show_bug.cgi?id=629019). The backing library used for clustering is [Apache Mahout](http://mahout.apache.org/).
 
 ### Service Requirements
 
-To clients, Grundle is an HTTP service exposing three REST API methods:
+To clients, Grouperfish is an HTTP service exposing three REST API methods:
 
 #### *add document*
 
@@ -13,7 +13,7 @@ To clients, Grundle is an HTTP service exposing three REST API methods:
     
     {"id": <doc-id>, "text": <textToCluster>}
 
-Queues a document for clustering. If documents with the same collection-key exist already, the new document is clustered together with them, and added to an existing cluster if appropriate. If the collection key does not exist yet, a new collection is created. The namespace serves as a general scope for collection key and document id. In later versions we’ll be able to manage permissions on this level, so that one Grundle installation can serve any number of clients.
+Queues a document for clustering. If documents with the same collection-key exist already, the new document is clustered together with them, and added to an existing cluster if appropriate. If the collection key does not exist yet, a new collection is created. The namespace serves as a general scope for collection key and document id. In later versions we’ll be able to manage permissions on this level, so that one Grouperfish installation can serve any number of clients.
 
 #### *get all clusters*
 
@@ -48,11 +48,11 @@ Nevertheless, if you are interested in helping out or if you have your own ideas
 
 ## Components
 
-* [grundle](https://github.com/michaelku/grundle) -- this project: Mainly a central place for docs like this and github tickets etc. Not much actual code.
+* [grouperfish](https://github.com/michaelku/grouperfish) -- this project: Mainly a central place for docs like this and github tickets etc. Not much actual code.
 
-* [grundle-rest](https://github.com/michaelku/grundle-rest) -- A node-service for REST clients. They add documents and retrieve clusters here, in JSON format. Documents and clusters are stored in [riak](https://github.com/basho/riak), one bucket per corpus.
+* [grouper-rest](https://github.com/michaelku/grouper-rest) -- A node-service for REST clients. They add documents and retrieve clusters here, in JSON format. Documents and clusters are stored in [riak](https://github.com/basho/riak), one bucket per corpus.
 
-* [grundle-worker](https://github.com/michaelku/grundle-worker) -- A java based clustering worker. Developed to run in a web container (tomcat, jetty...) to allow querying the status. Actual processing is triggered by subscribing to a [message queue](http://www.rabbitmq.com/). Java is used for painless integration with Mahout/Hadoop.
+* [grouper-worker](https://github.com/michaelku/grouper-worker) -- A java based clustering worker. Developed to run in a web container (tomcat, jetty...) to allow querying the status. Actual processing is triggered by subscribing to a [message queue](http://www.rabbitmq.com/). Java is used for painless integration with Mahout/Hadoop.
 
 
 Roadmap
