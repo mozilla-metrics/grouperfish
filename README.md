@@ -50,7 +50,7 @@ Nevertheless, if you are interested in helping out or if you have your own ideas
 
 * [grouperfish](https://github.com/michaelku/grouperfish) -- this project: Mainly a central place for docs like this and github tickets etc. Not much actual code.
 
-* [grouper-rest](https://github.com/michaelku/grouper-rest) -- A node-service for REST clients. They add documents and retrieve clusters here, in JSON format. Documents and clusters are stored in [riak](https://github.com/basho/riak), one bucket per corpus.
+* [grouper-rest](https://github.com/michaelku/grouper-rest) -- A node-service for REST clients. They add documents and retrieve clusters here, in JSON format. Documents and clusters are stored in [hbase](http://hbase.apache.org).
 
 * [grouper-worker](https://github.com/michaelku/grouper-worker) -- A java based clustering worker. Developed to run in a web container (tomcat, jetty...) to allow querying the status. Actual processing is triggered by subscribing to a [message queue](http://www.rabbitmq.com/). Java is used for painless integration with Mahout/Hadoop.
 
@@ -74,17 +74,17 @@ Roadmap
 * Incremental building of clusters ("like crystals in a water glass").
 * Full initial build (or rebuild) of clusters from a TSV dump of the form: collection-key, document-id, text.
 * Still serial processing (but already using a queue).
+* Allow for any value stored in redis to expire, by putting serialized copies into hbase. 
 
 ### 0.3 *(Garage Phase)* (Early April, 2011)
 * Locking using redis or zookeeper…
 * …allows for any number of workers
-* Failure recovery: reconstruct redis in-memory state from riak using M/R
+* Failure recovery: reconstruct redis in-memory state from hbase using M/R
 
 ## 0.4 
 * The more active collections (for input that means: latest version of Firefox, latest broken websites) need to be updated more often.
-* Allow for any value stored in redis to expire, by putting serialized copies into riak. This way we don't hit the mempory limit over time.
 
 ### 1.0 *(Front Lawn Status)* (May - June 2011)
 * Web frontend for introspection of collections and clusters.
 * Push messages whenever clusters have changed (AMQP).
-* Have a beer and BBQ in the sun.
+
