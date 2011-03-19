@@ -1,7 +1,15 @@
-#Grouperfish
+# Grouperfish
+
 #### A scalable text clustering service for the web
 
 The nascent Grouperfish project aims to provide a simple, online, scalable text clustering solution as a REST/JSON service. Initially this service is needed to drive sites and themes for [Firefox Input](http://input.mozilla.com), as described in [bug 629019](https://bugzilla.mozilla.org/show_bug.cgi?id=629019). The backing library used for clustering is [Apache Mahout](http://mahout.apache.org/).
+
+### Submodules
+
+Note that all functionality is implemented in two sub-modules:
+- [rest](git://github.com/michaelku/grouper-rest.git) node-based server for client request handling
+- [worker](git://github.com/michaelku/grouper-worker.git) java process for vectorizing and clustering
+
 
 ### Service Requirements
 
@@ -33,6 +41,8 @@ Fetches only the cluster with the given label.
 
     [<doc-id-1>, <doc-id-2>, …, <doc-id-n>]
 
+
+Note that cluster labels and document IDs are strings.
 
 ### Architecture Requirements
 
@@ -68,20 +78,21 @@ Roadmap
 >
 > -- Douglas Adams / Life, the Universe, and Everything 
 
-### 0.2 *(The Basement Level)* (March 15, 2011)
+### 0.2 *(The Basement Level)* (Mid-End March, 2011)
 * Working end-to-end process of storing docs and retrieving clusters: First implementation that can be used for input.
 * Building of clusters, using [Canopy Clustering](https://cwiki.apache.org/confluence/display/MAHOUT/Canopy+Clustering) and then [K-Means](https://cwiki.apache.org/confluence/display/MAHOUT/K-Means+Clustering)).
-* Incremental building of clusters ("like crystals in a water glass").
 * Full initial build (or rebuild) of clusters from a TSV dump of the form: collection-key, document-id, text.
-* Still serial processing (but already using a queue).
+* Still serial processing (batch scheduling).
 * Allow for any value stored in redis to expire, by putting serialized copies into hbase. 
 
 ### 0.3 *(Garage Phase)* (Early April, 2011)
-* Locking using redis or zookeeper…
+* Incremental building of clusters ("like crystals in a water glass").
+* Use message queue
+* Locking using Redis
 * …allows for any number of workers
-* Failure recovery: reconstruct redis in-memory state from hbase using M/R
 
-## 0.4 
+### 0.4 
+* Cache GETs using Redis
 * The more active collections (for input that means: latest version of Firefox, latest broken websites) need to be updated more often.
 
 ### 1.0 *(Front Lawn Status)* (May - June 2011)
