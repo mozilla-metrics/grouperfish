@@ -1,0 +1,35 @@
+{ "//": "CAUTION: "
+, "//": "Do not change the defaults."
+, "//": "Either use ./grouperfish.json or specify your own config file"
+, "//": "on the command line when starting a grouperfish process."
+, "//": "The '//' entries are comments and can be omitted in your config."
+
+, "//": "The Grouperfish frontend will listen here."
+, "restPort": "8030"
+
+, "//": "Spin up the hbase REST (stargate) service on this host."
+, "//": "For multiple servers you need to setup a reverse proxy."
+, "hbaseRest": "http://localhost:8080"
+
+, "//": "Quorum members separated by comma"
+, "hbaseZk": "localhost:2181"
+
+, "//": "Redis host:port -- Currently not used"
+, "redis": ""
+
+, "//": "RabbitMQ broker host:port -- Currently not used"
+, "rabbitmq": ""
+
+, "//": "Will be used to prefix all HBase table names Grouperfish uses."
+, "prefix": "grouperfish_"
+
+, "//": "Base directory for Grouperfish files in HDFS."
+, "hadoopBase": "/grouperfish"
+
+, "//": "ADVANCED: row key generation scheme: 'simple' or 'reverse_parts'."
+, "keyScheme": "reverse_parts"
+
+, "//": "ADVANCED: znode for HBase. Use null for hbase default."
+, "hbaseZkNode": null
+
+}

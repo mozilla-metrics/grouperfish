@@ -7,8 +7,10 @@ The nascent Grouperfish project aims to provide a simple, online, scalable text 
 ### Submodules
 
 Note that all functionality is implemented in two sub-modules:
-- [rest](git://github.com/michaelku/grouper-rest.git) node-based server for client request handling
-- [worker](git://github.com/michaelku/grouper-worker.git) java process for vectorizing and clustering
+
+* [rest](https://github.com/michaelku/grouper-rest) node-based server for client request handling
+
+* [worker](https://github.com/michaelku/grouper-worker) java process for vectorizing and clustering
 
 
 ### Service Requirements

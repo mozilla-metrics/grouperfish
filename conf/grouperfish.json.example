@@ -1,0 +1,8 @@
+{ "//": "Grouperfish configuration"
+, "//": "Override values from defaults.json here as you see fit."
+
+, "//": "Like this:"
+
+, "someString": "value"
+, "someNumber": 42
+}
