@@ -24,7 +24,7 @@
 , "prefix": "grouperfish_"
 
 , "//": "Base directory for Grouperfish files in HDFS."
-, "hadoopBase": "/grouperfish"
+, "dfsBase": "/grouperfish"
 
 , "//": "ADVANCED: row key generation scheme: 'simple' or 'reverse_parts'."
 , "keyScheme": "reverse_parts"
