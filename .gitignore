@@ -1,1 +1,6 @@
 conf/grouperfish.json
+.project
+.classpath
+.settings/
+target/
+

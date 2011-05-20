@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="grouper-clusterd" verbose="4">
+	<test name="run-all">
+	    <groups>
+            <run>
+                <include name="unit" />
+             </run>
+        </groups>
+		<packages>
+			<package name="org.mozilla.grouper.*" />
+		</packages>
+	</test>
+</suite>

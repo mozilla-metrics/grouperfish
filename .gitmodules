@@ -1,6 +1,0 @@
-[submodule "vendor/rest"]
-	path = vendor/rest
-	url = git://github.com/mozilla-metrics/grouper-rest.git
-[submodule "vendor/worker"]
-	path = vendor/worker
-	url = git://github.com/mozilla-metrics/grouper-worker.git
