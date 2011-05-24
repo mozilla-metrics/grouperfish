@@ -57,7 +57,7 @@ public class Cli {
     int[] counters =
       new StreamImporter(conf_, namespace, patterns).load(in);
 
-    log.info("Counters: #discarded/#used/#docs/#collections: {}",
+    log.info("Counters: [used, discarded, docs, collections]: {}",
              Arrays.toString(counters));
     return 0;
   }
