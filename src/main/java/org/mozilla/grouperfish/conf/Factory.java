@@ -37,7 +37,7 @@ public class Factory {
       /* javadoc says getenv throws npe on missing key, but does not... */
     }
     if (home == null) {
-      home = new File(path("../../")).getAbsolutePath();
+      home = new File(path("./")).getAbsolutePath();
     }
 
     final String defaultPath = path(home, "conf/defaults.json");
