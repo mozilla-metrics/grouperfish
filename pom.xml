@@ -71,7 +71,37 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.6-SNAPSHOT</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/mahout-core-0.6-SNAPSHOT.jar</systemPath>
+      <exclusions>
+        <exclusion>
+          <artifactId>hbase</artifactId>
+          <groupId>org.apache.mahout.hbase</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-math</artifactId>
+      <version>0.6-SNAPSHOT</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/mahout-math-0.6-SNAPSHOT.jar</systemPath>
+      <exclusions>
+        <exclusion>
+          <artifactId>hbase</artifactId>
+          <groupId>org.apache.mahout.hbase</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-utils</artifactId>
+      <version>0.6-SNAPSHOT</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/mahout-utils-0.6-SNAPSHOT.jar</systemPath>
       <exclusions>
         <exclusion>
           <artifactId>hbase</artifactId>
@@ -84,16 +114,20 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
-      <version>0.20.2-CDH3B4</version>
-      <scope>provided</scope>
+      <version>0.20.2-cdh3u0</version>
     </dependency>
     
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase</artifactId>
-      <version>0.90.1-CDH3B4</version>
+      <version>0.90.1-cdh3u0</version>
     </dependency>
-    
+
+    <dependency>
+    	<groupId>org.apache.lucene</groupId>
+    	<artifactId>lucene-analyzers</artifactId>
+    	<version>3.1.0</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -111,23 +145,6 @@
             <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
           </suiteXmlFiles>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-dependencies</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <!-- configure the plugin here -->
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
