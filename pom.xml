@@ -6,7 +6,7 @@
   <artifactId>grouperfish</artifactId>
   <version>0.3-SNAPSHOT</version>
 
-  <name>Grouperfish</name>
+  <name>grouperfish</name>
   <description>Clustering engine for the web</description>
   <url>https://github.com/mozilla-metrics/grouperfish</url>
 
@@ -73,13 +73,7 @@
       <artifactId>mahout-core</artifactId>
       <version>0.6-SNAPSHOT</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/lib/mahout-core-0.6-SNAPSHOT.jar</systemPath>
-      <exclusions>
-        <exclusion>
-          <artifactId>hbase</artifactId>
-          <groupId>org.apache.mahout.hbase</groupId>
-        </exclusion>
-      </exclusions>
+      <systemPath>${basedir}/lib/mahout-core-0.6-SNAPSHOT.jar</systemPath>
     </dependency>
     
     <dependency>
@@ -88,12 +82,6 @@
       <version>0.6-SNAPSHOT</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/mahout-math-0.6-SNAPSHOT.jar</systemPath>
-      <exclusions>
-        <exclusion>
-          <artifactId>hbase</artifactId>
-          <groupId>org.apache.mahout.hbase</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     
     <dependency>
@@ -102,12 +90,6 @@
       <version>0.6-SNAPSHOT</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/mahout-utils-0.6-SNAPSHOT.jar</systemPath>
-      <exclusions>
-        <exclusion>
-          <artifactId>hbase</artifactId>
-          <groupId>org.apache.mahout.hbase</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <!-- cloudera repository -->
