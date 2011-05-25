@@ -110,6 +110,14 @@
     	<artifactId>lucene-analyzers</artifactId>
     	<version>3.1.0</version>
     </dependency>
+    
+    <dependency>
+      <groupId>org.mozilla.metrics</groupId>
+      <artifactId>bagheera</artifactId>
+      <version>0.1</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/bagheera-0.1.jar</systemPath>
+    </dependency>
   </dependencies>
 
   <build>
