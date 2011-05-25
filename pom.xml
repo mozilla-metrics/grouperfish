@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.mozilla.metrics</groupId>
+  <groupId>com.mozilla.metrics</groupId>
   <artifactId>grouperfish</artifactId>
   <version>0.3-SNAPSHOT</version>
 
@@ -112,9 +112,9 @@
     </dependency>
     
     <dependency>
-      <groupId>org.mozilla.metrics</groupId>
+      <groupId>com.mozilla.metrics</groupId>
       <artifactId>bagheera</artifactId>
-      <version>0.1</version>
+      <version>0.2</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/bagheera-0.1.jar</systemPath>
     </dependency>
