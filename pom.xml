@@ -116,7 +116,7 @@
       <artifactId>bagheera</artifactId>
       <version>0.2</version>
       <scope>system</scope>
-      <systemPath>${basedir}/lib/bagheera-0.1.jar</systemPath>
+      <systemPath>${basedir}/lib/bagheera-0.2.jar</systemPath>
     </dependency>
   </dependencies>
 
