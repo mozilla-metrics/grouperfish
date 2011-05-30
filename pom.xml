@@ -179,7 +179,7 @@
               </descriptors>
               <archive>
                 <manifest>
-                  <mainClass>org.mozilla.grouperfish.cli.Cli</mainClass>
+                  <mainClass>com.mozilla.grouperfish.cli.Cli</mainClass>
                 </manifest>
               </archive>
             </configuration>
@@ -197,7 +197,7 @@
               <addClasspath>true</addClasspath>
               <classpathPrefix>${settings.localRepository}</classpathPrefix>
               <classpathLayoutType>repository</classpathLayoutType>
-              <mainClass>org.mozilla.grouperfish.cli.Cli</mainClass>
+              <mainClass>com.mozilla.grouperfish.cli.Cli</mainClass>
             </manifest>
           </archive>
         </configuration>
