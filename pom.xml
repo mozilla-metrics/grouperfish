@@ -67,29 +67,22 @@
       <version>1.5.8</version>
     </dependency>
 
-    <!-- local repository / Mahout snapshot -->
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-core</artifactId>
-      <version>0.6-SNAPSHOT</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/mahout-core-0.6-SNAPSHOT.jar</systemPath>
+      <version>0.5</version>
     </dependency>
     
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-math</artifactId>
-      <version>0.6-SNAPSHOT</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/mahout-math-0.6-SNAPSHOT.jar</systemPath>
+      <version>0.5</version>
     </dependency>
     
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-utils</artifactId>
-      <version>0.6-SNAPSHOT</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/mahout-utils-0.6-SNAPSHOT.jar</systemPath>
+      <version>0.5</version>
     </dependency>
 
     <!-- cloudera repository -->
