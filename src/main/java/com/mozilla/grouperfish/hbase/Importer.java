@@ -72,7 +72,7 @@ public class Importer<T extends Model> {
 	 * fun work environment... until everyone gets garbage collected that is.
 	 */
 	private ExecutorService workers() {
-		return new ThreadPoolExecutor(10, 20, 90, TimeUnit.SECONDS,
+		return new ThreadPoolExecutor(5, 10, 90, TimeUnit.SECONDS,
 
 		new ArrayBlockingQueue<Runnable>(100),
 
