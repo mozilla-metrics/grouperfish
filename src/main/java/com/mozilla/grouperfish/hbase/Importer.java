@@ -62,7 +62,7 @@ public class Importer<T extends Model> {
 	}
 
 	public void load(T item) throws IOException {
-		Put put = Adapters.create(factory_, model_).put(item);
+		Put put = factory_.adapter(model_).put(item);
 		factory_.table(model_).put(put);
 	}
 
@@ -136,7 +136,7 @@ public class Importer<T extends Model> {
 
 		Insert(final List<T> items) {
 			items_ = items;
-			adapter_ = items_.size() > 0 ? Adapters.create(factory_, model_) : null;
+			adapter_ = items_.size() > 0 ? factory_.adapter(model_) : null;
 		}
 
 		@Override

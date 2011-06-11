@@ -21,7 +21,7 @@ import com.mozilla.grouperfish.model.Model;
 
 /**
  * Provides database services.
- * 
+ *
  * TODO: Actually this should be split into two interfaces: 1) Public Storage
  * api hiding HBase from clients by giving them Importer etc. 2) The other as an
  * internal api to services like keys, schema and so on.
@@ -56,7 +56,7 @@ public class Factory {
 		return new Importer<T>(this, model);
 	}
 
-	public <T extends Model> Iterable<T> source(Class<T> model) {
+	public <T extends Model> Source<T> source(Class<T> model) {
 		return new Source<T>(this, model);
 	}
 
@@ -81,6 +81,20 @@ public class Factory {
 
 	void release(HTableInterface table) {
 		tableFactory_.releaseHTableInterface(table);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <S extends Model> RowAdapter<S> adapter(final Class<S> model) {
+		if (model == Cluster.class) {
+			return (RowAdapter<S>) new ClusterAdapter(this);
+		}
+		if (model == Collection.class) {
+			return (RowAdapter<S>) new CollectionAdapter(this);
+		}
+		if (model == Document.class) {
+			return (RowAdapter<S>) new DocumentAdapter(this);
+		}
+		return Assert.unreachable(RowAdapter.class);
 	}
 
 	private static final Map<Class<?>, String> tableByType_;

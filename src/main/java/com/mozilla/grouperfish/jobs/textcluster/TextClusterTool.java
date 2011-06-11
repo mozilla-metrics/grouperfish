@@ -34,6 +34,7 @@ import com.mozilla.grouperfish.model.Collection;
 import com.mozilla.grouperfish.model.Collection.Attribute;
 import com.mozilla.grouperfish.model.CollectionRef;
 
+
 public class TextClusterTool extends AbstractCollectionTool {
 
 	public TextClusterTool(Conf conf, Configuration hadoopConf) {
@@ -46,8 +47,8 @@ public class TextClusterTool extends AbstractCollectionTool {
 	}
 
 	@Override
-	public int run(CollectionRef collection, long timestamp) throws Exception {
-		return run(collection, timestamp, true);
+	public int run(Collection collection, long timestamp) throws Exception {
+		return runSequential(collection, timestamp);
 	}
 
 	@Override
@@ -56,15 +57,12 @@ public class TextClusterTool extends AbstractCollectionTool {
 		return null;
 	}
 
-	protected int run(CollectionRef collection, long timestamp, boolean sequential) throws Exception {
-		if (!sequential)
-			return super.run(collection, timestamp);
-
+	protected int runSequential(Collection collection, long timestamp) throws Exception {
 		// In memory version.
 		// :TODO: Add mapper+reducer based on divide & conquer (chunk & merge),
 		// maybe also based on more thorough parallelization.
 		final CollectionTool source = new VectorizeDocuments(conf_, getConf());
-		final Path inputDir = util_.outputDir(collection, timestamp, source);
+		final Path inputDir = util_.outputDir(collection.ref(), timestamp, source);
 		final Path p = new Path(inputDir, "tfidf-vectors/part-r-00000");
 
 		List<BaseCluster> stage1 = fromVectors(p);
@@ -77,15 +75,15 @@ public class TextClusterTool extends AbstractCollectionTool {
 			// Until then we use the document label of the cluster medoid (the
 			// id).
 			final String label = ((NamedVector) cluster.medoid()).getName();
-			final ClusterRef ref = new ClusterRef(collection, timestamp, label);
-			clusters.add(new Cluster(ref, cluster));
+			final ClusterRef clusterRef = new ClusterRef(collection.ref(), timestamp, label);
+			clusters.add(new Cluster(clusterRef, cluster));
 		}
 		final Importer<Cluster> importer = new Factory(conf_).importer(Cluster.class);
 		importer.load(clusters);
 
 		// Rebuild complete: Activate changes in collection meta...
 		final Importer<Collection> collectionImporter = new Factory(conf_).importer(Collection.class);
-		collectionImporter.load(new Collection(collection).set(Attribute.REBUILT, timestamp));
+		collectionImporter.load(collection.set(Attribute.REBUILT, timestamp));
 
 		return 0;
 	}

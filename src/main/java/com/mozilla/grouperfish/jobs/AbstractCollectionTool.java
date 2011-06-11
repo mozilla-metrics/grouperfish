@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.conf.Conf;
+import com.mozilla.grouperfish.hbase.Factory;
+import com.mozilla.grouperfish.model.Collection;
 import com.mozilla.grouperfish.model.CollectionRef;
 
 /**
@@ -40,8 +42,8 @@ public abstract class AbstractCollectionTool extends Configured implements Tool,
 			return usage(1);
 		}
 
-		CollectionRef collection = new CollectionRef(args[0], args[1]);
-
+		CollectionRef ref = new CollectionRef(args[0], args[1]);
+		Collection collection = new Factory(conf_).source(Collection.class).get(ref);
 		return run(collection, timestamp);
 	}
 
@@ -49,9 +51,9 @@ public abstract class AbstractCollectionTool extends Configured implements Tool,
 	 * @see CollectionTool#run(CollectionRef, long)
 	 */
 	@Override
-	public int run(CollectionRef collection, long timestamp) throws Exception {
+	public int run(Collection collection, long timestamp) throws Exception {
 
-		final Path dest = util_.outputDir(collection, timestamp, this);
+		final Path dest = util_.outputDir(collection.ref(), timestamp, this);
 		FileSystem fs = FileSystem.get(dest.toUri(), getConf());
 		if (fs.exists(dest)) {
 			// Should not happen in everyday usage, due to locking + timestamp.
@@ -60,8 +62,11 @@ public abstract class AbstractCollectionTool extends Configured implements Tool,
 			fs.delete(dest, true);
 		}
 
-		Job job = createSubmittableJob(collection, timestamp);
-		log.info("Running job: {}", job.getJobName());
+		new Util(conf_).setJobTracker(getConf(), collection);
+
+		Job job = createSubmittableJob(collection.ref(), timestamp);
+		log.info("Running job: {} using jobtracker: {}",
+				 job.getJobName(), getConf().getStringCollection("mapred.job.tracker"));
 		return job.waitForCompletion(true) ? 0 : 1;
 	}
 
@@ -71,7 +76,7 @@ public abstract class AbstractCollectionTool extends Configured implements Tool,
 
 	/**
 	 * Create a job to run on hadoop.
-	 * 
+	 *
 	 * Tools can implement this to create their job, or override
 	 * {@link #run(CollectionRef, long)}.
 	 */

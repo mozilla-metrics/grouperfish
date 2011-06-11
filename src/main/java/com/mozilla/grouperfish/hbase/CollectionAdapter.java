@@ -3,16 +3,21 @@ package com.mozilla.grouperfish.hbase;
 import java.util.Map;
 import java.util.NavigableMap;
 
+import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.hbase.Schema.Collections.Main;
 import com.mozilla.grouperfish.model.Collection;
 import com.mozilla.grouperfish.model.CollectionRef;
 import com.mozilla.grouperfish.model.Collection.Attribute;
+import com.mozilla.grouperfish.model.Document;
+import com.mozilla.grouperfish.model.Ref;
 
-class CollectionAdapter implements RowAdapter<Collection> {
+public class CollectionAdapter implements RowAdapter<Collection> {
 
 	static final String DEFAULT = "DEFAULT";
 	final Factory factory_;
@@ -80,6 +85,24 @@ class CollectionAdapter implements RowAdapter<Collection> {
 		maybeSet(c, Attribute.PROCESSED, main, Main.Configuration.PROCESSED.qualifier(DEFAULT));
 
 		return c;
+	}
+
+	@Override
+	public Get get(Ref<Collection> ref) {
+		Assert.check(ref instanceof CollectionRef);
+		return get((CollectionRef) ref);
+	}
+
+	public Get get(CollectionRef ref) {
+		return new Get(Bytes.toBytes(factory_.keys().key(ref)));
+	}
+
+	public Source<Document> documents(CollectionRef ref) {
+		final Scan scan = new Scan();
+		scan.setMaxVersions(1);
+		final String prefix = factory_.keys().documentPrefix(ref);
+		scan.setFilter(new PrefixFilter(Bytes.toBytes(prefix)));
+		return new Source<Document>(factory_, Document.class, scan);
 	}
 
 	private void maybeSet(final Collection c, final Attribute attr, final Map<byte[], byte[]> main,

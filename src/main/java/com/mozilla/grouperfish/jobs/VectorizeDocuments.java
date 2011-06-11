@@ -9,7 +9,8 @@ import org.apache.mahout.vectorizer.DocumentProcessor;
 import org.apache.mahout.vectorizer.collocations.llr.LLRReducer;
 import org.apache.mahout.vectorizer.tfidf.TFIDFConverter;
 import com.mozilla.grouperfish.conf.Conf;
-import com.mozilla.grouperfish.model.CollectionRef;
+import com.mozilla.grouperfish.model.Collection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,11 +26,13 @@ public class VectorizeDocuments extends AbstractCollectionTool {
 	}
 
 	@Override
-	public int run(CollectionRef collection, long timestamp) throws Exception {
+	public int run(Collection collection, long timestamp) throws Exception {
 		final Configuration hadoopConf = getConf();
 		CollectionTool source = new ExportDocuments(conf_, hadoopConf);
-		final Path inputDir = util_.outputDir(collection, timestamp, source);
-		final Path outputDir = util_.outputDir(collection, timestamp, this);
+		final Path inputDir = util_.outputDir(collection.ref(), timestamp, source);
+		final Path outputDir = util_.outputDir(collection.ref(), timestamp, this);
+
+		new Util(conf_).setJobTracker(getConf(), collection);
 
 		// 1. Tokenize
 		Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;

@@ -32,8 +32,7 @@ public class RebuildAll extends Configured implements Tool {
 			final Long rebuilt = c.get(Attribute.REBUILT);
 			final Long modified = c.get(Attribute.MODIFIED);
 			// TODO:
-			// Push these down to the HBase scannners, so number of collections
-			// can
+			// Push these attributes down to the HBase scannners, so number of collections can
 			// grow beyond mere thousands.
 			if (modified == null)
 				continue;
@@ -42,10 +41,13 @@ public class RebuildAll extends Configured implements Tool {
 			todo.add(c);
 		}
 
+		int i = 0;
 		for (Collection c : todo) {
 			final long timestamp = new Date().getTime();
+			log.info("\n\nProcessing collection {} / {}", ++i, todo.size());
 			log.info("Rebuilding collection {} at {}", c.ref().key(), timestamp);
-			rebuild.run(c.ref(), timestamp);
+			log.info("Size: {}", c.get(Attribute.SIZE));
+			rebuild.run(c, timestamp);
 		}
 
 		return 0;

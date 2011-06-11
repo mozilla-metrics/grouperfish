@@ -37,7 +37,6 @@ class CompositeConf implements Conf {
 			return upper_.get(key);
 		if (lower_.get(key) != null)
 			return lower_.get(key);
-		Assert.unreachable("Fatal: Cannot lookup configuration for key %s", key);
 		return null;
 	}
 

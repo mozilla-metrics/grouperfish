@@ -14,6 +14,8 @@ import org.apache.hadoop.util.Tool;
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.conf.Conf;
 import com.mozilla.grouperfish.jobs.textcluster.TextClusterTool;
+import com.mozilla.grouperfish.model.Collection;
+import com.mozilla.grouperfish.model.Collection.Attribute;
 import com.mozilla.grouperfish.model.CollectionRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,7 @@ public class Util {
 		tools_.put(TextClusterTool.NAME, TextClusterTool.class);
 		tools_.put(Rebuild.NAME, Rebuild.class);
 		tools_.put(RebuildAll.NAME, RebuildAll.class);
+		vanillaHadoopConf_ = HBaseConfiguration.create();
 	}
 
 	/** @return The exit status of the job. */
@@ -65,6 +68,14 @@ public class Util {
 		}
 	}
 
+	public void setJobTracker(Configuration hadoopConf, Collection collection) {
+		final int DISTRIBUTION_THRESHOLD = 128000;
+		final String setting = "mapred.job.tracker";
+		hadoopConf.set(setting,
+						collection.get(Attribute.SIZE) > DISTRIBUTION_THRESHOLD ?
+						vanillaHadoopConf_.get(setting) : "local");
+	}
+
 	public Path outputDir(CollectionRef collection, long timestamp, CollectionTool tool) {
 		return new Path(new StringBuilder().append(conf_.get(CONF_DFS_ROOT)).append('/')
 				.append(Long.toString(timestamp)).append('/').append(mangle(collection.namespace())).append('_')
@@ -86,7 +97,7 @@ public class Util {
 
 	/**
 	 * Reads Grouperfish configuration from the hadoop configuration.
-	 * 
+	 *
 	 * @see #saveConfToHadoopConf(Configuration)
 	 */
 	static Conf fromHadoopConf(Configuration hadoopConfig) {
@@ -100,6 +111,7 @@ public class Util {
 	private static final Logger log = LoggerFactory.getLogger(Util.class);
 
 	private final Conf conf_;
+	private final Configuration vanillaHadoopConf_;
 
 	private static final String HADOOP_CONF_KEY = "org.mozilla.grouperfish.conf";
 

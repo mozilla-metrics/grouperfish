@@ -9,6 +9,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import com.mozilla.grouperfish.model.Model;
+import com.mozilla.grouperfish.model.Ref;
 
 /**
  * Reads all model objects of a type from HBase. We'll add filter criteria as
@@ -16,21 +17,36 @@ import com.mozilla.grouperfish.model.Model;
  */
 public class Source<T extends Model> implements Iterable<T> {
 
-	public Source(final Factory factory, final Class<T> model) {
+	Source(final Factory factory, final Class<T> model) {
+		this(factory, model, new Scan());
+	}
+
+	Source(final Factory factory, final Class<T> model, final Scan scan) {
 		model_ = model;
 		factory_ = factory;
 		table_ = factory.table(model);
+		scan_ = scan;
 	}
 
 	@Override
 	public Iterator<T> iterator() {
 		try {
-			return new ModelIterator<T>(Adapters.create(factory_, model_), table_.getScanner(new Scan()));
+			return new ModelIterator<T>(factory_.adapter(model_), table_.getScanner(scan_));
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Could not create scanner", e);
 		}
 	}
+
+	public T get(Ref<T> reference) throws IOException {
+		RowAdapter<T> adapter = factory_.adapter(model_);
+		return adapter.read(table_.get(adapter.get(reference)));
+	}
+
+	public Scan getScan() {
+		return scan_;
+	}
+
 
 	static class ModelIterator<S extends Model> implements Iterator<S> {
 
@@ -60,6 +76,7 @@ public class Source<T extends Model> implements Iterable<T> {
 		private final RowAdapter<S> adapter_;
 	};
 
+	private final Scan scan_;
 	private final Factory factory_;
 	private final Class<T> model_;
 	private final HTableInterface table_;

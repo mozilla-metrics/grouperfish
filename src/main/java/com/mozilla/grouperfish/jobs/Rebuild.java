@@ -3,7 +3,7 @@ package com.mozilla.grouperfish.jobs;
 import org.apache.hadoop.conf.Configuration;
 import com.mozilla.grouperfish.conf.Conf;
 import com.mozilla.grouperfish.jobs.textcluster.TextClusterTool;
-import com.mozilla.grouperfish.model.CollectionRef;
+import com.mozilla.grouperfish.model.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +18,14 @@ public class Rebuild extends AbstractCollectionTool {
 	}
 
 	@Override
-	public int run(CollectionRef collection, long timestamp) throws Exception {
-		final CollectionTool[] toolchain = new CollectionTool[] { new ExportDocuments(conf_, getConf()),
-				new VectorizeDocuments(conf_, getConf()), new TextClusterTool(conf_, getConf()) };
+	public int run(Collection collection, long timestamp) throws Exception {
+		new Util(conf_).setJobTracker(getConf(), collection);
+
+		final CollectionTool[] toolchain = new CollectionTool[] {
+				new ExportDocuments(conf_, getConf()),
+				new VectorizeDocuments(conf_, getConf()),
+				new TextClusterTool(conf_, getConf())
+		};
 		for (final CollectionTool tool : toolchain) {
 			int returnCode = tool.run(collection, timestamp);
 			if (returnCode != 0) {

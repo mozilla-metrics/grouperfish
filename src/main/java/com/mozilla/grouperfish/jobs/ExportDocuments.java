@@ -4,27 +4,27 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.mapreduce.TableMapper;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+
 import com.mozilla.grouperfish.conf.Conf;
+import com.mozilla.grouperfish.hbase.CollectionAdapter;
 import com.mozilla.grouperfish.hbase.Factory;
 import com.mozilla.grouperfish.hbase.Schema.Documents;
+import com.mozilla.grouperfish.hbase.Source;
 import com.mozilla.grouperfish.model.CollectionRef;
 import com.mozilla.grouperfish.model.Document;
 
 /**
  * Export all documents into a directory, one file per map-task.
- * 
+ *
  * This is part of the full rebuild and a prerequisite for vectorization.
- * 
+ *
  * TODO: We want a better partitioner so that regions are only looked at by a
  * mapper if they overlap with our prefix.
  */
@@ -52,12 +52,12 @@ public class ExportDocuments extends AbstractCollectionTool {
 	}
 
 	@Override
-	protected Job createSubmittableJob(CollectionRef collection, long timestamp) throws Exception {
+	protected Job createSubmittableJob(CollectionRef ref, long timestamp) throws Exception {
 		final Configuration hadoopConf = this.getConf();
 		new Util(conf_).saveConfToHadoopConf(hadoopConf);
 
-		final Path outputDir = util_.outputDir(collection, timestamp, this);
-		final String jobName = jobName(collection, timestamp);
+		final Path outputDir = util_.outputDir(ref, timestamp, this);
+		final String jobName = jobName(ref, timestamp);
 		final Job job = new Job(hadoopConf, jobName);
 
 		job.setJarByClass(AbstractCollectionTool.class);
@@ -68,14 +68,12 @@ public class ExportDocuments extends AbstractCollectionTool {
 		FileOutputFormat.setOutputPath(job, outputDir);
 
 		// Set optional scan parameters
-		final Scan scan = new Scan();
-		scan.setMaxVersions(1);
 		final Factory factory = new Factory(conf_);
-		final String prefix = factory.keys().documentPrefix(collection);
-		scan.setFilter(new PrefixFilter(Bytes.toBytes(prefix)));
+		final Source<Document> documents = new CollectionAdapter(factory).documents(ref);
 
-		TableMapReduceUtil.initTableMapperJob(factory.tableName(Document.class), scan, ExportMapper.class, null, null,
-				job);
+		TableMapReduceUtil.initTableMapperJob(
+				factory.tableName(Document.class),
+				documents.getScan(), ExportMapper.class, null, null, job);
 		return job;
 	}
 
