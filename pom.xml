@@ -130,6 +130,12 @@
     </dependency>
     
     <dependency>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-queries</artifactId>
+        <version>3.1.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.mozilla.metrics</groupId>
       <artifactId>bagheera</artifactId>
       <version>0.2</version>

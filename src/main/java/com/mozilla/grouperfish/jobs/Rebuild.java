@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.mozilla.grouperfish.conf.Conf;
 import com.mozilla.grouperfish.hbase.Factory;
+import com.mozilla.grouperfish.hbase.Importer;
 import com.mozilla.grouperfish.jobs.carrot2.CarrotClusterTool;
 import com.mozilla.grouperfish.jobs.textcluster.TextClusterTool;
 import com.mozilla.grouperfish.model.Cluster;
@@ -23,6 +24,9 @@ public class Rebuild extends AbstractCollectionTool {
 
 	public Rebuild(Conf conf, Configuration hadoopConf) {
 		super(conf, hadoopConf);
+		exporter_ = new ExportDocuments(conf_, getConf());
+		clusterer_ = new CarrotClusterTool(conf_, getConf());
+		importer_ = new Factory(conf_).importer(Cluster.class);
 	}
 
 	@Override
@@ -32,11 +36,10 @@ public class Rebuild extends AbstractCollectionTool {
 		log.info("Size: {}", collection.get(Attribute.SIZE));
 
 		// Use smart in-memory clustering for smallish collections:
-		if (collection.get(Attribute.SIZE) < 100000) {
-			final Iterable<Document> input =
-				new ExportDocuments(conf_, getConf()).runLocal(collection.ref(), timestamp);
-			List<Cluster> clusters = new CarrotClusterTool(conf_, getConf()).runLocal(collection, timestamp, input);
-			new Factory(conf_).importer(Cluster.class).load(clusters);
+		if (collection.get(Attribute.SIZE) < 1000*1000) {
+			Iterable<Document> docs = exporter_.runLocal(collection, timestamp);
+			List<Cluster> clusters = clusterer_.runLocal(collection, timestamp, docs);
+			importer_.load(clusters);
 			return 0;
 		}
 
@@ -64,5 +67,9 @@ public class Rebuild extends AbstractCollectionTool {
 	private static final Logger log = LoggerFactory.getLogger(Rebuild.class);
 
 	static String NAME = "rebuild";
+
+	private ExportDocuments exporter_;
+	private CarrotClusterTool clusterer_;
+	private Importer<Cluster> importer_;
 
 }

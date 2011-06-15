@@ -44,7 +44,7 @@ public class RebuildAll extends Configured implements Tool {
 		int i = 0;
 		for (Collection c : todo) {
 			final long timestamp = new Date().getTime();
-			log.info("\n\nProcessing collection {} / {}", ++i, todo.size());
+			log.info("\n\n\nProcessing collection {} / {}", ++i, todo.size());
 
 			rebuild.run(c, timestamp);
 		}

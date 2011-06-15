@@ -17,6 +17,7 @@ import com.mozilla.grouperfish.hbase.CollectionAdapter;
 import com.mozilla.grouperfish.hbase.Factory;
 import com.mozilla.grouperfish.hbase.Schema.Documents;
 import com.mozilla.grouperfish.hbase.Source;
+import com.mozilla.grouperfish.model.Collection;
 import com.mozilla.grouperfish.model.CollectionRef;
 import com.mozilla.grouperfish.model.Document;
 
@@ -52,9 +53,9 @@ public class ExportDocuments extends AbstractCollectionTool {
 		super(conf, hadoopConf);
 	}
 
-	public Iterable<Document> runLocal(CollectionRef ref, long timestamp) {
+	public Iterable<Document> runLocal(Collection collection, long timestamp) {
 		final Factory factory = new Factory(conf_);
-		return new CollectionAdapter(factory).documents(ref);
+		return new CollectionAdapter(factory).documents(collection.ref());
 	}
 
 	@Override
