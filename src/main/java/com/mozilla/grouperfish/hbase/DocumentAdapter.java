@@ -1,5 +1,8 @@
 package com.mozilla.grouperfish.hbase;
 
+import java.util.Map;
+import java.util.NavigableMap;
+
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -7,6 +10,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.hbase.Schema.Documents;
+import com.mozilla.grouperfish.hbase.Schema.Documents.Main;
 import com.mozilla.grouperfish.model.CollectionRef;
 import com.mozilla.grouperfish.model.Document;
 import com.mozilla.grouperfish.model.DocumentRef;
@@ -38,8 +42,24 @@ class DocumentAdapter implements RowAdapter<Document> {
 	}
 
 	@Override
-	public Document read(Result next) {
-		return Assert.unreachable(Document.class, "Not implemented.");
+	public Document read(Result result) {
+
+		final Map<byte[], byte[]> columns;
+		{
+			final Map<byte[], NavigableMap<byte[], byte[]>> latest = result.getNoVersionMap();
+			columns = latest.get(Main.FAMILY);
+		}
+
+		final Document d;
+		{
+			final byte[] ns = columns.get(Main.NAMESPACE.qualifier);
+			final byte[] key = columns.get(Main.COLLECTION_KEY.qualifier);
+			final byte[] id = columns.get(Main.ID.qualifier);
+			final byte[] text = columns.get(Main.TEXT.qualifier);
+			final CollectionRef ref = new CollectionRef(Bytes.toString(ns), Bytes.toString(key));
+			d = new Document(new DocumentRef(ref, Bytes.toString(id)), Bytes.toString(text));
+		}
+		return d;
 	}
 
 	@Override

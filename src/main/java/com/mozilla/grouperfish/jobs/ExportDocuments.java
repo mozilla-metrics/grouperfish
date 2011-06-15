@@ -20,6 +20,7 @@ import com.mozilla.grouperfish.hbase.Source;
 import com.mozilla.grouperfish.model.CollectionRef;
 import com.mozilla.grouperfish.model.Document;
 
+
 /**
  * Export all documents into a directory, one file per map-task.
  *
@@ -49,6 +50,11 @@ public class ExportDocuments extends AbstractCollectionTool {
 
 	public ExportDocuments(Conf conf, Configuration hadoopConf) {
 		super(conf, hadoopConf);
+	}
+
+	public Iterable<Document> runLocal(CollectionRef ref, long timestamp) {
+		final Factory factory = new Factory(conf_);
+		return new CollectionAdapter(factory).documents(ref);
 	}
 
 	@Override

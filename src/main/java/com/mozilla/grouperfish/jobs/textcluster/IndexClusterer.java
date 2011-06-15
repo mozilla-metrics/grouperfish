@@ -11,7 +11,6 @@ import java.util.Map;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import com.mozilla.grouperfish.jobs.Histogram;
-import com.mozilla.grouperfish.model.BaseCluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +92,7 @@ public class IndexClusterer {
 	 * Returns <tt>null</tt> until BLOCK_SIZE vectors have been added. Then,
 	 * compute and return a clustering and reset the internal state.
 	 */
-	public List<BaseCluster> add(Vector next) {
+	public List<VectorCluster> add(Vector next) {
 		if (next.getNumNondefaultElements() < MIN_DOCUMENT_LENGTH)
 			return null;
 		++n_;
@@ -108,7 +107,7 @@ public class IndexClusterer {
 			return null;
 
 		createIndex();
-		List<BaseCluster> clusters = createClusters();
+		List<VectorCluster> clusters = createClusters();
 		reset();
 		return clusters;
 	}
@@ -117,7 +116,7 @@ public class IndexClusterer {
 	 * Force calculation of the cluster, e.g. where the collection is smaller
 	 * than the chunk size.
 	 */
-	public List<BaseCluster> clusters() {
+	public List<VectorCluster> clusters() {
 		createIndex();
 		return createClusters();
 	}
@@ -149,7 +148,7 @@ public class IndexClusterer {
 	/**
 	 * Calculates clusters. Remaining clusters are added to the remainder.
 	 */
-	private List<BaseCluster> createClusters() {
+	private List<VectorCluster> createClusters() {
 		final long ts1 = System.currentTimeMillis();
 		log.info(String.format("1/3 Creating scores for %d vectors...", n_));
 
@@ -334,7 +333,7 @@ public class IndexClusterer {
 		// Now we just need to create a cluster for each medoid and its
 		// followers.
 
-		final List<BaseCluster> clusters = new ArrayList<BaseCluster>();
+		final List<VectorCluster> clusters = new ArrayList<VectorCluster>();
 
 		{
 			log.info("3/3. Creating clusters, sorted by size desc:");
@@ -359,7 +358,7 @@ public class IndexClusterer {
 					histogram.add(followersList.size());
 				}
 
-				clusters.add(new BaseCluster(vectors_.get(idx), followersList, similarityList));
+				clusters.add(new VectorCluster(vectors_.get(idx), followersList, similarityList));
 			}
 
 			log.info(String.format("Size distribution: %s", histogram));

@@ -33,12 +33,9 @@ public class ClusterAdapter implements RowAdapter<Cluster> {
 						Bytes.toBytes(cluster.ref().rebuildTs()))
 				.add(Clusters.Main.FAMILY, Clusters.Main.LABEL.qualifier, Bytes.toBytes(cluster.ref().label()));
 
-		// Medoid
-		put.add(Clusters.Documents.FAMILY, Bytes.toBytes(cluster.representativeDoc().id()), Bytes.toBytes(1.0));
-
 		// Contents
 		int i = 0;
-		for (DocumentRef doc : cluster.relatedDocs()) {
+		for (DocumentRef doc : cluster.documents()) {
 			put.add(Clusters.Documents.FAMILY, Bytes.toBytes(doc.id()),
 					Bytes.toBytes(cluster.similarities().get(i).toString()));
 			++i;
