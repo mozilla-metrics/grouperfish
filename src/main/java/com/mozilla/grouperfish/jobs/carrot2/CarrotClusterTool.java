@@ -1,9 +1,11 @@
 package com.mozilla.grouperfish.jobs.carrot2;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.carrot2.clustering.lingo.LingoClusteringAlgorithm;
@@ -70,6 +72,8 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 		int numOthers = 0;
 		final List<Cluster> clusters;
 
+		final Set<String> assigned = new HashSet<String>();
+
 		// Part 1: Calculate clusters using Carrot2 algorithms
 		{
 			final long start = System.currentTimeMillis();
@@ -89,14 +93,19 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 			final Class<?> algorithm = LingoClusteringAlgorithm.class;
 
 			final Controller controller = ControllerFactory.createSimple();
-			final ProcessingResult result = controller.process(carrotDocs, collection.ref().key(), algorithm);
+			// :TODO: well that’s as hard coded as it gets... REMOVE THIS and get stopwords in
+			final String HINT = "Firefox";
+			final ProcessingResult result = controller.process(carrotDocs, HINT, algorithm);
 			final List<org.carrot2.core.Cluster> clustersByTopic = result.getClusters();
 
 			clusters = new ArrayList<Cluster>(clustersByTopic.size());
 			for (org.carrot2.core.Cluster carrotCluster : clustersByTopic) {
 				final List<DocumentRef> related = new ArrayList<DocumentRef>(clustersByTopic.size());
 				for (org.carrot2.core.Document carrotDoc : carrotCluster.getDocuments()) {
-					related.add(new DocumentRef(collection.ref(), carrotDoc.getField("id").toString()));
+					final String documentId = carrotDoc.getField("id").toString();
+					if (assigned.contains(documentId)) continue;
+					assigned.add(documentId);
+					related.add(new DocumentRef(collection.ref(), documentId));
 				}
 				final String label = carrotCluster.getLabel();
 				final Cluster cluster =
