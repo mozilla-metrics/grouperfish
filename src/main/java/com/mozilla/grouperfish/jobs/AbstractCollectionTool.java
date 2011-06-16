@@ -42,8 +42,13 @@ public abstract class AbstractCollectionTool extends Configured implements Tool,
 			return usage(1);
 		}
 
-		CollectionRef ref = new CollectionRef(args[0], args[1]);
+		String ns = args[0], ck = args[1];
+		CollectionRef ref = new CollectionRef(ns, ck);
 		Collection collection = new Factory(conf_).source(Collection.class).get(ref);
+		if (collection == null) {
+			System.err.format("No such collection: %s / %s\n", ns, ck);
+			return 1;
+		}
 		return run(collection, timestamp);
 	}
 

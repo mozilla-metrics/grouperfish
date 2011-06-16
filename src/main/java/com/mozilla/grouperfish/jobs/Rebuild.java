@@ -1,5 +1,6 @@
 package com.mozilla.grouperfish.jobs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -7,10 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mozilla.grouperfish.conf.Conf;
+import com.mozilla.grouperfish.hbase.CollectionAdapter;
 import com.mozilla.grouperfish.hbase.Factory;
 import com.mozilla.grouperfish.hbase.Importer;
 import com.mozilla.grouperfish.jobs.carrot2.CarrotClusterTool;
-import com.mozilla.grouperfish.jobs.textcluster.TextClusterTool;
 import com.mozilla.grouperfish.model.Cluster;
 import com.mozilla.grouperfish.model.Collection;
 import com.mozilla.grouperfish.model.Collection.Attribute;
@@ -24,25 +25,37 @@ public class Rebuild extends AbstractCollectionTool {
 
 	public Rebuild(Conf conf, Configuration hadoopConf) {
 		super(conf, hadoopConf);
-		exporter_ = new ExportDocuments(conf_, getConf());
+		hbase_ = new Factory(conf_);
+		new ExportDocuments(conf_, getConf());
 		clusterer_ = new CarrotClusterTool(conf_, getConf());
-		importer_ = new Factory(conf_).importer(Cluster.class);
+		clusterImporter_ = hbase_.importer(Cluster.class);
+		collectionImporter_ = hbase_.importer(Collection.class);
 	}
 
 	@Override
 	public int run(Collection collection, long timestamp) throws Exception {
-		new Util(conf_).setJobTracker(getConf(), collection);
 		log.info("Rebuilding collection {} at {}", collection.ref().key(), timestamp);
-		log.info("Size: {}", collection.get(Attribute.SIZE));
 
-		// Use smart in-memory clustering for smallish collections:
-		if (collection.get(Attribute.SIZE) < 1000*1000) {
-			Iterable<Document> docs = exporter_.runLocal(collection, timestamp);
-			List<Cluster> clusters = clusterer_.runLocal(collection, timestamp, docs);
-			importer_.load(clusters);
-			return 0;
+		// :TODO: this is inefficient- the frontend needs to maintain the collection size counter...
+		// (needs atomic increment)
+		long size = 0;
+		List<Document> docs = new ArrayList<Document>();
+		for (Document doc : new CollectionAdapter(hbase_).documents(collection.ref(), timestamp)) {
+			docs.add(doc);
+			++size;
 		}
+		collection.set(Attribute.SIZE, size);
+		log.info("Updated collection size to: {}", size);
 
+		List<Cluster> clusters = clusterer_.runLocal(collection, timestamp, docs);
+		clusterImporter_.load(clusters);
+
+		// Rebuild complete: Activate changes in collection meta...
+		collection.set(Attribute.REBUILT, timestamp);
+		collectionImporter_.load(collection);
+
+
+		/*
 		final CollectionTool[] toolchain = new CollectionTool[] {
 				new ExportDocuments(conf_, getConf()),
 				new VectorizeDocuments(conf_, getConf()),
@@ -56,6 +69,7 @@ public class Rebuild extends AbstractCollectionTool {
 				return returnCode;
 			}
 		}
+		*/
 		return 0;
 	}
 
@@ -68,8 +82,9 @@ public class Rebuild extends AbstractCollectionTool {
 
 	static String NAME = "rebuild";
 
-	private ExportDocuments exporter_;
-	private CarrotClusterTool clusterer_;
-	private Importer<Cluster> importer_;
+	private final Factory hbase_;
+	private final CarrotClusterTool clusterer_;
+	private final Importer<Cluster> clusterImporter_;
+	private final Importer<Collection> collectionImporter_;
 
 }

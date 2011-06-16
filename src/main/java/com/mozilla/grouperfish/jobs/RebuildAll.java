@@ -27,6 +27,7 @@ public class RebuildAll extends Configured implements Tool {
 	@Override
 	public int run(final String[] conf) throws Exception {
 		CollectionTool rebuild = new Rebuild(conf_, getConf());
+
 		final List<Collection> todo = new ArrayList<Collection>();
 		for (Collection c : new Factory(conf_).source(Collection.class)) {
 			final Long rebuilt = c.get(Attribute.REBUILT);

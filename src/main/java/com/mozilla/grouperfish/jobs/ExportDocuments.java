@@ -17,7 +17,6 @@ import com.mozilla.grouperfish.hbase.CollectionAdapter;
 import com.mozilla.grouperfish.hbase.Factory;
 import com.mozilla.grouperfish.hbase.Schema.Documents;
 import com.mozilla.grouperfish.hbase.Source;
-import com.mozilla.grouperfish.model.Collection;
 import com.mozilla.grouperfish.model.CollectionRef;
 import com.mozilla.grouperfish.model.Document;
 
@@ -53,11 +52,6 @@ public class ExportDocuments extends AbstractCollectionTool {
 		super(conf, hadoopConf);
 	}
 
-	public Iterable<Document> runLocal(Collection collection, long timestamp) {
-		final Factory factory = new Factory(conf_);
-		return new CollectionAdapter(factory).documents(collection.ref());
-	}
-
 	@Override
 	protected Job createSubmittableJob(CollectionRef ref, long timestamp) throws Exception {
 		final Configuration hadoopConf = this.getConf();
@@ -76,7 +70,7 @@ public class ExportDocuments extends AbstractCollectionTool {
 
 		// Set optional scan parameters
 		final Factory factory = new Factory(conf_);
-		final Source<Document> documents = new CollectionAdapter(factory).documents(ref);
+		final Source<Document> documents = new CollectionAdapter(factory).documents(ref, timestamp);
 
 		TableMapReduceUtil.initTableMapperJob(
 				factory.tableName(Document.class),

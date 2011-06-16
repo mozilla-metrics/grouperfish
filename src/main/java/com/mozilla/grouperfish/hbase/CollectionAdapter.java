@@ -1,5 +1,6 @@
 package com.mozilla.grouperfish.hbase;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.NavigableMap;
 
@@ -9,6 +10,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.util.Bytes;
+
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.hbase.Schema.Collections.Main;
 import com.mozilla.grouperfish.model.Collection;
@@ -16,6 +18,7 @@ import com.mozilla.grouperfish.model.CollectionRef;
 import com.mozilla.grouperfish.model.Collection.Attribute;
 import com.mozilla.grouperfish.model.Document;
 import com.mozilla.grouperfish.model.Ref;
+
 
 public class CollectionAdapter implements RowAdapter<Collection> {
 
@@ -37,18 +40,21 @@ public class CollectionAdapter implements RowAdapter<Collection> {
 		for (Attribute a : Collection.Attribute.values()) {
 			if (collection.get(a) == null)
 				continue;
+			// :TODO: we should store any number as plain byte...
+			// Currently we keep the text representation to help the REST service.
+			byte[] representation = Bytes.toBytes(String.valueOf(collection.get(a)));
 			switch (a) {
 			case MODIFIED:
-				put.add(Main.FAMILY, Main.MODIFIED.qualifier, Bytes.toBytes(collection.get(a)));
+				put.add(Main.FAMILY, Main.MODIFIED.qualifier, representation);
 				break;
 			case SIZE:
-				put.add(Main.FAMILY, Main.SIZE.qualifier, Bytes.toBytes(collection.get(a)));
+				put.add(Main.FAMILY, Main.SIZE.qualifier, representation);
 				break;
 			case REBUILT:
-				put.add(Main.FAMILY, Main.Configuration.REBUILT.qualifier(DEFAULT), Bytes.toBytes(collection.get(a)));
+				put.add(Main.FAMILY, Main.Configuration.REBUILT.qualifier(DEFAULT), representation);
 				break;
 			case PROCESSED:
-				put.add(Main.FAMILY, Main.Configuration.PROCESSED.qualifier(DEFAULT), Bytes.toBytes(collection.get(a)));
+				put.add(Main.FAMILY, Main.Configuration.PROCESSED.qualifier(DEFAULT), representation);
 				break;
 			default:
 				Assert.unreachable("Unknown collection attribute: ", a.name());
@@ -64,6 +70,8 @@ public class CollectionAdapter implements RowAdapter<Collection> {
 
 	@Override
 	public Collection read(Result result) {
+
+		if (result.isEmpty()) return null;
 
 		final Map<byte[], byte[]> main;
 		{
@@ -97,11 +105,18 @@ public class CollectionAdapter implements RowAdapter<Collection> {
 		return new Get(Bytes.toBytes(factory_.keys().key(ref)));
 	}
 
-	public Source<Document> documents(CollectionRef ref) {
+	public Source<Document> documents(CollectionRef ref, long timestamp) {
 		final Scan scan = new Scan();
 		scan.setMaxVersions(1);
 		final String prefix = factory_.keys().documentPrefix(ref);
 		scan.setFilter(new PrefixFilter(Bytes.toBytes(prefix)));
+		try {
+			scan.setTimeRange(0, timestamp);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+
 		return new Source<Document>(factory_, Document.class, scan);
 	}
 
@@ -109,7 +124,7 @@ public class CollectionAdapter implements RowAdapter<Collection> {
 			final byte[] qualifier) {
 		if (!main.containsKey(qualifier))
 			return;
-		c.set(attr, Bytes.toLong(main.get(qualifier)));
+		c.set(attr, Long.valueOf(Bytes.toString(main.get(qualifier))));
 	}
 
 }

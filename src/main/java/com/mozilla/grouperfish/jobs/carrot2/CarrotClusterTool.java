@@ -7,7 +7,6 @@ import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
 import org.carrot2.clustering.lingo.LingoClusteringAlgorithm;
-import org.carrot2.clustering.stc.STCClusteringAlgorithm;
 import org.carrot2.core.Controller;
 import org.carrot2.core.ControllerFactory;
 import org.carrot2.core.ProcessingResult;
@@ -40,8 +39,8 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 	static final String NAME = "carrot_cluster_tool";
 	private static final Object OTHERS = "Other Topics";
 
-	private static int LIMIT_LINGO = 700;
-	private static int LIMIT_STC = 3000;
+	//private static int LIMIT_LINGO = 700;
+	private static int LIMIT_CLUSTERING = 3000;
 
 	/** Runs local carrot2 based clustering. Use only for small collections. */
 	public List<Cluster> runLocal(Collection collection,
@@ -53,14 +52,14 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 		final Index<Cluster> index;
 
 		final Iterable<Document> docs;
-		if (n < LIMIT_STC) {
+		if (n < LIMIT_CLUSTERING) {
 			docs = source;
 			index = null;
 		}
 		else {
 			 ArrayList<Document> shuffled = new ArrayList<Document>();
 			 for (Document doc : source) shuffled.add(doc);
-			 randomizeSubList(shuffled, LIMIT_STC);
+			 randomizeSubList(shuffled, LIMIT_CLUSTERING);
 			 docs = shuffled;
 			 index = new Index<Cluster>();
 		}
@@ -84,11 +83,10 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 				carrotDoc.setField("id", next.ref().id());
 				carrotDocs.add(carrotDoc);
 				++docsProcessed;
-				if (docsProcessed >= LIMIT_STC) break;
+				if (docsProcessed >= LIMIT_CLUSTERING) break;
 			}
 
-			final Class<?> algorithm = n > LIMIT_LINGO ?
-					STCClusteringAlgorithm.class : LingoClusteringAlgorithm.class;
+			final Class<?> algorithm = LingoClusteringAlgorithm.class;
 
 			final Controller controller = ControllerFactory.createSimple();
 			final ProcessingResult result = controller.process(carrotDocs, collection.ref().key(), algorithm);
@@ -120,7 +118,7 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 					 			  clusters.size(), numOthers});
 		}
 
-		if (n <= LIMIT_STC) return clusters;
+		if (n <= LIMIT_CLUSTERING) return clusters;
 
 		// Part 2: Associate remaining documents.
 		{

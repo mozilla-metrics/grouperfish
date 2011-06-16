@@ -57,7 +57,6 @@ public class Index<T> {
 
 		try {
 			writer_.addDocument(doc);
-			log.info("Added text '{}'", text);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);

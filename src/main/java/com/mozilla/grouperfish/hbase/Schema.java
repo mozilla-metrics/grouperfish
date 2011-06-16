@@ -5,7 +5,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 /**
  * Helps to address table names, column families and column qualifiers without
  * duplicating their string / byte[] literals too much (DRY pinciple).
- * 
+ *
  * This <em>static</em> collection of identifiers gives some compile time safety
  * when referencing database items. It is not to be confused with the model
  * classes.
@@ -44,13 +44,13 @@ public abstract class Schema {
 
 				/**
 				 * Produces a configuration-specific qualifier.
-				 * 
+				 *
 				 * @param configuration
 				 *            Name of the configuration the attribute is of.
 				 * @return A column qualifier for use with the HBase api.
 				 */
 				public byte[] qualifier(final String configuration) {
-					return Bytes.toBytes(configuration + ':' + asQualifier(this));
+					return Bytes.toBytes(configuration + ':' +this.name().toLowerCase());
 				}
 			}
 
