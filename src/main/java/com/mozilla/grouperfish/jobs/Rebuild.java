@@ -38,6 +38,11 @@ public class Rebuild extends AbstractCollectionTool {
 		// TODO:
 		// Push these attributes down to the HBase scannners, so number of collections can
 		// grow beyond mere thousands.
+		if (namespace != null && !namespace.equals(c.ref().namespace())) {
+			log.info("Ignoring collection '{} / {}' because namespace != " + namespace,
+					 c.ref().namespace(), c.ref().key());
+			return false;
+		}
 		if (modified == null) {
 			log.info("Ignoring collection '{} / {}' because it has no modification date set.",
 					 c.ref().namespace(), c.ref().key());
@@ -45,11 +50,6 @@ public class Rebuild extends AbstractCollectionTool {
 		}
 		if (rebuilt != null && rebuilt > modified) {
 			log.info("Ignoring collection '{} / {}' because of no growth since last rebuild.",
-					 c.ref().namespace(), c.ref().key());
-			return false;
-		}
-		if (namespace != null && !namespace.equals(c.ref().namespace())) {
-			log.info("Ignoring collection '{} / {}' because namespace != " + namespace,
 					 c.ref().namespace(), c.ref().key());
 			return false;
 		}

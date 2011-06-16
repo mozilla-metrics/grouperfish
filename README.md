@@ -18,6 +18,12 @@ To clients, Grouperfish is an HTTP service exposing three REST API methods:
 
 Queues a document for clustering. If documents with the same collection-key exist already, the new document is clustered together with them. If the collection key does not exist yet, a new collection is created. The namespace serves as a general scope for collection key and document id. In later versions we’ll be able to manage permissions on this level, so that one Grouperfish installation can serve any number of clients.
 
+A bulk load can be performed using a request body of the form
+
+   {"bulk": [<doc-1>, <doc-2>, ..., <doc-n>]}
+
+where the individual docs have the form of the single request (id with text). A good bulk load would be anywhere from 100 to 3,000 documents.
+
 To do: Add new documents to existing clusters incrementally. 
 
 #### *get all clusters*
