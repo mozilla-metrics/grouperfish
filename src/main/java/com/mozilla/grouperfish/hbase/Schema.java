@@ -50,7 +50,7 @@ public abstract class Schema {
 				 * @return A column qualifier for use with the HBase api.
 				 */
 				public byte[] qualifier(final String configuration) {
-					return Bytes.toBytes(configuration + ':' +this.name().toLowerCase());
+					return Bytes.toBytes(configuration + ':' + this.name().toLowerCase());
 				}
 			}
 

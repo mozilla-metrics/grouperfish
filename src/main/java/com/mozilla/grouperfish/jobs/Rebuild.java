@@ -32,8 +32,35 @@ public class Rebuild extends AbstractCollectionTool {
 		collectionImporter_ = hbase_.importer(Collection.class);
 	}
 
+	public boolean needsProcessing(Collection c, String namespace) {
+		final Long rebuilt = c.get(Attribute.REBUILT);
+		final Long modified = c.get(Attribute.MODIFIED);
+		// TODO:
+		// Push these attributes down to the HBase scannners, so number of collections can
+		// grow beyond mere thousands.
+		if (modified == null) {
+			log.info("Ignoring collection '{} / {}' because it has no modification date set.",
+					 c.ref().namespace(), c.ref().key());
+			return false;
+		}
+		if (rebuilt != null && rebuilt > modified) {
+			log.info("Ignoring collection '{} / {}' because of no growth since last rebuild.",
+					 c.ref().namespace(), c.ref().key());
+			return false;
+		}
+		if (namespace != null && !namespace.equals(c.ref().namespace())) {
+			log.info("Ignoring collection '{} / {}' because namespace != " + namespace,
+					 c.ref().namespace(), c.ref().key());
+			return false;
+		}
+		return true;
+	}
+
 	@Override
 	public int run(Collection collection, long timestamp) throws Exception {
+
+		if (!needsProcessing(collection, null)) return 0;
+
 		log.info("Rebuilding collection {} at {}", collection.ref().key(), timestamp);
 
 		// :TODO: this is inefficient- the frontend needs to maintain the collection size counter...

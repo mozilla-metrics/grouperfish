@@ -26,19 +26,15 @@ public class RebuildAll extends Configured implements Tool {
 
 	@Override
 	public int run(final String[] conf) throws Exception {
-		CollectionTool rebuild = new Rebuild(conf_, getConf());
+
+		final String namespace = conf.length > 0 ? conf[0]: null;
+
+		Rebuild rebuild = new Rebuild(conf_, getConf());
 
 		final List<Collection> todo = new ArrayList<Collection>();
 		for (Collection c : new Factory(conf_).source(Collection.class)) {
-			final Long rebuilt = c.get(Attribute.REBUILT);
-			final Long modified = c.get(Attribute.MODIFIED);
-			// TODO:
-			// Push these attributes down to the HBase scannners, so number of collections can
-			// grow beyond mere thousands.
-			if (modified == null)
-				continue;
-			if (rebuilt != null && rebuilt > modified)
-				continue;
+			if (!rebuild.needsProcessing(c, namespace)) continue;
+			log.info("Queueing collection '{} / {}' for processing.", c.ref().namespace(), c.ref().key());
 			todo.add(c);
 		}
 
