@@ -20,7 +20,7 @@ Queues a document for clustering. If documents with the same collection-key exis
 
 A bulk load can be performed using a request body of the form
 
-   {"bulk": [<doc-1>, <doc-2>, ..., <doc-n>]}
+    {"bulk": [<doc-1>, <doc-2>, ..., <doc-n>]}
 
 where the individual docs have the form of the single request (id with text). A good bulk load would be anywhere from 100 to 3,000 documents.
 
