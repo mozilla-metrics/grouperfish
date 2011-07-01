@@ -147,13 +147,21 @@ public class Importer<T extends Model> {
 			for (T item : items_) {
 				batch.add(adapter_.put(item));
 			}
-			try {
-				table_.get().put(batch);
-			} catch (IOException e) {
-				String from = adapter_.key(items_.get(0));
-				String to = adapter_.key(items_.get(items_.size() - 1));
-				log.error(String.format("While inserting batch %s,%s", from, to));
-				log.error("IO Error in importer", e);
+			int retriesLeft = 5;
+			while (retriesLeft > 0) {
+				try {
+					table_.get().put(batch);
+					retriesLeft = 0;
+				} catch (IOException e) {
+					String from = adapter_.key(items_.get(0));
+					String to = adapter_.key(items_.get(items_.size() - 1));
+					log.error(String.format("While inserting batch %s,%s", from, to));
+					log.error("IO Error in importer", e);
+					--retriesLeft;
+					if (retriesLeft == 0) {
+						log.error("No retries left. Giving up.", e);
+					}
+				}
 			}
 		}
 	}
