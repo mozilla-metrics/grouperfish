@@ -1,11 +1,6 @@
 package com.mozilla.grouperfish.jobs;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.lucene.analysis.Analyzer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.mozilla.grouperfish.conf.Conf;
 import com.mozilla.grouperfish.model.Collection;
 
@@ -22,13 +17,13 @@ public class VectorizeDocuments extends AbstractCollectionTool {
 
 	@Override
 	public int run(Collection collection, long timestamp) throws Exception {
-		final Configuration hadoopConf = getConf();
-		CollectionTool source = new ExportDocuments(conf_, hadoopConf);
-		final Path inputDir = util_.outputDir(collection.ref(), timestamp, source);
-		final Path outputDir = util_.outputDir(collection.ref(), timestamp, this);
-
-		new Util(conf_).setJobTracker(getConf(), collection);
-
+//		final Configuration hadoopConf = getConf();
+//		CollectionTool source = new ExportDocuments(conf_, hadoopConf);
+//		final Path inputDir = util_.outputDir(collection.ref(), timestamp, source);
+//		final Path outputDir = util_.outputDir(collection.ref(), timestamp, this);
+//
+//		new Util(conf_).setJobTracker(getConf(), collection);
+//
 //		// 1. Tokenize
 //		Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
 //		Path tokenizedPath = new Path(outputDir, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
@@ -75,7 +70,7 @@ public class VectorizeDocuments extends AbstractCollectionTool {
 		return NAME;
 	}
 
-	private static final Logger log = LoggerFactory.getLogger(VectorizeDocuments.class);
+//	private static final Logger log = LoggerFactory.getLogger(VectorizeDocuments.class);
 
 	public static final String NAME = "vectorize";
 

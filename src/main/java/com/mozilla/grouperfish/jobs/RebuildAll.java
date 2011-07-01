@@ -7,12 +7,12 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.mozilla.grouperfish.conf.Conf;
 import com.mozilla.grouperfish.hbase.Factory;
 import com.mozilla.grouperfish.model.Collection;
-import com.mozilla.grouperfish.model.Collection.Attribute;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Fully rebuilds all collection that are out of date.
