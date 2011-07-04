@@ -6,15 +6,15 @@ import operator
 import re
 import string
 
+import css
 import enchant
 import numpy as np
 import scipy.sparse as ssp
 import scipy.io as spio
-import Stemmer
 from nltk import bigrams
 from nltk.metrics import edit_distance
+from nltk import PorterStemmer
 from nltk.corpus import wordnet
-from nltk.stem import WordNetLemmatizer
 
 
 
@@ -34,7 +34,7 @@ def cleandoc(doc, usebigrams = False,stopwords=None):
 
     """
 
-    class RepeatReplacer(object):
+    class _RepeatReplacer(object):
         def __init__(self):
             self.repeat_regexp = re.compile(r'(\w*)(\w)\2(\w*)')
             self.repl =r'\1\2\3'
@@ -48,7 +48,7 @@ def cleandoc(doc, usebigrams = False,stopwords=None):
             else:
                 return repl_word
 
-    class SpellingReplacer(object):
+    class _SpellingReplacer(object):
         def __init__(self, dict_name='en',max_dist=2):
             self.spell_dict = enchant.Dict(dict_name)
             self.max_dist = 2
@@ -65,8 +65,8 @@ def cleandoc(doc, usebigrams = False,stopwords=None):
             else:
                 return word
 
-    rreplacer = RepeatReplacer()
-    sreplacer = SpellingReplacer()
+    rreplacer = _RepeatReplacer()
+    sreplacer = _SpellingReplacer()
     delchars = ''.join(c for c in map(chr, range(256)) if not c.isalpha())
     doc = [d.translate(None,delchars) for d in doc.split()]
     if usebigrams is True:
@@ -78,11 +78,9 @@ def cleandoc(doc, usebigrams = False,stopwords=None):
         doc = [sreplacer.replace(rreplacer.replace(t.lower())) for t in doc if t.lower() not in stopwords]
     else:
         doc = [sreplacer.replace(rreplacer.replace(t.lower())) for t in doc if t.lower()]
-    stemmer = Stemmer.Stemmer('english')
-    lemmatizer = WordNetLemmatizer()
-    doc = stemmer.stemWords(doc)
-    doc = [lemmatizer.lemmatize(t) for t in doc]
-    #Doing lower casing again just because the stemmers/lemmatizers are doing
+    stemmer = PorterStemmer()
+    doc = [stemmer.stem(t) for t in doc]
+    #Doing lower casing again just because the stemmers are doing
     #capitalizations. They also occasionally generate single letter chars
     if stopwords is not None:
         doc = [d.lower().translate(None,string.digits+string.punctuation) for d in doc if d.lower() not in\
@@ -341,10 +339,20 @@ def generate_subset(corpus,**kwargs):
         select = True
     return subset
 
-# TODO (Eshwaran): Generate feature clusters: Take every feature, determine
-# cluster it belongs to, and create word cloud of top ten features.
 
-#TODO (Eshwaran): Actually implement the algorithm in the reference
+#TODO (Eshwaran): Implement the algorithm in the reference
+"""
+References:
+        @article{gottron2009document,
+        title={Document word clouds: Visualising web documents as tag clouds
+        to aid users in relevance decisions},
+        author={Gottron, T.},
+        journal={Research and Advanced Technology for Digital Libraries},
+        pages={94--105},
+        year={2009},
+        publisher={Springer}
+        }
+"""
 
 def generate_featureclouds(centroids,featuredict,sessionid):
 
@@ -358,19 +366,7 @@ def generate_featureclouds(centroids,featuredict,sessionid):
     Returns:
         An html object
 
-    References:
-        @article{gottron2009document,
-        title={Document word clouds: Visualising web documents as tag clouds
-        to aid users in relevance decisions},
-        author={Gottron, T.},
-        journal={Research and Advanced Technology for Digital Libraries},
-        pages={94--105},
-        year={2009},
-        publisher={Springer}
-        }
     """
-    import css
-    import numpy as np
     NUM_FEATURES_REQ = 10
     FONT_URL = \
     'http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold'
@@ -380,6 +376,40 @@ def generate_featureclouds(centroids,featuredict,sessionid):
     for colid,features in topfeatures.iteritems():
         features = mapfeatures_to_cloudbins(features)
         divstr += css.generate_single_cloud(colid,features)
+    bodystr = css.generate_body(divstr)
+    return css.wrap_into_html(bodystr,sessionid,FONT_URL,STYLE_URL)
+
+def generate_featureclusters(centroids,featuredict,sessionid):
+    """  Create feature cluster clouds by generating feature clusters.
+    Generate feature cluster clouds by determining for every feature which
+    cluster it most belongs to by finding centroid where it has max value. Top
+    ten such features for every cluster are extracted and visualized using as an
+    HTML page.
+
+    Args:
+        centroids: A  dense matrix where every column vector is a centroid vector.
+        featuredict: A dict with key : matrix index (int) and value: features
+        (str)
+    Returns:
+        An html object
+    """
+    NUM_FEATURES_REQ = 10
+    FONT_URL = \
+    'http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold'
+    STYLE_URL = 'wordcloud.css'
+    divstr = ''
+    featureclusters = {}
+    for index,feature in featuredict.iteritems():
+        cid = centroids[index,:].argmax()
+        if cid in featureclusters:
+            featureclusters[cid].append((feature,centroids[index,cid]))
+        else:
+            featureclusters[cid] = [(feature,centroids[index,cid])]
+    for cid,features in featureclusters.iteritems():
+        topfeatures = dict(sorted(features,key = lambda feature:\
+                               feature[1])[0:NUM_FEATURES_REQ])
+        topfeatures = mapfeatures_to_cloudbins(topfeatures)
+        divstr += css.generate_single_cloud(cid,topfeatures)
     bodystr = css.generate_body(divstr)
     return css.wrap_into_html(bodystr,sessionid,FONT_URL,STYLE_URL)
 
@@ -597,6 +627,168 @@ class GenerateVectors:
         return { 'data':vecs*diag, 'docids':self.docids,\
                 'featuredict':self.featuredict}
 
+class KMeans:
 
+    """ Batch KMeans . Does Spherical KMeans  only
+    Args:
+        data - CSC Matrix with rows as features and columns as points
+        k - Number of clusters to generate
+        n - Number of iterations
+        randomcentroids - Generate Centroids by partitioning matrix 
+        determininstically or randomize selection of columns. 
+        delta = Convergence Parameter
+        verbose - Enables debug setting
 
+    Methods:
+        chunks - Chunks up list
+        converged - checks convergence
+        getdeterministicpartitions - gets deterministic partitions for
+        clustering
+        getrandomizedpartitions - gets randomized partitions for clustering
+        getcentroids
+        run
+
+    References:
+        1. @article{dhillon2001concept,
+        title={Concept decompositions for large sparse text data using
+        clustering},
+        author={Dhillon, I.S. and Modha, D.S.},
+        journal={Machine learning},
+        volume={42},
+        number={1},
+        pages={143--175},
+        year={2001},
+        publisher={Springer}
+        }
+
+    """
+
+    def __init__(self, data, k, n, delta, randomcentroids, verbose):
+        self.data = data
+        self.k = k
+        self.n = n
+        self.delta = delta
+        self.randomcentroids = randomcentroids
+        self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.StreamHandler())
+        if verbose:
+            self.logger.setLevel(logging.DEBUG)
+            self.logger.debug("Starting KMeans debugging...")
+
+    def chunks(self,l,n):
+        """ Chunks up list l into divisions of n"
+        Args:
+            l : A list
+            n : The splits required
+        Returns:
+            A list of lists
+        """
+        return [l[i:i+n] for i in range(0, len(l), n)]
+
+    def converged(self,clusters,newclusters):
+        """ Check convergence.
+         We check if difference of sum of  norm of sum of all the vectors for each cluster
+         computed during prev iteration and curre iteration is less than delta
+         Args:
+             clusters: A dict with key as cluster id and value as a list of docs
+             belonging to it.
+             newclusters: Similar datastructure for the new cluster
+        Returns:
+            Boolean indicating convergence
+        """
+        currnorms = np.zeros(self.k)
+        newnorms = np.zeros(self.k)
+        for centroid,v_ids in clusters.iteritems():
+            currsum =  np.mat(np.zeros((self.data.shape[0],1)))
+            for v in v_ids:
+                currsum = currsum + self.data[:,v].todense()
+            currnorms[centroid] = math.sqrt(currsum.T*currsum)
+        for centroid,v_ids in newclusters.iteritems():
+            newsum =  np.mat(np.zeros((self.data.shape[0],1)))
+            for v in v_ids:
+                newsum = newsum + self.data[:,v].todense()
+            newnorms[centroid] = math.sqrt(newsum.T*newsum)
+        if math.fabs(currnorms.sum() - newnorms.sum())< self.delta:
+            return True
+        else:
+            return False
+
+    def getdeterministicpartitions(self):
+        """ Divide up the vectors among the k partitions """
+        nvectors = self.data.shape[1]
+        numsplits = int(math.floor(nvectors/self.k))
+        v_ids = range(0,nvectors,1)
+        v_idslist = self.chunks(v_ids,numsplits)
+        ii = 0
+        self.clusters = {}
+        while ii < self.k:
+            self.clusters[ii] = v_idslist[ii]
+            ii = ii + 1
+        self.centroids = getcentroids(self.data,self.clusters)
+        return {'centroids':self.centroids,'clusters':self.clusters}
+
+    def getrandomizedpartitions(self):
+        """ Divide up the vectors among the k partitions """
+        nvectors = self.data.shape[1]
+        numsplits = int(math.floor(nvectors/self.k))
+        v_ids = range(0,nvectors,1)
+        np.random.shuffle(v_ids)
+        v_idslist = self.chunks(v_ids,numsplits)
+        ii = 0
+        self.clusters = {}
+        while ii < self.k:
+            self.clusters[ii] = v_idslist[ii]
+            ii = ii + 1
+        self.centroids = getcentroids(self.data,self.clusters)
+        return {'centroids':self.centroids,'clusters':self.clusters}
+
+    def run(self):
+        """ Runs spherical kmeans, returns clusters and centroids.
+        Returns:
+            clusters. A dict mapping cluster IDs to the corresponding vector IDs
+            centroids. The clusters themeselves.
+        """
+        assert (self.data.shape[1] > self.k), "Number of clusters requested greater than\
+                number of vectors"
+        self.logger.debug("Data is of dimensions:\
+                     (%d,%d)",self.data.shape[0],self.data.shape[1])
+        self.logger.debug("Generating %d clusters ...",self.k)
+        if self.randomcentroids:
+            self.logger.debug("Generating centroids by randomized partioning")
+            result = self.getrandomizedpartitions()
+        else:
+            self.logger.debug("Generating centroids by arbitrary partitioning")
+            result = self.getdeterministicpartitions()
+        centroids = result['centroids']
+        clusters = result['clusters']
+        ii = 0
+        new_clusters = {}
+        while ii < self.n:
+            self.logger.debug("Iteration %d",ii)
+            newclusters = {}
+            jj = 0
+            while jj < self.data.shape[1]:
+                kk = 0
+                dcentroids = [0]*self.k
+                while kk < self.k:
+                    dcentroids[kk] =\
+                    (self.data[:,jj].T*self.centroids[:,kk]).todense()
+                    kk = kk + 1
+                dclosest = min(dcentroids)
+                closestcluster = dcentroids.index(dclosest)
+                if closestcluster in newclusters:
+                    newclusters[closestcluster].append(jj)
+                else:
+                    newclusters[closestcluster] = [jj]
+                jj = jj+1
+            self.logger.debug("Going to get new centroids...")
+            newcentroids = getcentroids(self.data,newclusters)
+            self.logger.debug("Going to check convergence...")
+            if self.converged(self.clusters,newclusters):
+                break
+            else:
+                self.centroids = newcentroids
+                self.clusters =  newclusters
+            ii = ii + 1
+        return {'clusters':self.clusters,'centroids':self.centroids}
 
