@@ -1,4 +1,5 @@
 #/usr/bin/env python
+""" Wrapper script to visualize louvain_method output. """
 
 import math
 import logging
