@@ -3,9 +3,12 @@ package com.mozilla.grouperfish.cli;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
+import org.apache.hadoop.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +25,8 @@ import com.mozilla.grouperfish.model.Collection.Attribute;
 import com.mozilla.grouperfish.model.CollectionRef;
 import com.mozilla.grouperfish.model.Document;
 import com.mozilla.grouperfish.model.DocumentRef;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class Cli {
 
@@ -88,15 +93,30 @@ public class Cli {
 
 		final Source<Document> docLookup = hbase.source(Document.class);
 		final PrintStream out = System.out;
+		out.format("<!doctype html><html><head><title>Clusters for %s</title>",
+				   StringUtils.escapeHTML(ownerRef.key()));
+		out.format("<link rel='stylesheet' type='text/css' href='clusters.css' />");
+		out.format("<h1>Collection <em>%s</em></h1>\n", StringUtils.escapeHTML(ownerRef.key()));
+
+
+		List<Cluster> sorted = new ArrayList<Cluster>();
+		for (final Cluster cluster : clusters) sorted.add(cluster);
+		Collections.sort(sorted, new Comparator<Cluster>() {
+			public int compare(Cluster o1, Cluster o2) {
+				int s1 = o1.documents().size();
+				int s2 = o2.documents().size();
+				return Integer.signum(s2 - s1);
+			}
+		});
+
 		int i = 0;
-		for (final Cluster cluster : clusters) {
+		for (final Cluster cluster : sorted) {
 			++i;
+			out.format("<h2>%s</h2>\n", StringUtils.escapeHTML(cluster.ref().label()));
+			out.format("<ol>\n");
 			for (final DocumentRef docRef : cluster.documents()) {
 				try {
-					out.print(cluster.ref().label().replace("\t", "\\t"));
-					out.print("\t");
-					out.print(docLookup.get(docRef).text());
-					out.print("\n");
+					out.format("<li>%s</li>\n", StringUtils.escapeHTML(docLookup.get(docRef).text()));
 				} catch (final IOException e) {
 					log.error("Failed to lookup document by id={} (owner: {} / {})", new Object[]{
 							   docRef.id(), docRef.ownerRef().namespace(), docRef.ownerRef().key()
@@ -105,7 +125,9 @@ public class Cli {
 					return 1;
 				}
 			}
+			out.format("</ol>\n\n");
 		}
+		out.format("</body></html>");
 		log.info("Exported {} clusters for collection {} / {} (size={}, rebuilt={})", new Object[]{
 				     i, ownerRef.namespace(), ownerRef.key(),
 				     collection.get(Attribute.SIZE), lastRebuilt
