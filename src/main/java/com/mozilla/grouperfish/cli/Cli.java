@@ -3,6 +3,7 @@ package com.mozilla.grouperfish.cli;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -92,11 +93,14 @@ public class Cli {
 			new ClusterAdapter(hbase).all(ownerRef, lastRebuilt);
 
 		final Source<Document> docLookup = hbase.source(Document.class);
-		final PrintStream out = System.out;
-		out.format("<!doctype html><html><head><title>Clusters for %s</title>",
-				   StringUtils.escapeHTML(ownerRef.key()));
+		PrintStream out;
+		try { out = new PrintStream(System.out, true, "UTF-8"); }
+		catch (UnsupportedEncodingException e1) { return Assert.unreachable(Integer.class); }
+		out.format("<!doctype html><html><head>");
+		out.format("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />");
+		out.format("<title>Clusters for %s</title>", StringUtils.escapeHTML(ownerRef.key()));
 		out.format("<link rel='stylesheet' type='text/css' href='clusters.css' />");
-		out.format("<h1>Collection <em>%s</em></h1>\n", StringUtils.escapeHTML(ownerRef.key()));
+		out.format("<h1>Collection <q>%s</q></h1>\n", StringUtils.escapeHTML(ownerRef.key()));
 
 
 		List<Cluster> sorted = new ArrayList<Cluster>();
@@ -112,11 +116,16 @@ public class Cli {
 		int i = 0;
 		for (final Cluster cluster : sorted) {
 			++i;
-			out.format("<h2>%s</h2>\n", StringUtils.escapeHTML(cluster.ref().label()));
+			if ("Other Topics".equals(cluster.ref().label())) continue;
+			out.format("<h2><q>%s</q> (%s messages)</h2>\n",
+					   StringUtils.escapeHTML(cluster.ref().label()), cluster.documents().size());
 			out.format("<ol>\n");
+			int j = 0; final int limit = 20;
 			for (final DocumentRef docRef : cluster.documents()) {
 				try {
+					j++;
 					out.format("<li>%s</li>\n", StringUtils.escapeHTML(docLookup.get(docRef).text()));
+					if (j == limit) break;
 				} catch (final IOException e) {
 					log.error("Failed to lookup document by id={} (owner: {} / {})", new Object[]{
 							   docRef.id(), docRef.ownerRef().namespace(), docRef.ownerRef().key()
