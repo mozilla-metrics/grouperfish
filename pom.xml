@@ -18,13 +18,7 @@
   </properties>
   
   <repositories>
-    <repository>
-      <id>cdh.release.repo</id>
-      <url>https://repository.cloudera.com/content/repositories/releases</url>
-      <name>Cloudera Releases Repository</name>
-      <snapshots><enabled>true</enabled></snapshots>
-    </repository>
-    
+
     <repository>
       <id>sonatype-nexus-public</id>
       <name>SonaType public snapshots and releases repository</name>
@@ -33,9 +27,16 @@
         <!-- set to true if you wish to fetch releases from this repo too. -->
         <enabled>false</enabled>
       </releases>
-        <snapshots>
-          <enabled>true</enabled>
-        </snapshots>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    
+    <repository>
+      <id>cdh.release.repo</id>
+      <url>https://repository.cloudera.com/content/repositories/releases</url>
+      <name>Cloudera Releases Repository</name>
+      <snapshots><enabled>true</enabled></snapshots>
     </repository>
   </repositories>
 
@@ -80,11 +81,66 @@
       <scope>test</scope>
     </dependency>
 
+
+    <!-- All logging to logback (a slf4j impl)  -->
     <dependency>
-      <artifactId>slf4j-api</artifactId>
       <groupId>org.slf4j</groupId>
-      <version>1.5.8</version>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>1.5.11</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>1.5.11</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.5.11</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>0.9.20</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>0.9.20</version>
+    </dependency>
+        
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.5.8</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jcl</artifactId>
+      <version>1.5.8</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.1.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.16</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- End of logging configuration (yes, it is that long). -->
 
     <dependency>
       <groupId>org.apache.mahout</groupId>
@@ -92,8 +148,8 @@
       <version>0.3</version>
       <exclusions>
       	<exclusion>
-      		<artifactId>hbase</artifactId>
       		<groupId>org.apache.mahout.hbase</groupId>
+            <artifactId>hbase</artifactId>
       	</exclusion>
       </exclusions>
     </dependency>
@@ -121,6 +177,16 @@
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase</artifactId>
       <version>0.90.1-cdh3u0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
