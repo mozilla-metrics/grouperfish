@@ -8,10 +8,10 @@ import com.mozilla.grouperfish.model.DocumentRef;
 
 /**
  * Generates rowkeys. Instances must be threadsafe.
- * 
+ *
  * For now, keys will be UTF-8 coded. We'll probably need to allow any byte[]
  * for keys for best space efficiency and performance.
- * 
+ *
  * Whatever scheme is used to generate keys, it must work with the prefix
  * methods defined here, to allow for efficient scans.
  */
@@ -22,7 +22,7 @@ public abstract class Keys {
 	}
 
 	public String clustersPrefix(String ns, String ck, long rebuildTS) {
-		return cluster(ns, ck, rebuildTS, null) + '/';
+		return cluster(ns, ck, rebuildTS, null);
 	}
 
 	public final String key(DocumentRef ref) {

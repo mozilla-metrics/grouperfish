@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mozilla.grouperfish.conf.Conf;
-import com.mozilla.grouperfish.hbase.CollectionAdapter;
+import com.mozilla.grouperfish.hbase.DocumentAdapter;
 import com.mozilla.grouperfish.hbase.Factory;
 import com.mozilla.grouperfish.hbase.Importer;
 import com.mozilla.grouperfish.jobs.carrot2.CarrotClusterTool;
@@ -67,7 +67,7 @@ public class Rebuild extends AbstractCollectionTool {
 		// (needs atomic increment)
 		long size = 0;
 		List<Document> docs = new ArrayList<Document>();
-		for (Document doc : new CollectionAdapter(hbase_).documents(collection.ref(), timestamp)) {
+		for (Document doc : new DocumentAdapter(hbase_).all(collection.ref(), timestamp)) {
 			docs.add(doc);
 			++size;
 		}

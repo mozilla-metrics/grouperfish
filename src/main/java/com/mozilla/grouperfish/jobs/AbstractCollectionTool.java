@@ -38,7 +38,7 @@ public abstract class AbstractCollectionTool extends Configured implements Tool,
 		long timestamp = new Date().getTime();
 		if (args.length == 4 && "--timestamp".equals(args[2])) {
 			timestamp = Long.valueOf(args[3]);
-		} else if (args.length > 3) {
+		} else if (args.length > 3 || args.length < 2) {
 			return usage(1);
 		}
 

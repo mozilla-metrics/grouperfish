@@ -33,12 +33,6 @@
       <fileNamePattern>logs/archive/grouperfish.%d{yyyy/MM}.log.gz</fileNamePattern>
       <maxHistory>365</maxHistory>
     </rollingPolicy>
-    
-    <!-- 
-    <encoder>
-      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
-    </encoder>
-    -->
   </appender>
   
   

@@ -2,7 +2,6 @@ package com.mozilla.grouperfish.jobs;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
@@ -10,45 +9,47 @@ import org.apache.hadoop.hbase.mapreduce.TableMapper;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import com.mozilla.grouperfish.conf.Conf;
-import com.mozilla.grouperfish.hbase.DocumentAdapter;
+import com.mozilla.grouperfish.hbase.ClusterAdapter;
 import com.mozilla.grouperfish.hbase.Factory;
-import com.mozilla.grouperfish.hbase.Schema.Documents;
 import com.mozilla.grouperfish.hbase.Source;
+import com.mozilla.grouperfish.model.Cluster;
 import com.mozilla.grouperfish.model.CollectionRef;
-import com.mozilla.grouperfish.model.Document;
 
 
 /**
- * Export all documents into a directory, one file per map-task.
- *
- * This is part of the full rebuild and a prerequisite for vectorization.
- *
- * TODO: We want a better partitioner so that regions are only looked at by a
- * mapper if they overlap with our prefix.
+ * Export clusters into a tsv file (cluster key, document text)
  */
-public class ExportDocuments extends AbstractCollectionTool {
+public class ExportClusters extends AbstractCollectionTool {
 
-	final static String NAME = "export_documents";
+	final static String NAME = "export_clusters";
 
 	static class ExportMapper extends TableMapper<Text, Text> {
 		public static enum Counters {
 			ROWS_USED
 		}
 
+		private Factory factory_;
+		public void setup(Context context) {
+			factory_ = new Factory(Util.fromHadoopConf(context.getConfiguration()));
+		}
+
 		@Override
 		protected void map(ImmutableBytesWritable key, Result row, ExportMapper.Context context)
 				throws java.io.IOException, InterruptedException {
 			context.getCounter(Counters.ROWS_USED).increment(1);
-			byte[] documentID = row.getColumnLatest(Documents.Main.FAMILY, Documents.Main.ID.qualifier).getValue();
-			KeyValue text = row.getColumnLatest(Documents.Main.FAMILY, Documents.Main.TEXT.qualifier);
-			context.write(new Text(documentID), new Text(text.getValue()));
+			ClusterAdapter adapter = new ClusterAdapter(factory_);
+			final Cluster c = adapter.read(row);
+			for (int i = 0; i < c.documents().size(); ++i) {
+				context.write(new Text(c.ref().label()), new Text(c.documents().get(i).id()));
+			}
+
 		};
 	}
 
-	public ExportDocuments(Conf conf, Configuration hadoopConf) {
+	public ExportClusters(Conf conf, Configuration hadoopConf) {
 		super(conf, hadoopConf);
 	}
 
@@ -63,18 +64,19 @@ public class ExportDocuments extends AbstractCollectionTool {
 
 		job.setJarByClass(AbstractCollectionTool.class);
 		job.setNumReduceTasks(0);
-		job.setOutputFormatClass(SequenceFileOutputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
 		FileOutputFormat.setOutputPath(job, outputDir);
 
 		// Set optional scan parameters
 		final Factory factory = new Factory(conf_);
-		final Source<Document> documents = new DocumentAdapter(factory).all(ref, timestamp);
+		final Source<Cluster> clusters = new ClusterAdapter(factory).all(ref, timestamp);
 
 		TableMapReduceUtil.initTableMapperJob(
-				factory.tableName(Document.class),
-				documents.getScan(), ExportMapper.class, null, null, job);
+				factory.tableName(Cluster.class),
+				clusters.getScan(), ExportMapper.class, null, null, job);
+
 		return job;
 	}
 
