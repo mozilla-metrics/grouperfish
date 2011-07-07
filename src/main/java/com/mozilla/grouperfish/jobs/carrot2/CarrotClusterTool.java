@@ -1,6 +1,8 @@
 package com.mozilla.grouperfish.jobs.carrot2;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -96,9 +98,17 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 			// :TODO: well that’s as hard coded as it gets... REMOVE THIS and get stopwords in
 			final String HINT = "Firefox";
 			final ProcessingResult result = controller.process(carrotDocs, HINT, algorithm);
-			final List<org.carrot2.core.Cluster> clustersByTopic = result.getClusters();
+			final List<org.carrot2.core.Cluster> clustersByTopic =
+				new ArrayList<org.carrot2.core.Cluster>(result.getClusters());
 
-			clusters = new ArrayList<Cluster>(clustersByTopic.size());
+			Collections.sort(clustersByTopic, new Comparator<org.carrot2.core.Cluster>() {
+				public int compare(org.carrot2.core.Cluster o1,
+						org.carrot2.core.Cluster o2) {
+					return Integer.signum(o2.getLabel().length() - o1.getLabel().length());
+				}
+			});
+
+			List<Cluster> maybeEmpty = new ArrayList<Cluster>(clustersByTopic.size());
 			for (org.carrot2.core.Cluster carrotCluster : clustersByTopic) {
 				final List<DocumentRef> related = new ArrayList<DocumentRef>(clustersByTopic.size());
 				for (org.carrot2.core.Document carrotDoc : carrotCluster.getDocuments()) {
@@ -110,7 +120,7 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 				final String label = carrotCluster.getLabel();
 				final Cluster cluster =
 					new Cluster(new ClusterRef(collection.ref(), timestamp, label), related);
-				clusters.add(cluster);
+				maybeEmpty.add(cluster);
 
 				if (label.equals(OTHERS)) {
 					numOthers = carrotCluster.size();
@@ -120,6 +130,12 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 						index.add(carrotDoc.getTitle(), label, cluster);
 					}
 				}
+			}
+
+			clusters = new ArrayList<Cluster>(clustersByTopic.size());
+			for (Cluster c : maybeEmpty) {
+				if (c.documents().size() == 0) continue;
+				clusters.add(c);
 			}
 
 			log.info("Carrot2 results in {}ms: {} docs, {} clusters, {} in Other Topics",
