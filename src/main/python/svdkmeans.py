@@ -1,12 +1,9 @@
 #/usr/bin/env python
 
-""" Wrapper script for SVD + Spherical K Means.
-    Performs Rank r (Default 250)  approximation of Term-Document normalized
-    tfidf matrix. Renormalizes it and passes it as input to Spherical K Means. 
-    The output clusters are then visualized as follows: Generate concept vectors
-    for each cluster, generate both feature clouds and feature clusters. 
+""" Wrapper script for SVD + K Means.
+    Performs Rank r (Default 250)  approximation of matrix. This is then
+    clustered by KMeans. The output clusters are then visualized as follows: Generate    concept vectors for each cluster, generate both feature clouds and feature clusters.
 """
-#TODO (Eshwaran): Do I need to renormalize column vectors or are they always normalized for me? 
 
 import math
 import logging
@@ -23,18 +20,18 @@ from sparsesvd import sparsesvd
 
 
 def gen_args():
-    parser = argparse.ArgumentParser(description='Spherical KMeans Clusterer\
+    parser = argparse.ArgumentParser(description='KMeans Clusterer\
                                      With Dimensionality Recuction')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-opinion', metavar = 'input',type = file,\
                         help='Tab Separated input opinions file')
     group.add_argument('-corpus', metavar = 'corpus', type = file,\
                        help='Pickled corpus')
-    group.add_argument('-i', '--index', action = 'store', nargs = 3,\
+    group.add_argument('-i', '--index', action = 'store', nargs = 4,\
                        metavar=("index", "featuredict",\
                                 "docids"), dest='indexstuff', help = 'Index +\
-                       featuredict + docids.\
-                       stopwords/mindfpercent/maxdfpercent/usebigrams can be\
+                       featuredict + docids + ndocs_actualcontent.\
+                       stopwords,mindfpercent,maxdfpercent,usebigrams can be\
                        ignored when this option is set',type = file)
     parser.add_argument('-mindfpercent', metavar = 'mindfpercent', action = 'store', type =\
                         int, default = 0.05, dest = 'mindfpercent', help = 'min\
@@ -63,6 +60,9 @@ def gen_args():
                         'usebigrams', help = 'Use bigrams. Default =\
                         No')
     # K Means Options
+    parser.add_argument('-classical',action = 'store_true', default = False, dest =\
+                        'classical', help = 'Select type of\
+                        KMeans to use Spherical or Euclidean. Default: Spherical')
     parser.add_argument('-k', metavar = 'k', action = 'store', type = int, dest\
                                      = 'k', help = 'Number of clusters to generate')
     parser.add_argument('-n', metavar = 'n', action = 'store', type = int, dest=\
@@ -81,6 +81,9 @@ def gen_args():
                         to perform. Minimum value which is default is 250.\
                         Suppose number of features is less than 250, we take\
                         half of the features.')
+    parser.add_argument('-tf' ,action = 'store_true', default = False, dest =\
+                        'tf', help = 'Select type of\
+                        Vectors (tf/tfidf)  Default: tfidf')
     return parser
 
 def main():
@@ -91,6 +94,10 @@ def main():
     logger.addHandler(logging.StreamHandler())
     if args.verbose:
         logger.setLevel(logging.DEBUG)
+    if args.classical:
+        normalize = True
+    else:
+        normalize = False
     if args.opinion:
         corpus = corpusutil.create(args.opinion)
         logger.debug("Number of documents in corpus: %d ", len(corpus))
@@ -104,6 +111,8 @@ def main():
                                                  args.minfrequency,\
                                                  verbose = args.verbose,\
                                                  usebigrams = args.usebigrams,\
+                                                 normalize = normalize,\
+                                                 tf = args.tf,\
                                                  stopwords = stopwords)
         else:
             datacreator = corpusutil.GenerateVectors(corpus = corpus, mindfpercent\
@@ -114,6 +123,8 @@ def main():
                                                  args.minfrequency,\
                                                  verbose = args.verbose,\
                                                  usebigrams = args.usebigrams,\
+                                                 normalize = normalize,\
+                                                 tf = args.tf,\
                                                  stopwords = None)
         result = datacreator.create()
         docids = result['docids']
@@ -131,6 +142,8 @@ def main():
                                                  args.minfrequency,\
                                                  verbose = args.verbose,\
                                                  usebigrams = args.usebigrams,\
+                                                 normalize = normalize,\
+                                                 tf = args.tf,\
                                                  stopwords = stopwords)
         else:
             datacreator = corpusutil.GenerateVectors(corpus = corpus, mindfpercent\
@@ -141,6 +154,8 @@ def main():
                                                  args.minfrequency,\
                                                  verbose = args.verbose,\
                                                  usebigrams = args.usebigrams,\
+                                                 normalize = normalize,\
+                                                 tf = args.tf,\
                                                  stopwords = None)
         result = datacreator.create()
         docids = result['docids']
@@ -150,12 +165,15 @@ def main():
         featuredict = cPickle.load(args.indexstuff[1])
         docids = cPickle.load(args.indexstuff[2])
         datacreator = corpusutil.GenerateVectors(index = index, featuredict =\
-                                             featuredict, docids = docids)
+                                             featuredict, docids = docids,\
+                                                ndocs_content = ndocs_content,\
+                                                normalize = normalize,\
+                                                tf = args.tf)
         result = datacreator.create()
     data = result['data']
     p = data.shape[0]
     n = data.shape[1]
-    logger.debug(" Normalized TFIDF Vectors are of dimensions: (%d,%d)",\
+    logger.debug(" Vectors are of dimensions: (%d,%d)",\
                  p, n)
     if args.saveint:
         cPickle.dump(docids,open("tfidfvectors_key_"+sessionid+'.pck','w'))
@@ -165,9 +183,9 @@ def main():
     DEFAULT_RANK = 250
     r = args.r
     maxr = min(p,n)
-    logger.debug(" Data can have rank not greater than : %d", maxr)
+    logger.debug(" Data can have rank not greate than : %d", maxr)
     if maxr >= DEFAULT_RANK:
-        if DEFAULT_RANK > r or r > maxrank:
+        if DEFAULT_RANK > r or r > maxr:
             r = DEFAULT_RANK
     else:
         r = int(maxr/2)
@@ -175,22 +193,26 @@ def main():
     ut,s,vt = sparsesvd(data,r)
     red_data = ssp.csc_matrix(np.dot(ut.T,np.dot(np.diag(s),vt)))
     logger.debug(" Generated rank %d approximation", r)
-    logger.debug(" Normalizing columns of reduced rank matrix...")
-    invnorms = np.zeros(n)
-    normsii = np.arange(0,n,1)
-    normsjj = np.arange(0,n,1)
-    for col in range(n):
-        print col
-        invnorms[col] = math.sqrt((red_data[:,col].T*red_data[:,col]).todense())
-        if invnorms[col] is not 0:
-            invnorms[col] = 1/invnorms[col]
-    diag = ssp.coo_matrix((invnorms,(normsii,normsjj)),shape = (n,n)).tocsc()
-    red_data = red_data*diag
+    if normalize:
+        logger.debug(" Normalizing columns of reduced rank matrix...")
+        invnorms = np.zeros(n)
+        normsii = np.arange(0,n,1)
+        normsjj = np.arange(0,n,1)
+        for col in range(n):
+            invnorms[col] = math.sqrt((red_data[:,col].T*red_data[:,col]).todense())
+            if invnorms[col] is not 0:
+                invnorms[col] = 1/invnorms[col]
+        diag = ssp.coo_matrix((invnorms,(normsii,normsjj)),shape = (n,n)).tocsc()
+        red_data = red_data*diag
     logger.debug(" Doing KMeans on reduced rank matrix...")
-    kmeans = corpusutil.KMeans(red_data,args.k,args.n,args.delta,args.randomcentroids,args.verbose)
+    kmeans = corpusutil.KMeans(data = red_data,k = args.k,n = args.n, delta =\
+                               args.delta,randomcentroids =\
+                               args.randomcentroids, verbose =
+                               args.verbose,classical = args.classical)
     result = kmeans.run()
     clusters = result['clusters']
     centroids = result['centroids']
+    centroiddict = result['centroiddict']
     if args.saveint:
         cPickle.dump(clusters,open("redrank_clusters_"+sessionid+'.pck','w'))
         spio.mmwrite(open("redrank_centroids_"+sessionid+'.mtx','w'),centroids,\
@@ -200,11 +222,19 @@ def main():
     if args.saveint:
         spio.mmwrite(open("originalmat_centroids_"+sessionid+'.mtx','w'),\
                      originalmat_centroids,comment="CSC Matrix", field = 'real')
-    vis_output = corpusutil.generate_conceptclouds(originalmat_centroids.todense(),featuredict,sessionid)
+    vis_output = corpusutil.genconceptclouds(centroids = centroids,\
+                                             centroiddict = centroiddict,\
+                                             featuredict = featuredict,\
+                                             corpus = corpus,\
+                                             clusters = clusters,\
+                                             docids = docids,\
+                                             sessionid = sessionid)
     svdkmeansvis = open("svdkmeans-concept_clouds_"+str(sessionid)+'.html','w')
     svdkmeansvis.write(vis_output)
     svdkmeansvis.close()
-    vis_output = corpusutil.generate_featureclusters(originalmat_centroids.todense(),featuredict,sessionid)
+    vis_output = corpusutil.genfeatureclouds(originalmat_centroids.todense(),\
+                                             centroiddict,\
+                                             featuredict,sessionid)
     svdkmeansvis = open("svdkmeans-feature_clusters_"+str(sessionid)+'.html','w')
     svdkmeansvis.write(vis_output)
     svdkmeansvis.close()

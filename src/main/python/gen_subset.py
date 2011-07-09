@@ -36,12 +36,16 @@ def gen_args():
     parser.add_argument('-device',metavar = 'device', action = 'store', type \
                         = str, dest = 'device', help = 'Device\
                         identifier for mobile')
+    parser.add_argument('-sessionid',action = 'store', dest = 'sessionid',\
+                        default = str(int(time.time()*100000)), help =\
+                        'Generate unique session id. Default = time\
+                        dependent')
     return parser
 
 def main():
     parser = gen_args()
     args = parser.parse_args()
-    sessionid = str(int(time.time()*100000))
+    sessionid = args.sessionid
     logger =  logging.getLogger(__name__)
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.DEBUG)
