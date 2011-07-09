@@ -1,6 +1,6 @@
 #/usr/bin/env python
 
-""" Wrapper script for K Means.
+""" Wrapper script for Spectral KMeans
     Performs KMeans on document matrix. For spherical kmeans, the matrix should
     be normalized. Refer corpusutil documentation for more details. 
 """

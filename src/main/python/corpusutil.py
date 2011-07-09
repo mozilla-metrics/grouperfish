@@ -11,11 +11,12 @@ import enchant
 import numpy as np
 import scipy.sparse as ssp
 import scipy.io as spio
+import scipy.linalg as spla
 from nltk import bigrams
 from nltk.metrics import edit_distance
 from nltk import PorterStemmer
 from nltk.corpus import wordnet
-
+from sparsesvd import sparsesvd
 
 
 def cleandoc(doc, usebigrams = False,stopwords=None):
@@ -69,24 +70,31 @@ def cleandoc(doc, usebigrams = False,stopwords=None):
     sreplacer = _SpellingReplacer()
     delchars = ''.join(c for c in map(chr, range(256)) if not c.isalpha())
     doc = [d.translate(None,delchars) for d in doc.split()]
-    if usebigrams is True:
-        temp = doc
-        doc = bigrams(temp)
-        doc = [ ' '.join(t) for t in doc]
-        doc.extend(temp)
-    if stopwords is not None:
-        doc = [sreplacer.replace(rreplacer.replace(t.lower())) for t in doc if t.lower() not in stopwords]
+    USELESS_DOC_SIZE = 2
+    if len(doc) > USELESS_DOC_SIZE:
+        if usebigrams is True:
+            temp = doc
+            doc = bigrams(temp)
+            doc = [ ' '.join(t) for t in doc]
+            doc.extend(temp)
+        if stopwords is not None:
+            doc = [sreplacer.replace(rreplacer.replace(t.lower())) for t\
+                   in doc if t.lower() not in stopwords]
+        else:
+            doc = [sreplacer.replace(rreplacer.replace(t.lower())) for t\
+                   in doc if t.lower()]
+        #stemmer = PorterStemmer()
+        #doc = [stemmer.stem(t) for t in doc]
+        #Doing lower casing again just because the stemmers are doing
+        #capitalizations. They also occasionally generate single letter chars
+        if stopwords is not None:
+            doc = [d.lower().translate(None,string.digits+string.punctuation)\
+                   for d in doc if d.lower() not in stopwords]
+        else:
+            doc =  [d.lower().translate(None,string.digits+string.punctuation)\
+                    for d in doc ]
     else:
-        doc = [sreplacer.replace(rreplacer.replace(t.lower())) for t in doc if t.lower()]
-    stemmer = PorterStemmer()
-    doc = [stemmer.stem(t) for t in doc]
-    #Doing lower casing again just because the stemmers are doing
-    #capitalizations. They also occasionally generate single letter chars
-    if stopwords is not None:
-        doc = [d.lower().translate(None,string.digits+string.punctuation) for d in doc if d.lower() not in\
-               stopwords]
-    else:
-        doc =  [d.lower().translate(None,string.digits+string.punctuation) for d in doc ]
+        doc = []
     return doc
 
 
@@ -188,20 +196,22 @@ def enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
     return type('enum', (), enums)
 
-def extract_topfeatures(data,featuredict,nfeaturesreq):
-    """ Extracts top nfeaturesreq  from data
+def extract_topfeatures(centroids,centroiddict,featuredict,nfeaturesreq):
+    """ Extracts top nfeaturesreq  from centroids
     Args:
-        data: A matrix with each column containing one observation.
+        centroids: A matrix with each column containing one observation.
+        centroidict: Dict mapping from centroid id to centroid column ids
         featuredict: A map from matrix indices to features
         nfeaturesreq: Number of features to extract
     Returns:
-        topfeatures: A dict of dicts. The key of dict is the  column
-        identifier.The value is a dict with key as feature and value as matrix
+        topfeatures: A dict of dicts. The key of dict is the centroid id.
+        The value is a dict with key as feature and value as matrix
         value.
     """
-    lindex = data.shape[0] - nfeaturesreq
-    rindex = data.shape[0] + 1
-    sortedargs  =  np.matrix.argsort(data,axis = 0)[lindex:rindex,:]
+    invcentroiddict = dict((v,k) for k,v in centroiddict.iteritems())
+    lindex = centroids.shape[0] - nfeaturesreq
+    rindex = centroids.shape[0] + 1
+    sortedargs  =  np.matrix.argsort(centroids,axis = 0)[lindex:rindex,:]
     ii = 0
     topfeatures = {}
     while ii < sortedargs.shape[1]:
@@ -209,9 +219,9 @@ def extract_topfeatures(data,featuredict,nfeaturesreq):
         jj = 0
         while jj < sortedargs.shape[0]:
             feature = featuredict[sortedargs[jj,ii]]
-            colfeatures[feature] = data[sortedargs[jj,ii],ii]
+            colfeatures[feature] = centroids[sortedargs[jj,ii],ii]
             jj = jj + 1
-        topfeatures[ii] = colfeatures
+        topfeatures[invcentroiddict[ii]] = colfeatures
         ii = ii + 1
     return topfeatures
 
@@ -339,47 +349,65 @@ def generate_subset(corpus,**kwargs):
         select = True
     return subset
 
+def genclustermetadata(clusterid, v_ids, docids, corpus, sessionid):
+    """ Generate relevant text docs corresponding to clusterid. """
+    title = 'cluster%d_%s.txt'%(clusterid,sessionid)
+    docf = open(title,'w')
+    contents = 'Cluster %d\n'%(clusterid,)
+    clusterdocids = [docids[v] for v in v_ids]
+    for  d_id in clusterdocids:
+        contents += '\t'.join(corpus[d_id])
+        contents += '\n'
+    docf.write(contents)
+    docf.close()
+    return css.undecoratedhyperlink(title,str(clusterid))
 
-#TODO (Eshwaran): Implement the algorithm in the reference
-"""
-References:
-        @article{gottron2009document,
-        title={Document word clouds: Visualising web documents as tag clouds
-        to aid users in relevance decisions},
-        author={Gottron, T.},
-        journal={Research and Advanced Technology for Digital Libraries},
-        pages={94--105},
-        year={2009},
-        publisher={Springer}
-        }
-"""
 
-def generate_featureclouds(centroids,featuredict,sessionid):
+def genconceptclouds(**kwargs):
 
     """ Take top ten features from every cluster and create cloud.
     Cloud is generated and saved to file identified by sessionid
 
     Args:
-        centroids: A  dense matrix where every column vector is a centroid vector.
-        featuredict: A dict with key : matrix index (int) and value: features
-        (str)
+        centroids: A  CSC matrix where every column vector is a centroid vector.
+        centroiddict: A dict mapping from cluster id to centroid columns
+        featuredict: A dict with key : matrix index (int) and value: features (str)
+        clusters: A dict with key as cluster id and values as list of
+        vector ids that belong to it
+        corpus: The corpus.
+        docids: List of docids, their indices are vector ids.
+
     Returns:
         An html object
 
     """
+    centroids = kwargs.get('centroids')
+    centroiddict = kwargs.get('centroiddict')
+    featuredict = kwargs.get('featuredict')
+    sessionid = kwargs.get('sessionid')
+    corpus = kwargs.get('corpus')
+    clusters = kwargs.get('clusters')
+    docids = kwargs.get('docids')
     NUM_FEATURES_REQ = 10
     FONT_URL = \
     'http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold'
     STYLE_URL = 'wordcloud.css'
     divstr = ''
-    topfeatures = extract_topfeatures(centroids,featuredict,NUM_FEATURES_REQ)
-    for colid,features in topfeatures.iteritems():
+    topfeatures = extract_topfeatures(centroids.todense(),centroiddict,\
+                                      featuredict,\
+                                      NUM_FEATURES_REQ)
+    for clusterid,features in topfeatures.iteritems():
         features = mapfeatures_to_cloudbins(features)
-        divstr += css.generate_single_cloud(colid,features)
+        if corpus is None:
+            divstr += css.generate_single_cloud(clusterid,features)
+        else:
+            clusterinfo = genclustermetadata(clusterid,clusters[clusterid],docids,\
+                                             corpus,sessionid)
+            divstr += css.generate_single_cloud(clusterinfo, features)
     bodystr = css.generate_body(divstr)
     return css.wrap_into_html(bodystr,sessionid,FONT_URL,STYLE_URL)
 
-def generate_featureclusters(centroids,featuredict,sessionid):
+def genfeatureclouds(centroids,centroiddict,featuredict,sessionid):
     """  Create feature cluster clouds by generating feature clusters.
     Generate feature cluster clouds by determining for every feature which
     cluster it most belongs to by finding centroid where it has max value. Top
@@ -388,6 +416,8 @@ def generate_featureclusters(centroids,featuredict,sessionid):
 
     Args:
         centroids: A  dense matrix where every column vector is a centroid vector.
+        centroiddict: A dictionary mapping from centroid ids to columns of
+        centroids
         featuredict: A dict with key : matrix index (int) and value: features
         (str)
     Returns:
@@ -398,13 +428,15 @@ def generate_featureclusters(centroids,featuredict,sessionid):
     'http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold'
     STYLE_URL = 'wordcloud.css'
     divstr = ''
+    invcentroiddict = dict((v,k) for k,v in centroiddict.iteritems())
     featureclusters = {}
     for index,feature in featuredict.iteritems():
-        cid = centroids[index,:].argmax()
+        cvid = centroids[index,:].argmax()
+        cid = invcentroiddict[cvid]
         if cid in featureclusters:
-            featureclusters[cid].append((feature,centroids[index,cid]))
+            featureclusters[cid].append((feature,centroids[index,cvid]))
         else:
-            featureclusters[cid] = [(feature,centroids[index,cid])]
+            featureclusters[cid] = [(feature,centroids[index,cvid])]
     for cid,features in featureclusters.iteritems():
         topfeatures = dict(sorted(features,key = lambda feature:\
                                feature[1])[0:NUM_FEATURES_REQ])
@@ -413,31 +445,47 @@ def generate_featureclusters(centroids,featuredict,sessionid):
     bodystr = css.generate_body(divstr)
     return css.wrap_into_html(bodystr,sessionid,FONT_URL,STYLE_URL)
 
-def getcentroids(data,clusters):
+def getcentroids(data,clusters, normalize = True):
     """ Uses clusters to generate centroids
     Args:
+        data: A csc matrix where columsn are observation
         clusters: A dict with key as cluster id and values as list of
         vector ids that belong to it
-    Returns: csc matrix of new centroids
+        Normalize centroids or not. (Default = True)
+    Returns:
+        dict containing: centroids, centroiddict
     """
     k = len(clusters)
     newcentroids =  np.mat(np.zeros((data.shape[0],k)))
     invnorms = np.zeros(k)
     normsII = np.arange(0,k,1)
     normsJJ = normsII
+    centroiddict = {}
+    ii = 0
     for centroid,v_ids in clusters.iteritems():
         for v in v_ids:
-            newcentroids[:,centroid] = newcentroids[:,centroid] +\
+            newcentroids[:,ii] = newcentroids[:,ii] +\
                     data[:,v].todense()
-        newcentroids[:,centroid] = newcentroids[:,centroid]*(float(1)/len(v_ids))
-        normcentroid = math.sqrt(newcentroids[:,centroid].T*newcentroids[:,centroid])
+        newcentroids[:,ii] = newcentroids[:,ii] *\
+                (float(1)/len(v_ids))
+        normcentroid = math.sqrt(newcentroids[:,ii].T *\
+                                 newcentroids[:,ii])
         if normcentroid is not 0:
-            invnorms[centroid] =\
-                    1/(math.sqrt(newcentroids[:,centroid].T*newcentroids[:,centroid]))
+            invnorms[ii] =\
+                    1/(math.sqrt(newcentroids[:,ii].T *\
+                                 newcentroids[:,ii]))
         else:
-            invnorms[centroid] = 0
-    diag = ssp.coo_matrix((invnorms,(normsII,normsJJ)),shape = (k,k)).tocsc()
-    return ssp.csc_matrix(newcentroids)*diag
+            invnorms[ii] = 0
+        assert(centroid not in centroiddict), 'Logic in getcentroids is wrong'
+        centroiddict[centroid] = ii
+        ii  = ii + 1
+    if normalize is True:
+        diag = ssp.coo_matrix((invnorms,(normsII,normsJJ)),shape = (k,k)).tocsc()
+        return {'centroids':ssp.csc_matrix(newcentroids)*diag,\
+                'centroiddict':centroiddict}
+    else:
+        return {'centroids':ssp.csc_matrix(newcentroids),\
+                'centroiddict':centroiddict}
 
 def getclusters(nodeclusterinfo):
     """ Generate clusters from partition info
@@ -493,7 +541,7 @@ def is_termfeature(ndocs, noccurs, ncorpus, maxdfpercent, mindfpercent,\
             return True
 
 def mapfeatures_to_cloudbins(features):
-    """ Helper function to generate_featureclouds. 
+    """ Helper function to genconceptclouds.
     Maps each feature value to  one of n bins where n is determined by length of
     features.
     Args:
@@ -515,14 +563,16 @@ def mapfeatures_to_cloudbins(features):
 
 class GenerateVectors:
 
-    """ Generates tfidf vectors from a given corpus
+    """ Generates vectors from a given corpus
     Args:
         corpus - A file object for the corpus file
         mindfpercent - Minimum number of documents in which term should exist
         maxdfpercent - Max number of documents in which terms can exist
         minfrequency - Minimum occurrences required
         verbose - Enables Debug setting
-        usebigrams - Usebigrams 
+        usebigrams - Usebigrams
+        tf - Generate Term Frequency Vectors
+        normalize - Normalize each vector
         stopwords - List of stopwords
     Methods:
         create - Wrapper for generate_vectors
@@ -535,10 +585,16 @@ class GenerateVectors:
         self.minfrequency = kwargs.get('minfrequency')
         self.stopwords = kwargs.get('stopwords')
         self.usebigrams = kwargs.get('usebigrams')
+        self.normalize = kwargs.get('normalize')
+        self.tf = kwargs.get('tf')
+        assert (self.normalize is not None), "Decide whether normalization is\
+        needed or not"
+        assert (self.tf is not None), "Decide whether tf/idf vectors are needed"
         self.index = kwargs.get('index')
         self.featuredict = kwargs.get('featuredict')
         self.docids = kwargs.get('docids')
         verbose = kwargs.get('verbose')
+        self.ndocs_content = kwargs.get('ndocs_content')
         self.logger = logging.getLogger(__name__)
         self.logger.addHandler(logging.StreamHandler())
         if verbose:
@@ -553,23 +609,21 @@ class GenerateVectors:
             self.corpus = create(self.corpus)
         if self.index is None:
             self.logger.info("Creating inverted index")
-
-            self.index, self.featuredict, self.docids, ndocs_content  =\
-            result = generate_index(corpus = self.corpus, maxdfpercent = self.maxdfpercent,\
-                                 mindfpercent = self.mindfpercent, minfrequency
-                                    = self.minfrequency,\
-                                 usebigrams = self.usebigrams, stopwords = self.stopwords)
+            result = generate_index(corpus = self.corpus, maxdfpercent =\
+                                    self.maxdfpercent, mindfpercent =\
+                                    self.mindfpercent, minfrequency =\
+                                    self.minfrequency, usebigrams =\
+                                    self.usebigrams, stopwords = self.stopwords)
             self.index = result['index']
             self.featuredict = result['featuredict']
             self.docids = result['docids']
             self.ndocs_content = result['ndocs_content']
-        else:
-            ndocs_content = None
         self.ndocs = len(self.docids)
         self.logger.debug("Corpus has %d total docs",self.ndocs)
-        if ndocs_content is not None:
-            self.logger.debug("Corpus has %d docs with actual\
-                              content",ndocs_content)
+        assert (self.ndocs_content is not None), "Must pass number of docs with\
+        content"
+        self.logger.debug("Corpus has %d docs with actual\
+                              content",self.ndocs_content)
         self.logger.debug("Index has %d features", len(self.index))
         self.logger.info("Creating vectors")
         return self.generate_vectors()
@@ -577,7 +631,7 @@ class GenerateVectors:
 
     def generate_vectors(self):
 
-        """ Generates tfidf vectors as  columns of a CSC matrix.
+        """ Generates doc vectors as  columns of a CSC matrix.
         Matrix columns are indices of docids which is returned
         """
 
@@ -596,22 +650,26 @@ class GenerateVectors:
         val = np.zeros(nelements)
         iielement = 0
         iiterm = 0
-        normsq = np.zeros(self.ndocs)
+        normsq = np.zeros(self.ndocs_content)
         for term,docs in self.index.iteritems():
             self.logger.debug("Working with feature %s",term)
             for doc,info in docs.iteritems():
                 tf = float(info[0])/info[1]
                 idf = math.log10(float(self.ndocs)/float(len(docs)))
-                tfidf = tf*idf
+                if self.tf:
+                    weight = tf
+                else:
+                    weight = tf*idf
                 II[iielement] = iiterm
                 JJ[iielement] = self.docids.index(doc)
-                val[iielement] = tfidf
-                normsq[self.docids.index(doc)] = normsq[self.docids.index(doc)] + tfidf*tfidf
+                val[iielement] = weight
+                normsq[self.docids.index(doc)] = normsq[self.docids.index(doc)]\
+                + weight*weight
                 iielement = iielement + 1
             iiterm = iiterm + 1
-        invnorms = np.zeros(self.ndocs)
+        invnorms = np.zeros(self.ndocs_content)
         ii = 0
-        while ii < self.ndocs:
+        while ii < self.ndocs_content:
             try:
                 invnorms[ii] = 1/math.sqrt(normsq[ii])
             except ZeroDivisionError:
@@ -619,17 +677,24 @@ class GenerateVectors:
                              features",self.docids[ii])
                 invnorms[ii] = 0
             ii = ii + 1
-        normsII = np.arange(0,self.ndocs,1)
-        normsJJ = normsII
-        diag = ssp.coo_matrix((invnorms,(normsII,normsJJ)),shape =\
-                                  (self.ndocs,self.ndocs)).tocsc()
-        vecs = ssp.coo_matrix((val,(II,JJ)),shape=(nfeatures,self.ndocs)).tocsc()
-        return { 'data':vecs*diag, 'docids':self.docids,\
+        vecs = ssp.coo_matrix((val,(II,JJ)),shape=(nfeatures,self.ndocs_content)).tocsc()
+        if self.normalize is True:
+            normsII = np.arange(0,self.ndocs_content,1)
+            normsJJ = normsII
+            diag = ssp.coo_matrix((invnorms,(normsII,normsJJ)),shape =\
+                                      (self.ndocs_content, self.ndocs_content)\
+                                 ).tocsc()
+            return { 'data':vecs*diag, 'docids':self.docids,\
+                'featuredict':self.featuredict}
+        else:
+            return { 'data':vecs, 'docids':self.docids,\
                 'featuredict':self.featuredict}
 
 class KMeans:
 
-    """ Batch KMeans . Does Spherical KMeans  only
+    """ Batch KMeans . Does Spherical and classical KMeans.
+    Please note that the input vectors should be normalized tf-idf vectors for
+    Spherical KMeans. Classical KMeans use L2 Norm. 
     Args:
         data - CSC Matrix with rows as features and columns as points
         k - Number of clusters to generate
@@ -637,6 +702,8 @@ class KMeans:
         randomcentroids - Generate Centroids by partitioning matrix 
         determininstically or randomize selection of columns. 
         delta = Convergence Parameter
+        classical - Boolean that determines whether to use classical kmeans or
+        not. Default = FALSE
         verbose - Enables debug setting
 
     Methods:
@@ -645,10 +712,10 @@ class KMeans:
         getdeterministicpartitions - gets deterministic partitions for
         clustering
         getrandomizedpartitions - gets randomized partitions for clustering
-        getcentroids
         run
 
     References:
+        Spherical KMeans:
         1. @article{dhillon2001concept,
         title={Concept decompositions for large sparse text data using
         clustering},
@@ -663,12 +730,18 @@ class KMeans:
 
     """
 
-    def __init__(self, data, k, n, delta, randomcentroids, verbose):
-        self.data = data
-        self.k = k
-        self.n = n
-        self.delta = delta
-        self.randomcentroids = randomcentroids
+    def __init__(self, **kwargs):
+        self.data = kwargs.get('data')
+        self.k = kwargs.get('k')
+        self.n = kwargs.get('n')
+        self.delta = kwargs.get('delta')
+        self.randomcentroids = kwargs.get('randomcentroids')
+        verbose = kwargs.get('verbose')
+        if self.randomcentroids is None:
+            self.randomcentroids = False
+        self.classical = kwargs.get('classical')
+        if self.classical is None:
+            self.classical = False
         self.logger = logging.getLogger(__name__)
         self.logger.addHandler(logging.StreamHandler())
         if verbose:
@@ -685,33 +758,34 @@ class KMeans:
         """
         return [l[i:i+n] for i in range(0, len(l), n)]
 
-    def converged(self,clusters,newclusters):
+    def converged(self, newQ):
         """ Check convergence.
-         We check if difference of sum of  norm of sum of all the vectors for each cluster
-         computed during prev iteration and curre iteration is less than delta
-         Args:
-             clusters: A dict with key as cluster id and value as a list of docs
-             belonging to it.
-             newclusters: Similar datastructure for the new cluster
+        Check whether difference between currQ and newQ less than delta.
+        Args:
+            newQ which is a new quality measure.
         Returns:
             Boolean indicating convergence
         """
-        currnorms = np.zeros(self.k)
-        newnorms = np.zeros(self.k)
-        for centroid,v_ids in clusters.iteritems():
-            currsum =  np.mat(np.zeros((self.data.shape[0],1)))
-            for v in v_ids:
-                currsum = currsum + self.data[:,v].todense()
-            currnorms[centroid] = math.sqrt(currsum.T*currsum)
-        for centroid,v_ids in newclusters.iteritems():
-            newsum =  np.mat(np.zeros((self.data.shape[0],1)))
-            for v in v_ids:
-                newsum = newsum + self.data[:,v].todense()
-            newnorms[centroid] = math.sqrt(newsum.T*newsum)
-        if math.fabs(currnorms.sum() - newnorms.sum())< self.delta:
+        if math.fabs(self.Q - newQ) < self.delta:
             return True
         else:
             return False
+
+    def getclosest(self,distances):
+        """ Find closest point from dict of points.
+        Args:
+            dcentroids: Dict of points.
+        Returns:
+            Closest point key
+        """
+        sortedkeys = distances.keys()
+        sortedkeys.sort(cmp = lambda a,b: cmp(distances[a],distances[b]))
+        MIN = 0
+        MAX = len(sortedkeys) - 1
+        if self.classical is True:
+            return sortedkeys[MIN]
+        else:
+            return sortedkeys[MAX]
 
     def getdeterministicpartitions(self):
         """ Divide up the vectors among the k partitions """
@@ -724,9 +798,46 @@ class KMeans:
         while ii < self.k:
             self.clusters[ii] = v_idslist[ii]
             ii = ii + 1
-        self.centroids = getcentroids(self.data,self.clusters)
-        return {'centroids':self.centroids,'clusters':self.clusters}
+        if self.classical is True:
+            result = getcentroids(self.data, self.clusters, normalize = False)
+        else:
+            result = getcentroids(self.data,self.clusters, normalize = True)
+        self.centroids = result['centroids']
+        self.centroiddict = result['centroiddict']
 
+    def getdist(self,a,b):
+        """ Returns distance between two points.
+        Args:
+            a: A vector in csc
+            b: A vector in csc
+        Returns:
+            dist
+        """
+        if self.classical is True:
+            return math.sqrt(((a-b).T*(a-b)).todense())
+        else:
+            return (a.T*b).todense()
+
+    def getQ(self, **kwargs):
+        """ Finds the quality of clusters
+        Args:
+            centroids: A sparse csc matrix .
+            clusters: A dict with key as cluster id and values as vectors
+        Returns:
+            Quality of clustering.
+        """
+        centroids = kwargs.get('centroids')
+        clusters = kwargs.get('clusters')
+        centroiddict = kwargs.get('centroiddict')
+        Q = 0
+        for c_id,v_ids in clusters.iteritems():
+            for v in v_ids:
+                cv_id = centroiddict[c_id]
+                Q += self.getdist(self.data[:,v], centroids[:,cv_id])
+        return Q
+
+    #TODO: (Eshwaran) Generate global mean vector and generate centroids by
+    # random perturbations of this vector and then compute clusters
     def getrandomizedpartitions(self):
         """ Divide up the vectors among the k partitions """
         nvectors = self.data.shape[1]
@@ -739,28 +850,33 @@ class KMeans:
         while ii < self.k:
             self.clusters[ii] = v_idslist[ii]
             ii = ii + 1
-        self.centroids = getcentroids(self.data,self.clusters)
-        return {'centroids':self.centroids,'clusters':self.clusters}
+        if self.classical is True:
+            result = getcentroids(self.data,self.clusters, normalize = False)
+        else:
+            result = getcentroids(self.data,self.clusters, normalize = True)
+        self.centroids = result['centroids']
+        self.centroiddict = result['centroiddict']
 
     def run(self):
-        """ Runs spherical kmeans, returns clusters and centroids.
+        """ Runs kmeans, returns clusters and centroids.
         Returns:
             clusters. A dict mapping cluster IDs to the corresponding vector IDs
-            centroids. The clusters themeselves.
+            centroids. A CSC Matrix of all the centroids.
+            centroiddict: A dict mapping cluster IDs to centroid vector IDs.
         """
-        assert (self.data.shape[1] > self.k), "Number of clusters requested greater than\
-                number of vectors"
+        assert (self.data.shape[1] > self.k), "Number of clusters requested\
+        greater than number of vectors"
         self.logger.debug("Data is of dimensions:\
                      (%d,%d)",self.data.shape[0],self.data.shape[1])
         self.logger.debug("Generating %d clusters ...",self.k)
         if self.randomcentroids:
             self.logger.debug("Generating centroids by randomized partioning")
-            result = self.getrandomizedpartitions()
+            self.getrandomizedpartitions()
         else:
             self.logger.debug("Generating centroids by arbitrary partitioning")
-            result = self.getdeterministicpartitions()
-        centroids = result['centroids']
-        clusters = result['clusters']
+            self.getdeterministicpartitions()
+        self.Q = self.getQ(centroids = self.centroids, centroiddict =\
+                           self.centroiddict, clusters = self.clusters)
         ii = 0
         new_clusters = {}
         while ii < self.n:
@@ -768,27 +884,287 @@ class KMeans:
             newclusters = {}
             jj = 0
             while jj < self.data.shape[1]:
-                kk = 0
-                dcentroids = [0]*self.k
-                while kk < self.k:
-                    dcentroids[kk] =\
-                    (self.data[:,jj].T*self.centroids[:,kk]).todense()
-                    kk = kk + 1
-                dclosest = min(dcentroids)
-                closestcluster = dcentroids.index(dclosest)
+                actualk = len(self.clusters)
+                if self.k is not actualk:
+                    self.logger.debug("Number of clusters is %d and not k=%d",
+                                      actualk, k)
+                dcentroids = {}
+                for cid,cv_id in self.centroiddict.iteritems():
+                    dcentroids[cid] = self.getdist(self.data[:,jj],\
+                                                   self.centroids[:,cv_id])
+                closestcluster = self.getclosest(dcentroids)
                 if closestcluster in newclusters:
                     newclusters[closestcluster].append(jj)
                 else:
                     newclusters[closestcluster] = [jj]
                 jj = jj+1
             self.logger.debug("Going to get new centroids...")
-            newcentroids = getcentroids(self.data,newclusters)
+            if self.classical is True:
+                result = getcentroids(self.data,newclusters, normalize = False)
+            else:
+                result = getcentroids(self.data,newclusters, normalize = True)
+            newcentroids = result['centroids']
+            newcentroiddict = result['centroiddict']
             self.logger.debug("Going to check convergence...")
-            if self.converged(self.clusters,newclusters):
+            newQ = self.getQ(centroids = newcentroids, centroiddict =\
+                             newcentroiddict, clusters = newclusters)
+            if self.converged(newQ):
                 break
             else:
                 self.centroids = newcentroids
+                self.centroiddict = newcentroiddict
                 self.clusters =  newclusters
+                self.Q  = newQ
             ii = ii + 1
-        return {'clusters':self.clusters,'centroids':self.centroids}
+
+        return {'clusters':self.clusters, 'centroiddict':\
+                    self.centroiddict,'centroids':self.centroids}
+
+class SpectralCoClusterer:
+
+    """ SpectralCoClusterer: Performs SpectralCoClustering on input corpus. Note
+    that according to Reference 2, it is supposed to work well in practice for
+    TF. It has been tested in Reference 1 using Classical KMeans.
+
+    Args:
+        corpus - A dictionary with key as docid and
+        maxdfpercent - Stats for cleaning up corpus
+        mindfpercent - "
+        minfrequency - "
+        usebigrams - usebigrams or not
+        tf - Generate tf/idf vectors
+        k - Number of clusters to generate
+        n - Number of iterations
+        randomcentroids - Generate Centroids by partitioning matrix
+        determininstically or randomize selection of columns.
+        delta = Convergence Parameter
+        classical - Boolean that determines whether to use classical kmeans or
+        not. Default = TRUE
+        stopwords - A list of stopwords
+        verbose - Enables debug setting
+
+    Main Methods:
+        run: Generates normalized matrix, A, computes SVD to produce Z which is
+        clustered. Returns A, Z
+        visualize: Generates word clouds and document clouds. The document
+        cloud is a concept cloud.
+    """
+
+    def __init__(self, **kwargs):
+        self.corpus = kwargs.get('corpus')
+        assert(self.corpus is not None),"Corpus cannot be empty"
+        self.maxdfpercent = kwargs.get('maxdfpercent')
+        assert(self.maxdfpercent is not None),"Maxdfpercent cannot be empty"
+        self.mindfpercent = kwargs.get('mindfpercent')
+        assert(self.mindfpercent is not None),"Maxdfpercent cannot be empty"
+        self.minfrequency = kwargs.get('minfrequency')
+        assert(self.maxdfpercent is not None),"Maxdfpercent cannot be empty"
+        self.usebigrams = kwargs.get('usebigrams')
+        self.tf = kwargs.get('tf')
+        self.k = kwargs.get('k')
+        self.n = kwargs.get('n')
+        self.delta = kwargs.get('delta')
+        self.randomcentroids = kwargs.get('randomcentroids')
+        self.sessionid = kwargs.get('sessionid')
+        self.verbose = kwargs.get('verbose')
+        self.stopwords = kwargs.get('stopwords')
+        if self.randomcentroids is None:
+            self.randomcentroids = False
+        self.classical = kwargs.get('classical')
+        if self.classical is None:
+            self.classical = True
+        if self.classical is True:
+            self.normalize = False
+        else:
+            self.normalize = True
+        self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.StreamHandler())
+        if self.verbose:
+            self.logger.setLevel(logging.DEBUG)
+        self.logger.debug("Starting Spectral Co-Clustering debugging...")
+
+    def run(self):
+        """ Main method that drives Spectral Co-Clustering. """
+        self.logger.debug("Generating Vectors")
+        ALL_DIMENSIONS = 0
+        vectorcreator = GenerateVectors(corpus = self.corpus,\
+                                                   mindfpercent =\
+                                                   self.mindfpercent,\
+                                                   maxdfpercent =\
+                                                   self.maxdfpercent,\
+                                                   minfrequency =\
+                                                   self.minfrequency,\
+                                                   verbose = self.verbose,\
+                                                   usebigrams =\
+                                                   self.usebigrams,\
+                                                   normalize = self.normalize,\
+                                                   tf = self.tf,\
+                                                   stopwords = self.stopwords)
+        result = vectorcreator.create()
+        self.A = result['data']
+        self.nfeatures = self.A.shape[0]
+        self.ndocs = self.A.shape[1]
+        self.logger.debug("Word By Documentmatrix A has dim:(%d,%d)",\
+                          self.nfeatures,self.ndocs)
+        self.docids  = result['docids']
+        self.featuredict = result['featuredict']
+        self.logger.debug("Generating normalized Adjacency Matrix, A_n")
+        self.genAn()
+        self.logger.debug("Finding SVD of An")
+        un,s,vnt = spla.svd(self.An.todense())
+        self.logger.debug('Shape of un (%d,%d)', un.shape[0], un.shape[1])
+        vn = vnt.T
+        self.logger.debug('Shape of vn (%d,%d)', vn.shape[1], vn.shape[1])
+        self.logger.debug("Generating Z matrix")
+        self.getZ(un,vn)
+        data = (self.Z.T).tocsc()
+        kmeans = KMeans(data = data, k = self.k, n = self.n,\
+                        delta = self.delta,randomcentroids =\
+                        self.randomcentroids, verbose =\
+                        self.verbose, classical = self.classical)
+        result = kmeans.run()
+        self.coclusters = result['clusters']
+        self.logger.debug('Number of co-clusters produced: %d',\
+                          len(self.coclusters))
+        self.visualizeclusters()
+        return { 'fclouds':self.fclouds,'docclouds':self.docclouds,\
+                'A':self.A,'An':self.An,'Z':self.Z }
+
+    def genAn(self):
+        self.getinvsqrtD1()
+        self.logger.debug('D1 dimensions are (%d,%d)',self.D1.shape[0],\
+                          self.D1.shape[1])
+        self.getinvsqrtD2()
+        self.logger.debug('D2 dimensions are (%d,%d)',self.D2.shape[0],\
+                          self.D2.shape[1])
+        self.An = self.D1*self.A*self.D2
+        self.logger.debug('An dimensions are (%d,%d)',self.An.shape[0],\
+                          self.An.shape[1])
+
+    def getinvsqrtD1(self):
+        numwords = self.A.shape[0]
+        d = np.zeros(numwords)
+        II = np.arange(0,numwords,1)
+        JJ = II
+        for ii in range(numwords):
+            temp = math.sqrt(self.A[ii,:].todense().sum())
+            d[ii] = 1/temp
+        self.D1 = ssp.coo_matrix((d,(II,JJ)),shape = (numwords,numwords)).tocsc()
+
+    def getinvsqrtD2(self):
+        numdocs = self.A.shape[1]
+        d = np.zeros(numdocs)
+        II = np.arange(0,numdocs,1)
+        JJ = II
+        for ii in range(numdocs):
+            temp = math.sqrt(self.A[:,ii].todense().sum())
+            d[ii] = 1/temp
+        self.D2 = ssp.coo_matrix((d,(II,JJ)),shape = (numdocs,numdocs)).tocsc()
+
+    def getZ(self,un,vn):
+        self.l = int(math.ceil(math.log(self.k,2)))
+        self.pruneun(un)
+        self.prunevn(vn)
+        self.getZfeatures()
+        self.getZdocs()
+        self.Z = ssp.vstack([self.Zfeatures,self.Zdocs])
+
+    def pruneun(self,un):
+        self.U = ssp.csc_matrix(un[:,1:(self.l+1)])
+
+    def prunevn(self,vn):
+        self.V = ssp.csc_matrix(vn[:,1:(self.l+1)])
+
+    def getZfeatures(self):
+        self.Zfeatures = self.D1*self.U
+
+    def getZdocs(self):
+        self.Zdocs = self.D2*self.V
+
+    def visualizeclusters(self):
+        self.splitclusters()
+        self.getfclouds()
+        self.getdocclouds()
+
+    def splitclusters(self):
+        self.dclusters = {}
+        self.fclusters = {}
+        for c_id, z_ids in self.coclusters.iteritems():
+            for z in z_ids:
+                if self.iszfeature(z):
+                    f_id = self.getfid(z)
+                    if c_id in self.fclusters:
+                        temp = self.fclusters[c_id]
+                        temp.append(self.featuredict[f_id])
+                        self.fclusters[c_id] = temp
+                    else:
+                        self.fclusters[c_id] = [self.featuredict[f_id]]
+                else:
+                    d_id = self.getdid(z)
+                    if c_id in self.dclusters:
+                        temp = self.dclusters[c_id]
+                        temp.append(d_id)
+                        self.dclusters[c_id] = temp
+                    else:
+                        self.dclusters[c_id] = [d_id]
+        self.logger.debug('Number of doc clusters: %d', len(self.dclusters))
+        self.logger.debug('Number of feature clusters: %d', len(self.fclusters))
+
+    def getdocclouds(self):
+        result = getcentroids(self.A,self.dclusters, self.classical)
+        dcentroids = result['centroids']
+        dcentroiddict = result['centroiddict']
+        self.docclouds = genconceptclouds(centroids = dcentroids,\
+                                          centroiddict = dcentroiddict,\
+                                        featuredict = self.featuredict,\
+                                        sessionid = self.sessionid,\
+                                        clusters = self.dclusters)
+
+    def getfclouds(self):
+        self.fclouds = ''
+        for cid, features in self.fclusters.iteritems():
+            self.fclouds += 'Cluster %d:\n'%(cid,)
+            self.fclouds += ','.join(features)
+            self.fclouds += '\n'
+
+    def iszfeature(self,z):
+        if z < self.nfeatures:
+            return True
+        else:
+            return False
+
+    def getfid(self,z):
+        assert (z < self.nfeatures), 'Run iszfeature prior to getfid'
+        return z
+
+    def getdid(self,z):
+        assert (z >= self.nfeatures), 'Run iszfeaure prior to getdid'
+        return z-self.nfeatures
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
