@@ -33,22 +33,29 @@ def generate_style_link(url):
     code = """<link href='%s' rel='stylesheet' type = 'text/css' />"""
     return code %(url,)
 
-def generate_single_cloud(clusterid,features):
+def generate_single_cloud(clusterinfo,features):
     """ Generates a single cloud from features.
     Args:
-        clusterid: integer identifier for cluster
+        clusterinfo: Information regarding cluster. html link mostly. 
         features: A dict of features where key corresponds to class id and value
         corresponds to feature to embed. id  should range between [1-10]
     Returns:
         cloud_element :A single css element corresponding to the cloud
     """
 
-    body = """<span class="cluster-id">%d</span>"""%(clusterid,)
+    body = """<span class="cluster-id">%s</span>"""%(clusterinfo,)
     for key,value in features.iteritems():
         assert key > 0 and key <= 10 ,"Key: %d is not in range [1-10]"%(key,)
         body += """<span class="word-%d">%s</span>"""%(key,value)
     return generate_CSSdiv(body,"word-cloud")
 
+def undecoratedhyperlink(url,linkname):
+    """ Return a string containing  HTML and inline CSS for an undecorated hyperlink.
+    """
+    astr = """<a
+    style=\"text-decoration:none\" href=\"%s\">%s</a>
+    """
+    return astr % (url, linkname)
 
 def wrap_into_html(body,sessionid,fonturl,styleurl):
     """ Generate html file inserting into head appropriate styles.

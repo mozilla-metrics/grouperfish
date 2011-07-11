@@ -1,5 +1,10 @@
 #/usr/bin/env python
 
+""" Wrapper script for K Means.
+    Performs KMeans on document matrix. For spherical kmeans, the matrix should
+    be normalized. Refer corpusutil documentation for more details. 
+"""
+
 import math
 import logging
 import sys
@@ -12,174 +17,19 @@ import numpy as np
 import scipy.sparse as ssp
 import scipy.io as spio
 
-class KMeans:
-
-    """ Batch KMeans . Does Spherical KMeans  only
-    Args:
-        data - CSC Matrix with rows as features and columns as points
-        k - Number of clusters to generate
-        n - Number of iterations
-        randomcentroids - Generate Centroids by partitioning matrix 
-        determininstically or randomize selection of columns. 
-        delta = Convergence Parameter
-        verbose - Enables debug setting
-
-    Methods:
-        chunks - Chunks up list
-        converged - checks convergence
-        getdeterministicpartitions - gets deterministic partitions for
-        clustering
-        getrandomizedpartitions - gets randomized partitions for clustering
-        getcentroids
-        run
-    """
-
-    def __init__(self, data, k, n, delta, randomcentroids, verbose):
-        self.data = data
-        self.k = k
-        self.n = n
-        self.delta = delta
-        self.randomcentroids = randomcentroids
-        self.logger = logging.getLogger(__name__)
-        if verbose:
-            self.logger.setLevel(logging.DEBUG)
-            self.logger.debug("Starting KMeans debugging...")
-
-    def chunks(self,l,n):
-        """ Chunks up list l into divisions of n"
-        Args:
-            l : A list
-            n : The splits required
-        Returns:
-            A list of lists
-        """
-        return [l[i:i+n] for i in range(0, len(l), n)]
-
-    def converged(self,clusters,newclusters):
-        """ Check convergence.
-         We check if difference of sum of  norm of sum of all the vectors for each cluster
-         computed during prev iteration and curre iteration is less than delta
-        """
-        currnorms = np.zeros(self.k)
-        newnorms = np.zeros(self.k)
-        for centroid,v_ids in clusters.iteritems():
-            currsum =  np.mat(np.zeros((self.data.shape[0],1)))
-            for v in v_ids:
-                currsum = currsum + self.data[:,v].todense()
-            currnorms[centroid] = math.sqrt(currsum.T*currsum)
-        for centroid,v_ids in newclusters.iteritems():
-            newsum =  np.mat(np.zeros((self.data.shape[0],1)))
-            for v in v_ids:
-                newsum = newsum + self.data[:,v].todense()
-            newnorms[centroid] = math.sqrt(newsum.T*newsum)
-        if math.fabs(currnorms.sum() - newnorms.sum())< self.delta:
-            return True
-        else:
-            return False
-
-    def getdeterministicpartitions(self):
-        """ Divide up the vectors among the k partitions """
-        nvectors = self.data.shape[1]
-        numsplits = int(math.floor(nvectors/self.k))
-        v_ids = range(0,nvectors,1)
-        v_idslist = self.chunks(v_ids,numsplits)
-        ii = 0
-        self.clusters = {}
-        while ii < self.k:
-            self.clusters[ii] = v_idslist[ii]
-            ii = ii + 1
-        self.centroids = corpusutil.getcentroids(self.data,self.clusters)
-        return {'centroids':self.centroids,'clusters':self.clusters}
-
-    def getrandomizedpartitions(self):
-        """ Divide up the vectors among the k partitions """
-        nvectors = self.data.shape[1]
-        numsplits = int(math.floor(nvectors/self.k))
-        v_ids = range(0,nvectors,1)
-        np.random.shuffle(v_ids)
-        v_idslist = self.chunks(v_ids,numsplits)
-        ii = 0
-        self.clusters = {}
-        while ii < self.k:
-            self.clusters[ii] = v_idslist[ii]
-            ii = ii + 1
-        self.centroids = corpusutil.getcentroids(self.data,self.clusters)
-        return {'centroids':self.centroids,'clusters':self.clusters}
-
-    def run(self):
-        """ Runs spherical kmeans, returns clusters and centroids.
-        Returns:
-            clusters. A dict mapping cluster IDs to the corresponding vector IDs
-            centroids. The clusters themeselves.
-        References:
-           1. @article{dhillon2001concept,
-            title={Concept decompositions for large sparse text data using
-            clustering},
-            author={Dhillon, I.S. and Modha, D.S.},
-            journal={Machine learning},
-            volume={42},
-            number={1},
-            pages={143--175},
-            year={2001},
-            publisher={Springer}
-                }
-        """
-        assert (self.data.shape[1] > self.k), "Number of clusters requested greater than\
-                number of vectors"
-        self.logger.debug("Data is of dimensions:\
-                     (%d,%d)",self.data.shape[0],self.data.shape[1])
-        self.logger.debug("Generating %d clusters ...",self.k)
-        if self.randomcentroids:
-            self.logger.debug("Generating centroids by randomized partioning")
-            result = self.getrandomizedpartitions()
-        else:
-            self.logger.debug("Generating centroids by arbitrary partitioning")
-            result = self.getdeterministicpartitions()
-        centroids = result['centroids']
-        clusters = result['clusters']
-        ii = 0
-        new_clusters = {}
-        while ii < self.n:
-            self.logger.debug("Iteration %d",ii)
-            newclusters = {}
-            jj = 0
-            while jj < self.data.shape[1]:
-                kk = 0
-                dcentroids = [0]*self.k
-                while kk < self.k:
-                    dcentroids[kk] =\
-                    (self.data[:,jj].T*self.centroids[:,kk]).todense()
-                    kk = kk + 1
-                dclosest = min(dcentroids)
-                closestcluster = dcentroids.index(dclosest)
-                if closestcluster in newclusters:
-                    newclusters[closestcluster].append(jj)
-                else:
-                    newclusters[closestcluster] = [jj]
-                jj = jj+1
-            self.logger.debug("Going to get new centroids...")
-            newcentroids = corpusutil.getcentroids(self.data,newclusters)
-            self.logger.debug("Going to check convergence...")
-            if self.converged(self.clusters,newclusters):
-                break
-            else:
-                self.centroids = newcentroids
-                self.clusters =  newclusters
-            ii = ii + 1
-            return {'clusters':self.clusters,'centroids':self.centroids}
 
 def gen_args():
-    parser = argparse.ArgumentParser(description='Spherical KMeans Clusterer')
+    parser = argparse.ArgumentParser(description='KMeans Clusterer')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-opinion', metavar = 'input',type = file,\
                         help='Tab Separated input opinions file')
     group.add_argument('-corpus', metavar = 'corpus', type = file,\
                        help='Pickled corpus')
-    group.add_argument('-i', '--index', action = 'store', nargs = 3,\
+    group.add_argument('-i', '--index', action = 'store', nargs = 4,\
                        metavar=("index", "featuredict",\
                                 "docids"), dest='indexstuff', help = 'Index +\
-                       featuredict + docids.\
-                       stopwords/mindfpercent/maxdfpercent/usebigrams can be\
+                       featuredict + docids + ndocs_actualcontent.\
+                       stopwords,mindfpercent,maxdfpercent,usebigrams can be\
                        ignored when this option is set',type = file)
     parser.add_argument('-mindfpercent', metavar = 'mindfpercent', action = 'store', type =\
                         int, default = 0.05, dest = 'mindfpercent', help = 'min\
@@ -208,6 +58,9 @@ def gen_args():
                         'usebigrams', help = 'Use bigrams. Default =\
                         No')
     # K Means Options
+    parser.add_argument('-classical',action = 'store_true', default = False, dest =\
+                        'classical', help = 'Select type of\
+                        KMeans to use Spherical or Euclidean. Default: Spherical')
     parser.add_argument('-k', metavar = 'k', action = 'store', type = int, dest\
                                      = 'k', help = 'Number of clusters to generate')
     parser.add_argument('-n', metavar = 'n', action = 'store', type = int, dest=\
@@ -220,6 +73,9 @@ def gen_args():
                         'randomcentroids', help = 'Generate centroids by\
                         partitioning matrix deterministically or randomize\
                         selection of columns. Default = false')
+    parser.add_argument('-tf' ,action = 'store_true', default = False, dest =\
+                        'tf', help = 'Select type of\
+                        Vectors (tf/tfidf)  Default: tfidf')
     return parser
 
 def main():
@@ -230,6 +86,10 @@ def main():
     logger.addHandler(logging.StreamHandler())
     if args.verbose:
         logger.setLevel(logging.DEBUG)
+    if args.classical:
+        normalize = True
+    else:
+        normalize = False
     if args.opinion:
         corpus = corpusutil.create(args.opinion)
         logger.debug("Number of documents in corpus: %d ", len(corpus))
@@ -243,6 +103,8 @@ def main():
                                                  args.minfrequency,\
                                                  verbose = args.verbose,\
                                                  usebigrams = args.usebigrams,\
+                                                 normalize = normalize,\
+                                                 tf = args.tf,\
                                                  stopwords = stopwords)
         else:
             datacreator = corpusutil.GenerateVectors(corpus = corpus, mindfpercent\
@@ -253,6 +115,8 @@ def main():
                                                  args.minfrequency,\
                                                  verbose = args.verbose,\
                                                  usebigrams = args.usebigrams,\
+                                                 normalize = normalize,\
+                                                 tf = args.tf,\
                                                  stopwords = None)
         result = datacreator.create()
         docids = result['docids']
@@ -270,6 +134,8 @@ def main():
                                                  args.minfrequency,\
                                                  verbose = args.verbose,\
                                                  usebigrams = args.usebigrams,\
+                                                 normalize = normalize,\
+                                                 tf = args.tf,\
                                                  stopwords = stopwords)
         else:
             datacreator = corpusutil.GenerateVectors(corpus = corpus, mindfpercent\
@@ -280,6 +146,8 @@ def main():
                                                  args.minfrequency,\
                                                  verbose = args.verbose,\
                                                  usebigrams = args.usebigrams,\
+                                                 normalize = normalize,\
+                                                 tf = args.tf,\
                                                  stopwords = None)
         result = datacreator.create()
         docids = result['docids']
@@ -289,27 +157,44 @@ def main():
         featuredict = cPickle.load(args.indexstuff[1])
         docids = cPickle.load(args.indexstuff[2])
         datacreator = corpusutil.GenerateVectors(index = index, featuredict =\
-                                             featuredict, docids = docids)
+                                             featuredict, docids = docids,\
+                                                ndocs_content = ndocs_content,\
+                                                normalize = normalize,\
+                                                tf = args.tf)
         result = datacreator.create()
     data = result['data']
     if args.saveint:
         cPickle.dump(docids,open("data_key_"+sessionid+'.pck','w'))
         spio.mmwrite(open("data_"+sessionid+".mtx",'w')\
                      ,data,comment="CSC Matrix",field = 'real')
-    kmeans = KMeans(data,args.k,args.n,args.delta,args.randomcentroids,args.verbose)
+    kmeans = corpusutil.KMeans(data = data,k = args.k,n = args.n, delta =\
+                               args.delta,randomcentroids =\
+                               args.randomcentroids, verbose =\
+                               args.verbose,classical = args.classical)
     result = kmeans.run()
     clusters = result['clusters']
     centroids = result['centroids']
+    centroiddict = result['centroiddict']
     if args.saveint:
         cPickle.dump(clusters,open("data_clusters_"+sessionid+'.pck','w'))
-        spio.mmwrite(open("data_centroids_"+sessionid+'.mtx','w'),centroids,comment="CSC\
-                         Matrix", field = 'real')
+        spio.mmwrite(open("data_centroids_"+sessionid+'.mtx','w'),centroids,\
+                     comment="CSC Matrix", field = 'real')
     logger.info(" %d Clusters Generated ",len(clusters))
-    if args.verbose:
-        vis_output = corpusutil.generate_featureclouds(centroids.todense(),featuredict,sessionid)
-        kmeansvis = open("kmeans-output_"+str(sessionid)+'.html','w')
-        kmeansvis.write(vis_output)
-        kmeansvis.close()
+    vis_output = corpusutil.genconceptclouds(centroids = centroids,\
+                                             centroiddict = centroiddict,\
+                                             featuredict = featuredict,\
+                                             corpus = corpus,\
+                                             clusters = clusters,\
+                                             docids = docids,\
+                                             sessionid = sessionid)
+    kmeansvis = open("kmeans-concept_clouds_"+str(sessionid)+'.html','w')
+    kmeansvis.write(vis_output)
+    kmeansvis.close()
+    vis_output = corpusutil.genfeatureclouds(centroids.todense(),centroiddict,\
+                                                     featuredict,sessionid)
+    kmeansvis = open("kmeans-feature_clusters_"+str(sessionid)+'.html','w')
+    kmeansvis.write(vis_output)
+    kmeansvis.close()
 
 if __name__ == "__main__":
     sys.exit(main())
