@@ -9,19 +9,30 @@ register './lib/mahout-collections-1.0.jar'
 SET default_parallel 7;
 SET pig.splitCombination 'false';
 
-raw = LOAD 'opinions-en.tsv' USING PigStorage('\t') AS (doc_id:int,datetime:long,praise_issue:chararray,product:chararray,version:chararray,os:chararray,language:chararray,text:chararray);
-filtered_raw = FILTER raw BY praise_issue == 'praise' AND version == '4.0b12';
-group_filtered = GROUP filtered_raw all;
-ndocs = FOREACH group_filtered GENERATE COUNT(filtered_raw);
-tokenized = FOREACH filtered_raw GENERATE doc_id,com.mozilla.pig.eval.text.Tokenize(text,'stopwords-en.txt') AS token_bag;
-doc_vectors = FOREACH tokenized GENERATE doc_id,com.mozilla.pig.eval.text.TermFrequency(token_bag) AS tf_bag;
+%default INPUT 'opinions.tsv'
+%default STOPWORDS 'stopwords-en.txt'
+%default STEM 'true'
+%default FEATUREINDEX 'feature-index'
+%default OUTPUT 'document-vectors-tf'
+
+raw = LOAD '$INPUT' USING PigStorage('\t') AS (doc_id:int,datetime:long,praise_issue:chararray,product:chararray,version:chararray,os:chararray,locale:chararray,text:chararray);
+filtered_raw = FILTER raw BY locale == 'en-US' AND praise_issue == 'issue' AND version == '5.0';
+/* tokenized = FOREACH filtered_raw GENERATE doc_id,com.mozilla.pig.eval.text.Tokenize(text,'$STOPWORDS', '$STEM') AS token_bag; */
+tokenized = FOREACH filtered_raw GENERATE doc_id,com.mozilla.pig.eval.text.NGramTokenize(text,'$STOPWORDS', '$STEM', 'true') AS token_bag;
+filtered_tokenized = FILTER tokenized BY SIZE(token_bag) > 1;
+doc_vectors = FOREACH filtered_tokenized GENERATE doc_id,com.mozilla.pig.eval.text.TermFrequency(token_bag) AS tf_bag;
 
 /* Put things back into document vector form before storing in Mahout's vector format */
-feature_vectors = FOREACH doc_vectors GENERATE (chararray)doc_id,com.mozilla.pig.eval.ml.TFVectorizer('feature-index', tf_bag) AS vec;
-STORE feature_vectors INTO 'document-vectors-tf' USING com.mozilla.pig.storage.DocumentVectorStorage('$NFEATURES');
+feature_vectors = FOREACH doc_vectors GENERATE (chararray)doc_id,com.mozilla.pig.eval.ml.TFVectorizer('$FEATUREINDEX', tf_bag) AS vec;
+STORE feature_vectors INTO '$OUTPUT' USING com.mozilla.pig.storage.DocumentVectorStorage('$NFEATURES');
 
 /* Run Mahout's Clustering on this output */
 /*
-/usr/lib/hadoop/bin/hadoop jar /usr/lib/mahout/mahout-core-0.5-job.jar org.apache.mahout.driver.MahoutDriver kmeans -i document-vectors -o kmeans-tanimoto-out -dm org.apache.mahout.common.distance.TanimotoDistanceMeasure -c random-clusters -ow -k 25 -x 20 -cl
-/usr/lib/mahout/bin/mahout clusterdump --seqFileDir kmeans-tanimoto-out/clusters-1 --pointsDir kmeans-tanimoto-out/clusteredPoints --output clusteranalyze.txt -d new-feature-index.txt -dt text
+/usr/lib/hadoop/bin/hadoop jar /usr/lib/mahout/mahout-core-0.5-job.jar org.apache.mahout.driver.MahoutDriver lda 
+-i document-vectors-tf 
+-o lda-out 
+-ow 
+-k 20 
+-v 12000
+-x 20
 */
