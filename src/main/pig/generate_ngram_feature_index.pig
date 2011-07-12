@@ -15,31 +15,53 @@ raw = LOAD '$INPUT' USING PigStorage('\t') AS (doc_id:int,datetime:long,praise_i
 grouped_raw = GROUP raw ALL;
 ndocs = FOREACH grouped_raw GENERATE COUNT(raw);
 
+/* Get all of the unigrams */
 tokenized = FOREACH raw GENERATE doc_id,FLATTEN(com.mozilla.pig.eval.text.Tokenize(text, '$STOPWORDS', '$STEM')) AS token:chararray;
 grouped_words = GROUP tokenized BY token;
 word_freq = FOREACH grouped_words GENERATE FLATTEN($0) AS word:chararray, COUNT($1) as count;
 /* filter on minDF = (count) > 10 AND maxDF % = (count/ndocs) < 0.9 */
 filtered_freq = FILTER word_freq BY SIZE(word) > 1 AND count > 10 AND ((double)count / (double)ndocs.$0) < 0.9;
-index = FOREACH filtered_freq GENERATE word;
+unigram_index = FOREACH filtered_freq GENERATE word;
 
-ngram_tokenized = FOREACH raw GENERATE doc_id,FLATTEN(com.mozilla.pig.eval.text.NGramTokenize(text, '$STOPWORDS', '$STEM', 'false')) AS token:chararray;
-ngram_grouped_words = GROUP ngram_tokenized BY token;
-ngram_word_freq = FOREACH ngram_grouped_words GENERATE FLATTEN($0) AS ngram:chararray, COUNT($1) as count;
+/* Get all of the bi-grams */
+bigram_tokenized = FOREACH raw GENERATE doc_id,FLATTEN(com.mozilla.pig.eval.text.NGramTokenize(text, '$STOPWORDS', '$STEM', 'false', '2', '2')) AS token:chararray;
+bigram_grouped_words = GROUP bigram_tokenized BY token;
+bigram_word_freq = FOREACH bigram_grouped_words GENERATE FLATTEN($0) AS ngram:chararray, COUNT($1) as count;
 /* filter on minDF = (count) > 100 AND maxDF % = (count/ndocs) < 0.9 */
-ngram_filtered_freq = FILTER ngram_word_freq BY SIZE(ngram) > 3 AND count > 100 AND ((double)count / (double)ndocs.$0) < 0.9;
-ngram_index = FOREACH ngram_filtered_freq GENERATE ngram;
+bigram_filtered_freq = FILTER bigram_word_freq BY SIZE(ngram) > 3 AND count > 100 AND ((double)count / (double)ndocs.$0) < 0.9;
+bigram_index = FOREACH bigram_filtered_freq GENERATE ngram;
 
-unigrams_from_ngrams = FOREACH ngram_index GENERATE FLATTEN(com.mozilla.pig.eval.text.Tokenize(ngram, '$STOPWORDS', '$STEM')) AS word:chararray;
-filterd_unigrams_from_ngrams = FILTER unigrams_from_ngrams BY SIZE(word) > 1;
-uniq_unigrams_from_ngrams = DISTINCT filterd_unigrams_from_ngrams;
+/* Get all of the tri-grams */
+trigram_tokenized = FOREACH raw GENERATE doc_id,FLATTEN(com.mozilla.pig.eval.text.NGramTokenize(text, '$STOPWORDS', '$STEM', 'false', '3', '3')) AS token:chararray;
+trigram_grouped_words = GROUP trigram_tokenized BY token;
+trigram_word_freq = FOREACH trigram_grouped_words GENERATE FLATTEN($0) AS ngram:chararray, COUNT($1) as count;
+/* filter on minDF = (count) > 100 AND maxDF % = (count/ndocs) < 0.9 */
+trigram_filtered_freq = FILTER trigram_word_freq BY SIZE(ngram) > 5 AND count > 100 AND ((double)count / (double)ndocs.$0) < 0.9;
+trigram_index = FOREACH trigram_filtered_freq GENERATE ngram;
 
-u = UNION index, uniq_unigrams_from_ngrams;
-grouped_u = GROUP u BY word;
-counted_u = FOREACH grouped_u GENERATE group, COUNT(u) AS count:long;
-symm_diff = FILTER counted_u BY count == 1;
-unigram_index = FOREACH symm_diff GENERATE group;
+/* Discard bigrams that are represented by trigrams */
+bigrams_from_trigrams = FOREACH trigram_index GENERATE FLATTEN(com.mozilla.pig.eval.text.NGramTokenize(ngram, '$STOPWORDS', '$STEM', 'false', '2', '2')) AS token:chararray;
+filtered_bigrams_from_trigrams = FILTER bigrams_from_trigrams BY SIZE(token) > 3;
+uniq_bigrams_from_trigrams = DISTINCT filtered_bigrams_from_trigrams;
 
-final_index = UNION unigram_index, ngram_index;
+bigram_u = UNION uniq_bigrams_from_trigrams, bigram_index;
+grouped_bigrams = GROUP bigram_u BY $0;
+counted_bigrams = FOREACH grouped_bigrams GENERATE group, COUNT(bigram_u) AS count:long;
+symm_diff_bigrams = FILTER counted_bigrams BY count == 1;
+final_bigram_index = FOREACH symm_diff_bigrams GENERATE group AS ngram:chararray;
 
-STORE ngram_filtered_freq INTO '$FREQ_OUTPUT';
+/* Discard unigrams that are represented by trigrams or bigrams */
+bigrams_and_trigrams = UNION final_bigram_index, trigram_index;
+unigrams_from_ngrams = FOREACH bigrams_and_trigrams GENERATE FLATTEN(com.mozilla.pig.eval.text.Tokenize(ngram, '$STOPWORDS', '$STEM')) AS word:chararray;
+filtered_unigrams_from_ngrams = FILTER unigrams_from_ngrams BY SIZE(word) > 1;
+uniq_unigrams_from_ngrams = DISTINCT filtered_unigrams_from_ngrams;
+
+unigram_u = UNION unigram_index, uniq_unigrams_from_ngrams;
+grouped_unigrams = GROUP unigram_u BY word;
+counted_unigrams = FOREACH grouped_unigrams GENERATE group, COUNT(unigram_u) AS count:long;
+symm_diff_unigrams = FILTER counted_unigrams BY count == 1;
+final_unigram_index = FOREACH symm_diff_unigrams GENERATE group;
+
+final_index = UNION final_unigram_index, final_bigram_index, trigram_index;
+
 STORE final_index INTO '$OUTPUT';

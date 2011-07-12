@@ -20,6 +20,8 @@ filtered_raw = FILTER raw BY locale == 'en-US' AND praise_issue == 'issue' AND v
 group_filtered = GROUP filtered_raw all;
 ndocs = FOREACH group_filtered GENERATE COUNT(filtered_raw);
 tokenized = FOREACH filtered_raw GENERATE doc_id,FLATTEN(com.mozilla.pig.eval.text.Tokenize(text,'$STOPWORDS', '$STEM')) AS token:chararray;
+/* Comment out the line above and uncomment the line below if you are using an ngram feature-index */
+/*tokenized = FOREACH filtered_raw GENERATE doc_id,FLATTEN(com.mozilla.pig.eval.text.NGramTokenize(text,'$STOPWORDS', '$STEM', 'true')) AS token:chararray;*/
 
 /* Pulled from @datachef's blog at http://thedatachef.blogspot.com to give proper credit */
 doc_tokens       = GROUP tokenized BY (doc_id, token);
