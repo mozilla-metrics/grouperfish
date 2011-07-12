@@ -17,8 +17,9 @@ SET pig.splitCombination 'false';
 
 raw = LOAD '$INPUT' USING PigStorage('\t') AS (doc_id:int,datetime:long,praise_issue:chararray,product:chararray,version:chararray,os:chararray,locale:chararray,text:chararray);
 filtered_raw = FILTER raw BY locale == 'en-US' AND praise_issue == 'issue' AND version == '5.0';
-/* tokenized = FOREACH filtered_raw GENERATE doc_id,com.mozilla.pig.eval.text.Tokenize(text,'$STOPWORDS', '$STEM') AS token_bag; */
-tokenized = FOREACH filtered_raw GENERATE doc_id,com.mozilla.pig.eval.text.NGramTokenize(text,'$STOPWORDS', '$STEM', 'true') AS token_bag;
+tokenized = FOREACH filtered_raw GENERATE doc_id,com.mozilla.pig.eval.text.Tokenize(text,'$STOPWORDS', '$STEM') AS token_bag;
+/* Comment out the line above and uncomment the line below if you are using an ngram feature-index */
+/*tokenized = FOREACH filtered_raw GENERATE doc_id,com.mozilla.pig.eval.text.NGramTokenize(text,'$STOPWORDS', '$STEM', 'true') AS token_bag;*/
 filtered_tokenized = FILTER tokenized BY SIZE(token_bag) > 1;
 doc_vectors = FOREACH filtered_tokenized GENERATE doc_id,com.mozilla.pig.eval.text.TermFrequency(token_bag) AS tf_bag;
 
