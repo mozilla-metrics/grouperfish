@@ -16,86 +16,13 @@ from nltk import bigrams
 from nltk.metrics import edit_distance
 from nltk import PorterStemmer
 from nltk.corpus import wordnet
+from nltk.util import trigrams as nltk_trigrams
+from nltk.tokenize import word_tokenize as nltk_word_tokenize
+from nltk.probability import FreqDist
+from nltk.corpus.util import LazyCorpusLoader
+from nltk.corpus.reader.api import CorpusReader
+from nltk.corpus.reader.util import StreamBackedCorpusView, concat
 from sparsesvd import sparsesvd
-
-
-def cleandoc(doc, usebigrams = False,stopwords=None):
-    """ Cleans document applying certain filers.
-
-    Filters applied include tokenize by white space, replace repeats e.g. goood
-    becomes good, correct spelling, stemming and lemmatize. 
-
-    Args:
-        doc: A string
-        usebigrams: Use bigrams or not
-        stopList: A list of stop words
-
-    Returns:
-        A list of tokens
-
-    """
-
-    class _RepeatReplacer(object):
-        def __init__(self):
-            self.repeat_regexp = re.compile(r'(\w*)(\w)\2(\w*)')
-            self.repl =r'\1\2\3'
-
-        def replace(self, word):
-            if wordnet.synsets(word):
-                return word
-            repl_word = self.repeat_regexp.sub(self.repl, word)
-            if repl_word != word:
-                return self.replace(repl_word)
-            else:
-                return repl_word
-
-    class _SpellingReplacer(object):
-        def __init__(self, dict_name='en',max_dist=2):
-            self.spell_dict = enchant.Dict(dict_name)
-            self.max_dist = 2
-
-        def replace(self, word):
-            if len(word) is not 0:
-                if self.spell_dict.check(word):
-                    return word
-                suggestions = self.spell_dict.suggest(word)
-                if suggestions and edit_distance(word, suggestions[0]) <= self.max_dist:
-                    return suggestions[0]
-                else:
-                    return word
-            else:
-                return word
-
-    rreplacer = _RepeatReplacer()
-    sreplacer = _SpellingReplacer()
-    delchars = ''.join(c for c in map(chr, range(256)) if not c.isalpha())
-    doc = [d.translate(None,delchars) for d in doc.split()]
-    USELESS_DOC_SIZE = 2
-    if len(doc) > USELESS_DOC_SIZE:
-        if usebigrams is True:
-            temp = doc
-            doc = bigrams(temp)
-            doc = [ ' '.join(t) for t in doc]
-            doc.extend(temp)
-        if stopwords is not None:
-            doc = [sreplacer.replace(rreplacer.replace(t.lower())) for t\
-                   in doc if t.lower() not in stopwords]
-        else:
-            doc = [sreplacer.replace(rreplacer.replace(t.lower())) for t\
-                   in doc if t.lower()]
-        #stemmer = PorterStemmer()
-        #doc = [stemmer.stem(t) for t in doc]
-        #Doing lower casing again just because the stemmers are doing
-        #capitalizations. They also occasionally generate single letter chars
-        if stopwords is not None:
-            doc = [d.lower().translate(None,string.digits+string.punctuation)\
-                   for d in doc if d.lower() not in stopwords]
-        else:
-            doc =  [d.lower().translate(None,string.digits+string.punctuation)\
-                    for d in doc ]
-    else:
-        doc = []
-    return doc
 
 
 def create(reader):
@@ -225,6 +152,81 @@ def extract_topfeatures(centroids,centroiddict,featuredict,nfeaturesreq):
         ii = ii + 1
     return topfeatures
 
+def find_no_clusters(**kwargs):
+    ''' Find the number of clusters.
+    Args:
+        X : The p X n matrix where every column is an observation.
+        samplesize: Percentage of n from which to subsample.
+    Returns:
+        k
+    References: 
+        1. @article{tibshirani2005cluster,
+        title={Cluster validation by prediction strength},
+        author={Tibshirani, R. and Walther, G.},
+        journal={Journal of Computational and Graphical Statistics},
+        volume={14},
+        number={3},
+        pages={511--528},
+        year={2005},
+        publisher={ASA}
+        }
+        2. http://blog.echen.me/2011/03/19/counting-clusters/
+
+    '''
+    X = kwargs.get('X')
+    samplesize = kwargs.get('samplesize')
+    mink = kwargs.get('mink')
+    maxk = kwargs.get('maxk')
+    n = kwargs.get('n')
+    delta = kwargs.get('delta')
+    randomcentroids = kwargs.get('randomcentroids')
+    verbose = kwargs.get('verbose')
+    classical = kwargs.get('classical')
+    result = gensubsamples(X,samplesize)
+    Xtr = result.get('Xtr')
+    Xte = result.get('Xte')
+    THRESHOLD = 0.8
+    assert(mink < Xtr.shape[1] and maxk < Xtr.shape[1]),\
+            'Bailing because sample size too small'
+    logger = logging.getLogger(__name__)
+    logger.addHandler(logging.StreamHandler())
+    if verbose:
+        logger.setLevel(logging.DEBUG)
+    for k in range(mink,maxk+1,1):
+        kmeans = KMeans(data = Xtr, k = k, n = n, delta = delta,\
+                        randomcentroids = randomcentroids, verbose =\
+                        verbose, classical = classical)
+        result = kmeans.run()
+        centroids_tr = result['centroids']
+        clusters_tr = result['clusters']
+        logger.debug('%d Iteration: Number of training clusters\
+                    generated: %d',k,len(clusters_tr))
+        kmeans =  KMeans(data = Xte, k = k, n = n, delta = delta,\
+                        randomcentroids = randomcentroids, verbose =\
+                        verbose, classical = classical)
+        result = kmeans.run()
+        centroids_te = result['centroids']
+        clusters_te = result['clusters']
+        logger.info('%d Iteration: Number of test clusters\
+                    generated: %d',k,len(clusters_tr))
+        if len(clusters_tr) != len(clusters_te):
+            logger.warning('Warning: Bailing out early because number of test\
+                           and training clusters are not equal.')
+            return (k-1)
+        predictions_te = getpredictions(centroids_tr,Xte,classical)
+        predictions_tr = getpredictions(centroids_te,Xtr,classical)
+        ps_te = getpredictionstrength(clusters_te,predictions_te)
+        logger.debug('Test Prediction Strength is %f',ps_te)
+        ps_tr = getpredictionstrength(clusters_tr,predictions_tr)
+        logger.debug('Training Prediction Strength is %f',ps_tr)
+        ps = 0.5*(ps_te+ps_tr)
+        logger.debug('Prediction Strength is %f',ps)
+        if ps > THRESHOLD:
+            return k
+    return k
+
+
+
 def generate_index(**kwargs):
     """ Generates inverted index from corpus.
 
@@ -236,7 +238,7 @@ def generate_index(**kwargs):
         descriptionfield: int identifier of the field to create index using.
         maxdfpercent: Maximum percentage of the docs in which term can occur
         mindfpercent: Minimum  percentage of the docs in which term can occur
-        minfrequency: Minimum total occurrences of term in doc
+        minfrequency: Minimum total occurrences of term in corpus
         usebigrams: Should I use bigrams or not. Default = false
         stopwords: A list of stop words to use.
 
@@ -261,9 +263,10 @@ def generate_index(**kwargs):
     minfrequency = kwargs.get('minfrequency')
     usebigrams = kwargs.get('usebigrams')
     stopwords = kwargs.get('stopwords')
+    cleaner = _CleanDoc()
     for currdocid,doc in corpus.iteritems():
         docids.append(currdocid)
-        doc = cleandoc(doc[descriptionfield],usebigrams,stopwords)
+        doc = cleaner.clean(doc[descriptionfield],usebigrams,stopwords)
         ndocs = ndocs + 1
         for term in doc:
             if term in index:
@@ -296,10 +299,37 @@ def generate_index(**kwargs):
     return\
 {'index':index,'featuredict':featuredict,'docids':docids,'ndocs_content':len(docs_content)}
 
+def gensubsamples(X,samplesize):
+    ''' Subsample from X and paritition that sample into test and training.
+    Args:
+        X: A csc matrix with columns as observations
+        samplesize: Percentage samples size required.
+    Returns:
+        Xtr: Training csc matrix
+        Xte: Test csc matrix
+    '''
+    nvectors = X.shape[1]
+    nreq = int(math.floor((nvectors*samplesize)/100))
+    if nreq % 2 is not 0:
+        nreq = nreq - 1
+    samplesize = (int) (nreq/2)
+    nfeatures = X.shape[0]
+    Xtr = np.mat(np.zeros((nfeatures,samplesize)))
+    Xte = np.mat(np.zeros((nfeatures,samplesize)))
+    v_ids = range(0,nvectors,1)
+    np.random.shuffle(v_ids)
+    v_req = v_ids[0:nreq]
+    ii = 0
+    for v in v_req:
+        if ii < samplesize: 
+            Xtr[:,ii] = X[:,v].todense()
+        else:
+            Xte[:,ii-samplesize] = X[:,v].todense()
+        ii = ii + 1
+    return {'Xtr':ssp.csc_matrix(Xtr),'Xte':ssp.csc_matrix(Xte)}
 
 def generate_subset(corpus,**kwargs):
     """ Generates a subset from corpus.
-
     Args: (arg name is case sensitive)
         corpus: A dict that has been run through create method.
         type:  issue,praise,suggestion,rating
@@ -505,6 +535,101 @@ def getclusters(nodeclusterinfo):
             clusters[clusterid] = temp
     return clusters
 
+def getpredictions(centroids,X,classical):
+    ''' Uses centroids to predict X.
+    Args:
+        centroids: A csc matrix where every column is a centroid.
+        X: A csc matrix where every column is an observation.
+        classical: A boolean to determine whether clusters 
+    Returns:
+        predictions: A dict where every key is an column index in X and value\
+                is a set of its neighbors according to centroids.
+    References:
+        1. @article{tibshirani2005cluster,
+        title={Cluster validation by prediction strength},
+        author={Tibshirani, R. and Walther, G.},
+        journal={Journal of Computational and Graphical Statistics},
+        volume={14},
+        number={3},
+        pages={511--528},
+        year={2005},
+        publisher={ASA}
+        }
+        2. http://blog.echen.me/2011/03/19/counting-clusters/
+
+
+    '''
+    clusters = {}
+    for ii in range(0,X.shape[1],1):
+        distances = {}
+        a = X[:,ii]
+        for jj in range(0,centroids.shape[1],1):
+            b = centroids[:,jj]
+            if classical is True:
+                distances[jj] = math.sqrt(((a-b).T*(a-b)).todense())
+            else:
+                distances[jj] = (a.T*b).todense()
+        sortedkeys = distances.keys()
+        sortedkeys.sort(cmp = lambda a,b: cmp(distances[a],distances[b]))
+        MIN = 0
+        MAX = len(sortedkeys) - 1
+        if classical is True:
+            cid = sortedkeys[MIN]
+        else:
+            cid = sortedkeys[MAX]
+        if cid in clusters:
+            temp = clusters[cid]
+            temp.add(ii)
+            clusters[cid] = temp
+        else:
+            temp = set([ii])
+            clusters[cid] = temp
+    predictions = {}
+    for cid,vectors in clusters.iteritems():
+        for v in vectors:
+            predictions[v] = vectors.difference(set([v]))
+    return predictions
+
+
+
+def getpredictionstrength(clusters,predictions):
+    ''' Find pairs that occur in the clusters as predicted.
+    Args:
+        clusters: A dict with keys as cluster ids and values as list of vector\
+                ids that belong to it.
+        predictions: A dict with keys as vector ids and values as a set of\
+                vectors that are in the same cluster as the key.
+    Returns:
+        predictionstrength
+
+    References:
+        1. @article{tibshirani2005cluster,
+        title={Cluster validation by prediction strength},
+        author={Tibshirani, R. and Walther, G.},
+        journal={Journal of Computational and Graphical Statistics},
+        volume={14},
+        number={3},
+        pages={511--528},
+        year={2005},
+        publisher={ASA}
+        }
+        2. http://blog.echen.me/2011/03/19/counting-clusters/
+
+    '''
+    ps = []
+    for cid, vectors in clusters.iteritems():
+        count = 0
+        nc = len(vectors)
+        for v in vectors:
+            neighbors = set(vectors)
+            neighbors.remove(v)
+            predicted = predictions[v]
+            count += len(neighbors.intersection(predicted))
+        currps = (float(count))/(nc*(nc-1))
+        ps.append(currps)
+    return min(ps)
+
+
 
 def is_termfeature(ndocs, noccurs, ncorpus, maxdfpercent, mindfpercent,\
                    minfrequency):
@@ -517,7 +642,7 @@ def is_termfeature(ndocs, noccurs, ncorpus, maxdfpercent, mindfpercent,\
         ncorpus: Size of corpus
         maxdfpercent: Maximum percentage of the docs in which term can occur
         mindfpercent: Minimum  percentage of the docs in which term can occur
-        minfrequency: Minimum total occurrences of term in doc
+        minfrequency: Minimum total occurrences of term in corpus
 
     Returns:
         Boolean
@@ -561,6 +686,52 @@ def mapfeatures_to_cloudbins(features):
         ii = ii +1
     return out_features
 
+
+class _CleanDoc:
+    '''
+     Cleans document applying certain filers.
+    '''
+    def __init__(self):
+        self.languagedet = _LangDetect()
+        self.rreplacer = _RepeatReplacer()
+        self.sreplacer = _SpellingReplacer()
+        self.delchars = ''.join(c for c in map(chr, range(256)) if not c.isalpha())
+        self.stemmer = PorterStemmer()
+        self.USELESS_DOC_SIZE = 2
+
+    def clean(self,doc, usebigrams = False,stopwords=None):
+        '''
+        Cleans document applying certain filters.
+        Args:
+            doc: A string
+            usebigrams: Use bigrams or not
+            stopList: A list of stop words
+
+        Returns:
+            A list of tokens
+        '''
+        if self.languagedet.detect(doc) is not 'en':
+            return []
+        doc = [d.translate(None,self.delchars) for d in doc.split()]
+        if len(doc) <= self.USELESS_DOC_SIZE:
+            return []
+        if usebigrams is True:
+            doc_bigrams = bigrams(doc)
+            doc_bigrams = [ ' '.join(t) for t in doc]
+        if stopwords is not None:
+            doc = [self.sreplacer.replace(self.rreplacer.replace(t.lower())) for t\
+                       in doc if t.lower() not in stopwords]
+        else:
+            doc = [self.sreplacer.replace(self.rreplacer.replace(t.lower())) for t\
+                       in doc if t.lower()]
+        if usebigrams is True:
+            doc_bigrams.extend(doc)
+            return doc_bigrams
+        else:
+            return doc
+
+
+
 class GenerateVectors:
 
     """ Generates vectors from a given corpus
@@ -568,7 +739,7 @@ class GenerateVectors:
         corpus - A file object for the corpus file
         mindfpercent - Minimum number of documents in which term should exist
         maxdfpercent - Max number of documents in which terms can exist
-        minfrequency - Minimum occurrences required
+        minfrequency - Minimum occurrences of term in corpus required
         verbose - Enables Debug setting
         usebigrams - Usebigrams
         tf - Generate Term Frequency Vectors
@@ -887,7 +1058,7 @@ class KMeans:
                 actualk = len(self.clusters)
                 if self.k is not actualk:
                     self.logger.debug("Number of clusters is %d and not k=%d",
-                                      actualk, k)
+                                      actualk, self.k)
                 dcentroids = {}
                 for cid,cv_id in self.centroiddict.iteritems():
                     dcentroids[cid] = self.getdist(self.data[:,jj],\
@@ -982,6 +1153,13 @@ class SpectralCoClusterer:
         if self.verbose:
             self.logger.setLevel(logging.DEBUG)
         self.logger.debug("Starting Spectral Co-Clustering debugging...")
+        if self.k is None:
+            self.MIN_K = 2
+            self.MAX_K = 50
+            self.SAMPLE_SIZE_PERCENT = 100
+            self.logger.debug('k not fed in. Figuring out k between range %d\
+                              and %d and using sample size %d'\
+                              ,self.MIN_K,self.MAX_K,self.SAMPLE_SIZE_PERCENT)
 
     def run(self):
         """ Main method that drives Spectral Co-Clustering. """
@@ -1018,6 +1196,13 @@ class SpectralCoClusterer:
         self.logger.debug("Generating Z matrix")
         self.getZ(un,vn)
         data = (self.Z.T).tocsc()
+        if self.k is None:
+            self.k = find_no_clusters(X = data, samplesize =\
+                                      self.SAMPLE_SIZE_PERCENT,mink =\
+                                      self.MIN_K, maxk = self.MAX_K,\
+                                      classical = self.classical,\
+                                      verbose = self.verbose)
+            self.logger.debug('k found to be %d',self.k)
         kmeans = KMeans(data = data, k = self.k, n = self.n,\
                         delta = self.delta,randomcentroids =\
                         self.randomcentroids, verbose =\
@@ -1062,7 +1247,14 @@ class SpectralCoClusterer:
         self.D2 = ssp.coo_matrix((d,(II,JJ)),shape = (numdocs,numdocs)).tocsc()
 
     def getZ(self,un,vn):
-        self.l = int(math.ceil(math.log(self.k,2)))
+        ''' Get matrix Z.
+        Assumptions: If k is being selected, we take the max k we want and use
+        that to determine l which determines dimensions of Z.
+        '''
+        if self.k is None:
+            self.l  = int(math.ceil(math.log(self.MAX_K,2)))
+        else:
+            self.l = int(math.ceil(math.log(self.k,2)))
         self.pruneun(un)
         self.prunevn(vn)
         self.getZfeatures()
@@ -1114,11 +1306,13 @@ class SpectralCoClusterer:
         result = getcentroids(self.A,self.dclusters, self.classical)
         dcentroids = result['centroids']
         dcentroiddict = result['centroiddict']
-        self.docclouds = genconceptclouds(centroids = dcentroids,\
+        self.docclouds = genconceptclouds(corpus = self.corpus,\
+                                          centroids = dcentroids,\
                                           centroiddict = dcentroiddict,\
                                         featuredict = self.featuredict,\
                                         sessionid = self.sessionid,\
-                                        clusters = self.dclusters)
+                                        clusters = self.dclusters,
+                                         docids = self.docids)
 
     def getfclouds(self):
         self.fclouds = ''
@@ -1142,9 +1336,124 @@ class SpectralCoClusterer:
         return z-self.nfeatures
 
 
+class _LangIdCorpusReader(CorpusReader):
+    '''
+    LangID corpus reader
+    Source: http://misja.posterous.com/language-detection-with-python-nltk
+    '''
+    CorpusView = StreamBackedCorpusView
+
+    def _get_trigram_weight(self, line):
+        '''
+        Split a line in a trigram and its frequency count
+        '''
+        data = line.strip().split(' ')
+        if len(data) == 2:
+            return (data[1], int(data[0]))
+
+    def _read_trigram_block(self, stream):
+        '''
+        Read a block of trigram frequencies
+        '''
+        freqs = []
+        for i in range(20): # Read 20 lines at a time.
+            freqs.append(self._get_trigram_weight(stream.readline()))
+        return filter(lambda x: x !=None,freqs)
+
+    def freqs(self, fileids=None):
+        '''
+        Return trigram frequencies for a language from the
+        corpus        
+        '''
+        return concat([self.CorpusView(path, self._read_trigram_block)\
+                       for path in self.abspaths(fileids=fileids)])
+
+class _LangDetect(object):
+    '''
+    Language detection code.
+    Source: http://misja.posterous.com/language-detection-with-python-nltk
+    '''
+    language_trigrams = {}
+    langid = LazyCorpusLoader('langid', _LangIdCorpusReader,\
+                                         r'(?!\.).*\.txt')
+
+    def __init__(self, languages=['nl', 'en', 'fr', 'de', 'es']):
+        for lang in languages:
+            self.language_trigrams[lang] = FreqDist()
+            for f in self.langid.freqs(fileids=lang+"-3grams.txt"):
+                    self.language_trigrams[lang].inc(f[0],f[1])
+    
+    def detect(self, text):
+        '''
+        Detect the text's language                        
+        '''
+        words = nltk_word_tokenize(text.lower())
+        trigrams = {}
+        scores   = dict([(lang, 0) for lang in\
+                         self.language_trigrams.keys()])
+
+        for match in words:
+            for trigram in self.get_word_trigrams(match):
+                if not trigram in trigrams.keys():
+                    trigrams[trigram] = 0
+                trigrams[trigram] += 1
+
+        total = sum(trigrams.values())
+
+        for trigram, count in trigrams.items():
+            for lang, frequencies in self.language_trigrams.items():
+                # normalize and add to the total score
+                scores[lang] += (float(frequencies[trigram]) /\
+                                 float(frequencies.N())) * \
+                        (float(count) / float(total))
+
+        return sorted(scores.items(), key=lambda x: x[1],\
+                      reverse=True)[0][0]
+
+    def get_word_trigrams(self, match):
+        return [''.join(trigram) for trigram in nltk_trigrams(match)\
+                if trigram != None]      
 
 
+class _RepeatReplacer(object):
+    '''
+    Replaces repeat of text. Eg. looove becomes love.
+    Source: http://www.nltk.org/book
+    '''
+    def __init__(self):
+        self.repeat_regexp = re.compile(r'(\w*)(\w)\2(\w*)')
+        self.repl =r'\1\2\3'
 
+    def replace(self, word):
+        if wordnet.synsets(word):
+            return word
+        repl_word = self.repeat_regexp.sub(self.repl, word)
+        if repl_word != word:
+            return self.replace(repl_word)
+        else:
+            return repl_word
+
+class _SpellingReplacer(object):
+    '''
+    Spelling correction.
+    Source: http://www.nltk.org/book
+    '''
+    def __init__(self, dict_name='en',max_dist=2):
+        self.spell_dict = enchant.Dict(dict_name)
+        self.max_dist = 2
+
+    def replace(self, word):
+        if len(word) is not 0:
+            if self.spell_dict.check(word):
+                return word
+            suggestions = self.spell_dict.suggest(word)
+            if suggestions and edit_distance(word, suggestions[0])\
+               <= self.max_dist:
+                return suggestions[0]
+            else:
+                return word
+        else:
+            return word
 
 
 

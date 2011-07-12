@@ -218,7 +218,9 @@ def main():
         spio.mmwrite(open("redrank_centroids_"+sessionid+'.mtx','w'),centroids,\
                      comment="CSC Matrix", field = 'real')
     logger.info(" %d Clusters Generated ",len(clusters))
-    originalmat_centroids = corpusutil.getcentroids(data,clusters)
+    result = corpusutil.getcentroids(data,clusters)
+    originalmat_centroids = result['centroids']
+    originalmat_centroiddict = result['centroiddict']
     if args.saveint:
         spio.mmwrite(open("originalmat_centroids_"+sessionid+'.mtx','w'),\
                      originalmat_centroids,comment="CSC Matrix", field = 'real')
@@ -233,7 +235,7 @@ def main():
     svdkmeansvis.write(vis_output)
     svdkmeansvis.close()
     vis_output = corpusutil.genfeatureclouds(originalmat_centroids.todense(),\
-                                             centroiddict,\
+                                             originalmat_centroiddict,\
                                              featuredict,sessionid)
     svdkmeansvis = open("svdkmeans-feature_clusters_"+str(sessionid)+'.html','w')
     svdkmeansvis.write(vis_output)

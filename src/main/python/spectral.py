@@ -56,7 +56,8 @@ def gen_args():
                         'classical', help = 'Select type of\
                         KMeans to use Spherical or Euclidean. Default: Spherical')
     parser.add_argument('-k', metavar = 'k', action = 'store', type = int, dest\
-                                     = 'k', help = 'Number of clusters to generate')
+                        = 'k',default = None, help = 'Number of clusters to\
+                        generate. No input leads to finding k.')
     parser.add_argument('-n', metavar = 'n', action = 'store', type = int, dest=\
                                      'n', help = 'Max number of iterations')
     parser.add_argument('-delta', metavar = 'delta', action = 'store', default\
@@ -86,6 +87,8 @@ def main():
         stopwords = None
     if args.opinion:
         corpus = corpusutil.create(args.opinion)
+    else:
+        corpus = cPickle.load(args.corpus)
     spectralcc = corpusutil.SpectralCoClusterer(corpus = corpus, mindfpercent\
                                                 = args.mindfpercent,\
                                                 maxdfpercent =\

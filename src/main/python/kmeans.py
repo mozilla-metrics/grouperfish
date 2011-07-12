@@ -62,7 +62,8 @@ def gen_args():
                         'classical', help = 'Select type of\
                         KMeans to use Spherical or Euclidean. Default: Spherical')
     parser.add_argument('-k', metavar = 'k', action = 'store', type = int, dest\
-                                     = 'k', help = 'Number of clusters to generate')
+                        = 'k',default = None, help = 'Number of clusters to\
+                        generate. No input leads to finding k.')
     parser.add_argument('-n', metavar = 'n', action = 'store', type = int, dest=\
                                      'n', help = 'Max number of iterations')
     parser.add_argument('-delta', metavar = 'delta', action = 'store', default\
@@ -90,12 +91,17 @@ def main():
         normalize = True
     else:
         normalize = False
-    if args.opinion:
-        corpus = corpusutil.create(args.opinion)
+    if args.stopwords is None:
+        stopwords = None
+    else:
+        stopwords = args.stopwords.read().split()
+    if args.opinion or args.corpus:
+        if args.opinion:
+            corpus = corpusutil.create(args.opinion)
+        else:
+            corpus = cPickle.load(args.corpus)
         logger.debug("Number of documents in corpus: %d ", len(corpus))
-        if args.stopwords:
-            stopwords = args.stopwords.read().split()
-            datacreator = corpusutil.GenerateVectors(corpus = corpus, mindfpercent\
+        datacreator = corpusutil.GenerateVectors(corpus = corpus, mindfpercent\
                                                  = args.mindfpercent,\
                                                  maxdfpercent =\
                                                  args.maxdfpercent,\
@@ -106,49 +112,6 @@ def main():
                                                  normalize = normalize,\
                                                  tf = args.tf,\
                                                  stopwords = stopwords)
-        else:
-            datacreator = corpusutil.GenerateVectors(corpus = corpus, mindfpercent\
-                                                 = args.mindfpercent,\
-                                                 maxdfpercent =\
-                                                 args.maxdfpercent,\
-                                                 minfrequency =\
-                                                 args.minfrequency,\
-                                                 verbose = args.verbose,\
-                                                 usebigrams = args.usebigrams,\
-                                                 normalize = normalize,\
-                                                 tf = args.tf,\
-                                                 stopwords = None)
-        result = datacreator.create()
-        docids = result['docids']
-        featuredict = result['featuredict']
-    elif args.corpus:
-        corpus = cPickle.load(args.corpus)
-        logger.debug("Number of documents in corpus: %d ", len(corpus))
-        if args.stopwords:
-            stopwords = args.stopwords.read().split()
-            datacreator = corpusutil.GenerateVectors(corpus = corpus, mindfpercent\
-                                                 = args.mindfpercent,\
-                                                 maxdfpercent =\
-                                                 args.maxdfpercent,\
-                                                 minfrequency =\
-                                                 args.minfrequency,\
-                                                 verbose = args.verbose,\
-                                                 usebigrams = args.usebigrams,\
-                                                 normalize = normalize,\
-                                                 tf = args.tf,\
-                                                 stopwords = stopwords)
-        else:
-            datacreator = corpusutil.GenerateVectors(corpus = corpus, mindfpercent\
-                                                 = args.mindfpercent,\
-                                                 maxdfpercent =\
-                                                 args.maxdfpercent,\
-                                                 minfrequency =\
-                                                 args.minfrequency,\
-                                                 verbose = args.verbose,\
-                                                 usebigrams = args.usebigrams,\
-                                                 normalize = normalize,\
-                                                 tf = args.tf,\
-                                                 stopwords = None)
         result = datacreator.create()
         docids = result['docids']
         featuredict = result['featuredict']
@@ -162,12 +125,25 @@ def main():
                                                 normalize = normalize,\
                                                 tf = args.tf)
         result = datacreator.create()
+
     data = result['data']
+    if args.k is None:
+        SAMPLE_SIZE_PERCENT = 50
+        MIN_K = 2
+        MAX_K = 50
+        logger.debug('k not set, finding k using sample size:\
+                     %f',SAMPLE_SIZE_PERCENT)
+        k = corpusutil.find_no_clusters(X = data, samplesize =\
+                                        SAMPLE_SIZE_PERCENT, mink = MIN_K, maxk\
+                                        = MAX_K, verbose = args.verbose,\
+                                       classical = args.classical)
+    else:
+        k = args.k
     if args.saveint:
         cPickle.dump(docids,open("data_key_"+sessionid+'.pck','w'))
         spio.mmwrite(open("data_"+sessionid+".mtx",'w')\
                      ,data,comment="CSC Matrix",field = 'real')
-    kmeans = corpusutil.KMeans(data = data,k = args.k,n = args.n, delta =\
+    kmeans = corpusutil.KMeans(data = data,k = k,n = args.n, delta =\
                                args.delta,randomcentroids =\
                                args.randomcentroids, verbose =\
                                args.verbose,classical = args.classical)
