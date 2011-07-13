@@ -48,11 +48,14 @@ public class Rebuild extends AbstractCollectionTool {
 					 c.ref().namespace(), c.ref().key());
 			return false;
 		}
+
+		/*
 		if (rebuilt != null && rebuilt > modified) {
 			log.info("Ignoring collection '{} / {}' because of no growth since last rebuild.",
 					 c.ref().namespace(), c.ref().key());
 			return false;
 		}
+		*/
 		return true;
 	}
 

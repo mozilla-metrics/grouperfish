@@ -1,5 +1,7 @@
 package com.mozilla.grouperfish.jobs.carrot2;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,6 +12,11 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.StopAnalyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.util.Version;
 import org.carrot2.clustering.lingo.LingoClusteringAlgorithm;
 import org.carrot2.core.Controller;
 import org.carrot2.core.ControllerFactory;
@@ -17,6 +24,7 @@ import org.carrot2.core.ProcessingResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.conf.Conf;
 import com.mozilla.grouperfish.jobs.AbstractCollectionTool;
 import com.mozilla.grouperfish.model.Cluster;
@@ -44,7 +52,25 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 	private static final Object OTHERS = "Other Topics";
 
 	//private static int LIMIT_LINGO = 700;
-	private static int LIMIT_CLUSTERING = 3000;
+	private static int LIMIT_CLUSTERING = 5000;
+
+
+	private List<String> terms(Analyzer analyzer, String message) {
+		TokenStream tokenStream = analyzer.tokenStream("text", new StringReader(message));
+		CharTermAttribute termAttribute = tokenStream.getAttribute(CharTermAttribute.class);
+
+		List<String> terms = new ArrayList<String>();
+		try {
+			while (tokenStream.incrementToken()) {
+			    terms.add(new String(termAttribute.buffer()));
+			}
+		} catch (IOException e) {
+			Assert.unreachable();
+		}
+
+		return terms;
+	}
+
 
 	/** Runs local carrot2 based clustering. Use only for small collections. */
 	public List<Cluster> runLocal(Collection collection,
@@ -83,9 +109,18 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 			final ArrayList<org.carrot2.core.Document> carrotDocs =
 				new ArrayList<org.carrot2.core.Document>();
 
+			Analyzer analyzer = new StopAnalyzer(Version.LUCENE_31);
 			while (it.hasNext()) {
 				Document next = it.next();
+
+				final int numTerms = terms(analyzer, next.text()).size();
+				if (numTerms <= 2) {
+					log.info("Discarding document '{}' ({} terms)", next.text(), numTerms);
+					continue;
+				}
+
 				org.carrot2.core.Document carrotDoc = new org.carrot2.core.Document(next.text());
+
 				carrotDoc.setField("id", next.ref().id());
 				carrotDocs.add(carrotDoc);
 				++docsProcessed;
@@ -101,6 +136,7 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 			final List<org.carrot2.core.Cluster> clustersByTopic =
 				new ArrayList<org.carrot2.core.Cluster>(result.getClusters());
 
+			// Prefer long topics when assigning documents.
 			Collections.sort(clustersByTopic, new Comparator<org.carrot2.core.Cluster>() {
 				public int compare(org.carrot2.core.Cluster o1,
 						org.carrot2.core.Cluster o2) {
@@ -108,18 +144,21 @@ public class CarrotClusterTool extends AbstractCollectionTool {
 				}
 			});
 
+			// Copy carrot2 clusters into our structure. Make sure each message is used only once.
 			List<Cluster> maybeEmpty = new ArrayList<Cluster>(clustersByTopic.size());
 			for (org.carrot2.core.Cluster carrotCluster : clustersByTopic) {
 				final List<DocumentRef> related = new ArrayList<DocumentRef>(clustersByTopic.size());
+				final List<Double> similarities = new ArrayList<Double>(clustersByTopic.size());
 				for (org.carrot2.core.Document carrotDoc : carrotCluster.getDocuments()) {
 					final String documentId = carrotDoc.getField("id").toString();
 					if (assigned.contains(documentId)) continue;
 					assigned.add(documentId);
 					related.add(new DocumentRef(collection.ref(), documentId));
+					similarities.add(5.0);
 				}
 				final String label = carrotCluster.getLabel();
 				final Cluster cluster =
-					new Cluster(new ClusterRef(collection.ref(), timestamp, label), related);
+					new Cluster(new ClusterRef(collection.ref(), timestamp, label), related, similarities);
 				maybeEmpty.add(cluster);
 
 				if (label.equals(OTHERS)) {

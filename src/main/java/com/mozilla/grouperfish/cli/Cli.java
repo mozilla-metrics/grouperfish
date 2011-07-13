@@ -7,7 +7,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.util.StringUtils;
 import org.slf4j.Logger;
@@ -120,8 +122,23 @@ public class Cli {
 			out.format("<h2><q>%s</q> (%s messages)</h2>\n",
 					   StringUtils.escapeHTML(cluster.ref().label()), cluster.documents().size());
 			out.format("<ol>\n");
+			List<DocumentRef> sortedDocs = new ArrayList<DocumentRef>(cluster.documents());
+			{
+				final Map<String, Double> scoreByDoc = new HashMap<String, Double>();
+				int d = 0;
+				for (final DocumentRef docRef : cluster.documents()) {
+					scoreByDoc.put(docRef.id(), cluster.similarities().get(d));
+					++d;
+				}
+				Collections.sort(sortedDocs, new Comparator<DocumentRef>() {
+					public int compare(DocumentRef o1, DocumentRef o2) {
+						return Integer.signum((int)(scoreByDoc.get(o1.id()) - scoreByDoc.get(o2.id())));
+					}
+				});
+			}
+
 			int j = 0; final int limit = 20;
-			for (final DocumentRef docRef : cluster.documents()) {
+			for (final DocumentRef docRef : sortedDocs) {
 				try {
 					j++;
 					out.format("<li>%s</li>\n", StringUtils.escapeHTML(docLookup.get(docRef).text()));
