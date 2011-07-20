@@ -186,12 +186,15 @@ def find_no_clusters(**kwargs):
     Xtr = result.get('Xtr')
     Xte = result.get('Xte')
     THRESHOLD = 0.8
-    assert(mink < Xtr.shape[1] and maxk < Xtr.shape[1]),\
-            'Bailing because sample size too small'
+    if mink >= Xtr.shape[1]:
+        mink = int (0.1*Xtr.shape[1])
+    if maxk >= Xtr.shape[1]:
+        maxk = int (0.9*Xtr.shape[1])
     logger = logging.getLogger(__name__)
     logger.addHandler(logging.StreamHandler())
     if verbose:
         logger.setLevel(logging.DEBUG)
+    ps_array = {}
     for k in range(mink,maxk+1,1):
         kmeans = KMeans(data = Xtr, k = k, n = n, delta = delta,\
                         randomcentroids = randomcentroids, verbose =\
@@ -223,6 +226,10 @@ def find_no_clusters(**kwargs):
         logger.debug('Prediction Strength is %f',ps)
         if ps > THRESHOLD:
             return k
+        else:
+            ps_array[k] = ps
+    k = max(ps_array.iteritems(), key=operator.itemgetter(1))[0]
+    logger.debug('No k above threshold found, k corresponding to max is %d',k)
     return k
 
 
@@ -625,7 +632,10 @@ def getpredictionstrength(clusters,predictions):
             neighbors.remove(v)
             predicted = predictions[v]
             count += len(neighbors.intersection(predicted))
-        currps = (float(count))/(nc*(nc-1))
+        if nc > 1:
+            currps = (float(count))/(nc*(nc-1))
+        else:
+            currps = float(count)
         ps.append(currps)
     return min(ps)
 
