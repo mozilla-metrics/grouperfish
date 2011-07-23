@@ -482,7 +482,7 @@ def genfeatureclouds(centroids,centroiddict,featuredict,sessionid):
     bodystr = css.generate_body(divstr)
     return css.wrap_into_html(bodystr,sessionid,FONT_URL,STYLE_URL)
 
-def getcentroids(data,clusters, normalize = True):
+def getcentroids(data, clusters, normalize = True):
     """ Uses clusters to generate centroids
     Args:
         data: A csc matrix where columsn are observation
