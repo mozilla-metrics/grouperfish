@@ -38,7 +38,6 @@
   
   <logger name="com.mozilla.grouperfish.rest" level="DEBUG"><appender-ref ref="REST"/></logger> 
   <logger name="com.mozilla.grouperfish.jobs" level="DEBUG"><appender-ref ref="JOBS"/></logger> 
-  <logger name="com.mozilla.grouperfish" level="DEBUG"><appender-ref ref="GENERAL"/></logger> 
-  <root level="INFO"><appender-ref ref="GENERAL" /></root>
+  <root level="TRACE"><appender-ref ref="GENERAL" /></root>
 
 </configuration>
