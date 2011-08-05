@@ -1,8 +1,0 @@
-{ "//": "Grouperfish configuration",
-  "//": "Override any values from defaults.json here as you see fit.",
-
-  "//": "Like this:",
-
-  "rest:port": "1337",
-  "storage:hbase:zookeeper:znode": "/clusteringcluster"
-}
