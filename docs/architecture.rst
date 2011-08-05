@@ -20,10 +20,10 @@ So that multiple users can each work with their own set of documents and transfo
 
 
 **Filters**
-Incoming documents might require post-processing to make them usable in transforms. An example of this would be language detection: Documents of the same language should be clustered together.
+Incoming documents might require post-processing to make them usable in transforms. An example of this would be language detection: Documents of the same language should be clustered together. Another possible use case would be to have heuristics specific to a Namespace.
 
 **Filter Configuration**
-For a filter to be used for a namespace, it requires a corresponding piece of configuration. For the language detection code, this configuration might tell the algorithm on which field the detection should be based (e.g. *text* or *description*)
+For a filter to be used for a namespace, it requires a corresponding piece of configuration. For the language detection code, this configuration might tell the algorithm on which field the detection should be based (e.g. *text* or *description*). 
 
 
 Storage
@@ -47,7 +47,7 @@ The processing of document is kicked off by POST-ing to a special REST URL (e.g.
 
 **Transforms**
 
-*Transforms* are programs that operate on a set of documents to generate a result such as clusters, trends, statistics and so on.  They can be implemented in arbitrary technologies and programming languages, e.g. using the hadoop Map/Reduce, as long as they can be setup and executed on a Unix-like platform.
+*Transforms* are programs that operate on a set of documents to generate a result such as clusters, trends, statistics and so on.  They can be implemented in arbitrary technologies and programming languages, e.g. using the hadoop Map/Reduce, as long as they can be setup and executed on a Unix-like platform.  
 
 Other than the batch system and the REST service, transforms are not aware of things such as queries or namespaces. They act only based on data that is immediately presented to them by the system.
 
