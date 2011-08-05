@@ -1,16 +1,16 @@
 Welcome to Grouperfish's documentation!
 =======================================
 
-**Note:** 
-This documentation serves as a specification. 
-It describes a system that has not reached a usable state yet.
+.. note::
+    This documentation serves as a specification.
+    It describes a system that has not reached a usable state yet.
 
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
-   
+
    introduction
    architecture
    installation
@@ -19,7 +19,7 @@ Contents:
    batch_system
    transforms
    queries
-   
+   todo
 
 Indices and tables
 ==================
