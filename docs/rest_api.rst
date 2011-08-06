@@ -2,3 +2,176 @@ Rest API
 ========
 
 
+Primer
+------
+
+Rest talks of *resources*, *entities* and *methods*:
+
+* In grouperfish, each *entity* is a piece of JSON:
+  
+  - a *document*: ``{"id": 17, "fooness": "Over 9000", "tags": ["ba", "fu"]}``
+  
+  - a *result*: ``{"output": ..., "meta": {...}}``
+  
+  - a *query*: ``{"prefix": {"fooness": "Ove"}}`` --- queries use 
+    `ElasticSearch Query DSL`_.
+  
+  - a *configuration*, e.g. for a transform:
+    ``{"transform": "LDA", "parameters": {"k": 3, ...}}``
+
+  - or a map containing one or more named entities of the same type.
+
+* All entities are JSON documents, so the request/response Content-Type is 
+  always ``application/json``.
+
+* The *resources* listed here contain ``<placeholders>`` in where actual
+  parameter values should go. Values can use any printable unicode character,
+  but URL-syntax (``?#=+/`` etc.) must be escaped properly.
+  
+* Most resources in Grouperfish allow for several HTTP *methods* to
+  create/update (``PUT``), read (``GET``), or ``DELETE`` entities.
+  Where allowed, resources respond like this to these methods:
+  
+  ``PUT``
+      The request body contains the entity to be stored. 
+      Response status is always ``201 Created`` on success. The response
+      status does not allow to determine if an existing resource was
+      overridden.
+
+  ``GET``
+      Status is either ``200 OK`` accompanied with the requested entity in the 
+      response body, or ``404 Not Found`` if the entity name is not used.
+
+  ``DELETE``
+      Response code is always ``204 No Content``. No information is given on 
+      wether the resource existed before deletion.
+
+.. _`ElasticSearch Query DSL`: 
+   http://www.elasticsearch.org/guide/reference/query-dsl/
+
+
+
+For Document Producers
+----------------------
+
+Users that push documents have a very limited view of the system. 
+They only see it as a sink for their data.
+
+
+Documents
+^^^^^^^^^
+
+============ =================================
+Resource     ``/documents/<ns>/<document-id>``
+============ =================================
+Entity type  *document*
+Methods      ``PUT``, ``GET``
+============ =================================
+
+This allows to add documents, and also to look them up later.
+
+It may take some time (depending on system configurations, iseconds to
+minutes) for documents to become indexed and thus visible to the batch processing system.
+
+
+For Result Consumers
+--------------------
+
+Users that are (also) interested in getting results need to know about 
+queries, because each result is identified using the source query name. They 
+might even specify queries on which batch transformation should be performed.
+
+Queries
+^^^^^^^
+
+============ ==============================
+Resource     ``/queries/<ns>/<query-name>``
+============ ==============================
+Entity type  *query*
+Methods      ``PUT``, ``GET``, ``DELETE``
+============ ==============================
+
+After a ``PUT``, when batch processing is performed on this namespace for the 
+next time, documents matching the query will be processed for each configured 
+transform. 
+
+The result can then be retrieved using ``GET /results/<ns>/<query-name>``.
+
+Besides pure ElasticSearch queries, you can also submit faceting queries:
+
+::
+
+    curl -XPUT /queries/mike/myQ -d '{
+        "facet_by": ["product", "version"],
+        "query": {"match_all": {}}
+    }'
+
+
+Results
+^^^^^^^
+
+For each combination of ES query and transform configuration, a result is put 
+into storage during the batch run.
+
+============ ===============================================
+Resource     ``/results/<ns>/<transform-name>/<query-name>``
+============ ===============================================
+Entity type  *result*
+Methods      ``GET``
+============ ===============================================
+
+Return the last transform result for a combination of transform/query.
+If no such result has been generated yet, return ``404 Not Found``.
+
+To retrieve results for faceting queries, you need to specify actual values
+for your facets. Just add the facets parameter to your get requests, 
+containing a ``key:value`` pair for each facet. Assuming the query 
+given in the previous example has been stored in the system, along with a 
+transform configuration named *themes*, you can get results like this:
+
+::
+
+    curl -XGET /results/mike/themes/myQ?facets=product%3AFirefox%20version%3A5
+
+The entity type *result* is currently not fully specified. There will be 
+variations depending on the algorithm that is actually used.
+
+
+For Admins
+----------
+
+There is a number of administrative APIs that can either be triggered by
+scripts (e.g. using ``curl``), or using the admin web UI.
+
+Transforms
+^^^^^^^^^^
+
+============ ===============================================
+Resource     ``/transforms/<ns>/<transform-name>``
+============ ===============================================
+Entity type  ``transform``
+Methods      ``PUT``, ``GET``, ``DELETE``
+============ ===============================================
+
+Batch Run
+^^^^^^^^^
+
+Batch runs can be kicked off using the REST API as well.
+
+============ ===============================================
+Resource     ``/run/<ns>/<transform-name>/<query-name>``
+============ ===============================================
+Entity Type  N/A
+Methods      ``POST``
+============ ===============================================
+
+Either transform name, or both query and transform name can be omitted to 
+run all transforms on the given query, or on all queries in the namespace.
+
+If a batch run is already executing, this run is postponed.
+
+The response status is ``202 Accepted`` if the run was scheduled, or ``404 Not 
+Found`` if either query or transform of the given names do not exist.
+
+
+
