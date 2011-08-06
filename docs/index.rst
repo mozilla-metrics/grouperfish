@@ -1,5 +1,5 @@
-Welcome to Grouperfish's documentation!
-=======================================
+Grouperfish
+===========
 
 .. note::
     This documentation serves as a specification.
@@ -19,7 +19,6 @@ Contents:
    batch_system
    transforms
    queries
-   todo
 
 Indices and tables
 ==================
