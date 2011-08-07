@@ -1,5 +1,6 @@
-Grouperfish
-===========
+###########
+GrouperFish
+###########
 
 .. note::
     This documentation serves as a specification.
@@ -15,6 +16,7 @@ Contents:
    architecture
    installation
    rest_api
+   configuration
    filters
    batch_system
    transforms
