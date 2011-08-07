@@ -154,10 +154,9 @@ To use a filter for incoming documents, or a transform in the batch process,
 a named piece of configuration needs to be added to the system.
 
 ============ =================================================================
-Resource     ``/configuration/<ns>/transforms/<transform-name>``
-             ``/configuration/<ns>/filters/<transform-name>``
+Resource     ``/configuration/<ns>/<name>``
 ============ =================================================================
-Entity type  ``transform``
+Entity type  ``configuration``
              e.g. ``{"transform": "LDA", "parameters": {"k": 3, ...}}``
 Methods      ``PUT``, ``GET``, ``DELETE``
 ============ =================================================================
