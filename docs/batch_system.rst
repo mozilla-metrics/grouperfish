@@ -1,3 +1,6 @@
+.. _batch_system:
+
+============
 Batch System
 ============
 
