@@ -21,6 +21,7 @@ Contents:
    batch_system
    transforms
    queries
+   todo
 
 Indices and tables
 ==================
