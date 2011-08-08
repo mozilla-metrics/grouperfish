@@ -22,6 +22,7 @@ Contents:
    transforms
    queries
    todo
+   hacking
 
 Indices and tables
 ==================
