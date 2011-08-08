@@ -19,9 +19,9 @@ The Batch System performs these steps for every batch run:
 
    * Otherwise
 
-       I. Fetch all concrete queries for this namespace
+     I. Fetch all concrete queries for this namespace
      
-      II. Fetch all template queries for this namespace
+     II. Fetch all template queries for this namespace
      
      III. Resolve the template queries (see below). 
           Add the reults to the concrete queries obtained in (I).
@@ -36,17 +36,17 @@ The Batch System performs these steps for every batch run:
 
 3. For each concrete query
 
-     I. Get the matching documents
+   I.   Get the matching documents
 
-    II. Write them to some ``hdfs://`` directory
+   II.  Write them to some ``hdfs://`` directory
 
    III. Call the transform executable with that directory's path 
         (see :ref:`transform-api`)
 
-    IV. Tag documents in ElasticSearch 
+   IV.  Tag documents in ElasticSearch 
         (if the transform has generated tags, see :ref:`tagging`)
 
-     V. POST the results summary document to the rest service
+   V.   POST the results summary document to the rest service
 
 
 .. _transform-api:
