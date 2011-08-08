@@ -10,32 +10,32 @@ Primer
 
 Rest talks of *resources*, *entities* and *methods*:
 
-* In grouperfish, each *entity* (*document*, *result*, *query*, 
+* In grouperfish, each *entity* (*document*, *result*, *query*,
   *configuration*) is represented as a piece of JSON.
 
-* All entities are JSON documents, so the request/response Content-Type is 
+* All entities are JSON documents, so the request/response Content-Type is
   always ``application/json``.
 
 * The *resources* listed here contain ``<placeholders>`` for the actual
   parameter values. Values can use any printable unicode character, but
   URL-syntax (``?#=+/`` etc.) must be escaped properly.
-  
+
 * Most resources in Grouperfish allow for several HTTP *methods* to
   create/update (``PUT``), read (``GET``), or ``DELETE`` entities.
   Where allowed, resources respond like this to these methods:
-  
+
   ``PUT``
-      The request body contains the entity to be stored. 
+      The request body contains the entity to be stored.
       Response status is always ``201 Created`` on success. The response
       status does not allow to determine if an existing resource was
       overridden.
 
   ``GET``
-      Status is either ``200 OK`` accompanied with the requested entity in the 
+      Status is either ``200 OK`` accompanied with the requested entity in the
       response body, or ``404 Not Found`` if the entity name is not used.
 
   ``DELETE``
-      Response code is always ``204 No Content``. No information is given on 
+      Response code is always ``204 No Content``. No information is given on
       wether the resource existed before deletion.
 
 
@@ -43,7 +43,7 @@ Rest talks of *resources*, *entities* and *methods*:
 For Document Producers
 ----------------------
 
-Users that push documents can have a very limited view of the system. 
+Users that push documents can have a very limited view of the system.
 They may see it just as a sink for their data.
 
 
@@ -68,8 +68,8 @@ minutes) for documents to become indexed and thus visible to the batch processin
 For Result Consumers
 --------------------
 
-Users that are (also) interested in getting results need to know about 
-queries, because each result is identified using the source query name. They 
+Users that are (also) interested in getting results need to know about
+queries, because each result is identified using the source query name. They
 might even specify queries on which batch transformation should be performed.
 
 
@@ -79,7 +79,7 @@ Queries
 A query is either an *concrete query* in ElasticSearch Query DSL, or a *template query*.
 
 
-.. _`ElasticSearch Query DSL`: 
+.. _`ElasticSearch Query DSL`:
    http://www.elasticsearch.org/guide/reference/query-dsl/
 
 ============ =================================================================
@@ -90,9 +90,9 @@ Entity type  *query*
 Methods      ``PUT``, ``GET``, ``DELETE``
 ============ =================================================================
 
-After a ``PUT``, when batch processing is performed on this namespace for the 
-next time, documents matching the query will be processed for each configured 
-transform. 
+After a ``PUT``, when batch processing is performed on this namespace for the
+next time, documents matching the query will be processed for each configured
+transform.
 
 The result can then be retrieved using ``GET /results/<ns>/<query-name>``.
 
@@ -111,7 +111,7 @@ To submit a template query, nest a normal query in a map like this:
 Results
 ^^^^^^^
 
-For each combination of ES query and transform configuration, a result is put 
+For each combination of ES query and transform configuration, a result is put
 into storage during the batch run.
 
 ============ =================================================================
@@ -126,16 +126,16 @@ Return the last transform result for a combination of transform/query.
 If no such result has been generated yet, return ``404 Not Found``.
 
 To retrieve results for template queries, you need to specify actual values
-for your facets. Just add the ``facets`` parameter to your get requests, 
-containing a ``key:value`` pair for each facet. Assuming the query 
-given in the previous example has been stored in the system, along with a 
+for your facets. Just add the ``facets`` parameter to your get requests,
+containing a ``key:value`` pair for each facet. Assuming the query
+given in the previous example has been stored in the system, along with a
 transform configuration named *themes*, you can get results like this:
 
 ::
 
     curl -XGET /results/mike/themes/myQ?facets=product%3AFirefox%20version%3A5
 
-The entity type *result* is currently not fully specified. There will be 
+The entity type *result* is currently not fully specified. There will be
 variations depending on the algorithm that is actually used.
 
 
@@ -150,7 +150,7 @@ scripts (e.g. using ``curl``), or using the admin web UI.
 Configuration
 ^^^^^^^^^^^^^
 
-To use a filter for incoming documents, or a transform in the batch process, 
+To use a filter for incoming documents, or a transform in the batch process,
 a named piece of configuration needs to be added to the system.
 
 ============ =================================================================
@@ -176,12 +176,12 @@ Entity Type  N/A
 Methods      ``POST``
 ============ =================================================================
 
-Either transform name, or both query and transform name can be omitted to 
+Either transform name, or both query and transform name can be omitted to
 run all transforms on the given query, or on all queries in the namespace.
 
 If a batch run is already executing, this run is postponed.
 
-The response status is ``202 Accepted`` if the run was scheduled, or ``404 Not 
+The response status is ``202 Accepted`` if the run was scheduled, or ``404 Not
 Found`` if either query or transform of the given names do not exist.
 
 .. seealso:: :ref:`batch_system`
