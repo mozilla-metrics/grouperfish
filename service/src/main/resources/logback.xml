@@ -13,9 +13,9 @@
   </appender>
   
   
-  <appender name="JOBS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender name="BATCH" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <encoder><pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern></encoder>
-    <file>logs/jobs.log</file>
+    <file>logs/batch.log</file>
 
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>logs/archive/jobs.%d{yyyy-MM}.log.gz</fileNamePattern>
@@ -37,7 +37,7 @@
   
   
   <logger name="com.mozilla.grouperfish.rest" level="DEBUG"><appender-ref ref="REST"/></logger> 
-  <logger name="com.mozilla.grouperfish.jobs" level="DEBUG"><appender-ref ref="JOBS"/></logger> 
+  <logger name="com.mozilla.grouperfish.batch" level="DEBUG"><appender-ref ref="BATCH"/></logger> 
   <root level="TRACE"><appender-ref ref="GENERAL" /></root>
 
 </configuration>

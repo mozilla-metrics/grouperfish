@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-<suite name="grouper-clusterd" verbose="4">
+<suite name="grouperfish-service" verbose="4">
 	<test name="run-all">
 	    <groups>
             <run>
@@ -9,7 +9,7 @@
              </run>
         </groups>
 		<packages>
-			<package name="org.mozilla.grouper.*" />
+			<package name="org.mozilla.grouperfish.*" />
 		</packages>
 	</test>
 </suite>

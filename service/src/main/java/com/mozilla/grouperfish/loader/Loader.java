@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.bagheera;
+package com.mozilla.grouperfish.loader;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mozilla.grouperfish.base.Helpers;
-import com.mozilla.grouperfish.cli.Grouperfish;
 import com.mozilla.grouperfish.json.JSONConverter;
 import com.mozilla.grouperfish.model.Entity;
 
@@ -30,7 +29,7 @@ public class Loader<T extends Entity> {
 
     private final String mapUrl_;
     private final JSONConverter<T> converter_;
-    private static Logger log = LoggerFactory.getLogger(Grouperfish.class);
+    private static Logger log = LoggerFactory.getLogger(Loader.class);
 
     /**
      * @param mapUrl The url to a bagheera map resource to use as destination.

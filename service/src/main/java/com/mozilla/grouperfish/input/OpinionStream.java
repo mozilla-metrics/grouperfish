@@ -45,9 +45,9 @@ public class OpinionStream implements Iterable<Document> {
 
         @Override
         public Document next() {
+            @SuppressWarnings("serial")
             Document doc = new Document(
                     row_[Field.ID.i],
-                    row_[Field.TEXT.i],
                     new HashMap<String, Object>() {{
                         for (Field f : Field.values())
                             put(f.name().toLowerCase(), row_[f.i]);

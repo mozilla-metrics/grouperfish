@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.bagheera;
+package com.mozilla.grouperfish.loader;
 
 import com.mozilla.grouperfish.json.Converters;
 import com.mozilla.grouperfish.model.Document;

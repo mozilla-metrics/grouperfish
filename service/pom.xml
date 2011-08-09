@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.mozilla.metrics</groupId>
-  <artifactId>grouperfish</artifactId>
+  <artifactId>grouperfish-service</artifactId>
   <version>0.3-SNAPSHOT</version>
 
   <name>grouperfish</name>
@@ -16,23 +16,26 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skip.tests>false</skip.tests>
   </properties>
-  
+
+
   <repositories>
+    <repository>
+      <id>mozilla-metrics-snapshots</id>
+      <url>http://mozilla-metrics.github.com/maven2/snapshots</url>
+    </repository>
+
     <repository>
       <id>sonatype-nexus-public</id>
       <name>SonaType public snapshots and releases repository</name>
       <url>https://oss.sonatype.org/content/groups/public</url>
-      <releases> 
-        <enabled>true</enabled>
-      </releases>
     </repository>
-    
+
     <repository>
       <id>java.net</id>
       <url>http://download.java.net/maven/2</url>
       <name>java.net Maven Repository</name>
     </repository>
-    
+
     <repository>
       <id>cdh.release.repo</id>
       <url>https://repository.cloudera.com/content/repositories/releases</url>
@@ -41,43 +44,13 @@
     </repository>
   </repositories>
 
+
   <dependencies>
 
-    <!-- Jersey JAX-RS -->
     <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-bundle</artifactId>
-      <version>1.8</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-multipart</artifactId>
-      <version>1.8</version>
-    </dependency>
-    <dependency>
-        <groupId>asm</groupId>
-        <artifactId>asm</artifactId>
-        <version>3.3.1</version>
-        <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.4</version>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
+      <groupId>com.mozilla</groupId>
+      <artifactId>bagheera</artifactId>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -95,7 +68,26 @@
     </dependency>
 
 
-    <!-- All logging to logback (a slf4j impl)  -->
+    <!-- Jersey JAX-RS build time dependencies -->
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-bundle</artifactId>
+      <version>1.8</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- End of JAX-RS configuration -->
+
+
+    <!-- Logging:
+         - slf4j is used by all loging inside of the project
+         - for all other common logging APIs, we put redirection in place
+         - the actual logging implementation is logback (posing as slf4j) -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
@@ -113,7 +105,7 @@
       <artifactId>slf4j-api</artifactId>
       <version>1.5.11</version>
     </dependency>
-    
+
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
@@ -125,7 +117,7 @@
       <artifactId>logback-core</artifactId>
       <version>0.9.20</version>
     </dependency>
-        
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
@@ -155,50 +147,8 @@
     </dependency>
     <!-- End of logging configuration. -->
 
-    <dependency>
-        <groupId>cybozulabs</groupId>
-        <artifactId>langdetect</artifactId>
-        <version>05-09-2011</version>
-        <scope>system</scope>
-        <systemPath>${basedir}/lib/langdetect.jar</systemPath>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.apache.mahout</groupId>
-        <artifactId>mahout-core</artifactId>
-        <version>0.5</version>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.mahout</groupId>
-        <artifactId>mahout-utils</artifactId>
-        <version>0.5</version>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.apache.pig</groupId>
-        <artifactId>pig</artifactId>
-        <version>0.8.0-cdh3u0</version>
-    </dependency>
-    
-    <!-- OpenCloud -->
-    <dependency>
-        <groupId>org.mcavallo</groupId>
-        <artifactId>opencloud</artifactId>
-        <version>0.2</version>
-        <scope>system</scope>
-        <systemPath>${basedir}/lib/opencloud-0.2.jar</systemPath>
-    </dependency>
-
-    <dependency>
-        <groupId>com.mozilla.metrics</groupId>
-        <artifactId>akela</artifactId>
-        <version>0.2-SNAPSHOT</version>
-        <scope>system</scope>
-        <systemPath>${basedir}/lib/akela-0.2-SNAPSHOT.jar</systemPath>
-    </dependency>
-
-    
   </dependencies>
+
 
   <build>
     <finalName>grouperfish</finalName>

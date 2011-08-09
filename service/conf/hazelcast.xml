@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hazelcast
+ xmlns="http://www.hazelcast.com/schema/config"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-basic.xsd">
+
+  <group>
+    <name>grouperfish</name>
+    <password>grouperfish</password>
+  </group>
+
+  <network>
+    <port auto-increment="true">5701</port>
+    <join>
+      <multicast enabled="true">
+        <!-- Default is ...3, ElasticSearch uses ....4 -->
+        <multicast-group>224.2.2.5</multicast-group>
+        <multicast-port>54328</multicast-port>
+      </multicast>
+      <tcp-ip enabled="false">
+        <interface>127.0.0.1</interface>
+      </tcp-ip>
+    </join>
+    <interfaces enabled="false">
+      <interface>*</interface>
+    </interfaces>
+  </network>
+
+  <executor-service>
+    <core-pool-size>16</core-pool-size>
+    <max-pool-size>64</max-pool-size>
+    <keep-alive-seconds>60</keep-alive-seconds>
+  </executor-service>
+
+  <map name="documents_*">
+    <time-to-live-seconds>20</time-to-live-seconds>
+    <backup-count>1</backup-count>
+    <eviction-policy>NONE</eviction-policy>
+    <max-size>0</max-size>
+    <eviction-percentage>25</eviction-percentage>
+    <merge-policy>hz.ADD_NEW_ENTRY</merge-policy>
+    <!-- HBaseMapStore -->
+    <map-store enabled="true">
+      <class-name>com.mozilla.bagheera.hazelcast.persistence.ElasticSearchMapStore</class-name>
+      <write-delay-seconds>5</write-delay-seconds>
+      <property name="hazelcast.hbase.pool.size">20</property>
+      <property name="hazelcast.hbase.table">telemetry</property>
+      <property name="hazelcast.hbase.column.family">data</property>
+      <property name="hazelcast.hbase.column.qualifier">json</property>
+    </map-store>
+  </map>
+
+</hazelcast>
+
