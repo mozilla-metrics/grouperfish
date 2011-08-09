@@ -13,28 +13,37 @@ Batch Operation
 
 The Batch System performs these steps for every batch run:
 
-1. Get queries to process
+1. **Get queries to process**
 
-   * If a query was specified when starting the run, fetch that one.
+   * If a query was specified when starting the run:
 
-   * Otherwise
+     Fetch that one query.
+
+   * Otherwise:
 
      I.   Fetch all concrete queries for this namespace
 
      II.  Fetch all template queries for this namespace
 
-     III. Resolve the template queries (see :ref:``template-queries``).
-          Add the reults to the concrete queries obtained in (I).
+     III. Resolve the template queries (see :ref:`template-queries`)
+
+          Add the results to the concrete queries obtained in (I)
 
 
-2. Get transform configurations to use
+2. **Get transform configurations to use**
 
-   * If a transform configuration was specified when starting, fetch that
+   * If a transform configuration was specified in the POST request:
 
-   * Otherwise, fetch all transform configurations for this namespace
+     Fetch that one transform
+
+   * Otherwise:
+
+     Fetch *all* transform configurations for this namespace
 
 
-3. For each concrete query
+3. **Run the transforms**
+
+   For each concrete query
 
    I.   Get the matching documents
 
@@ -46,8 +55,9 @@ The Batch System performs these steps for every batch run:
    IV.  Tag documents in ElasticSearch
         (if the transform has generated tags, see :ref:`tagging`)
 
-   V.   POST the results summary document to the rest service, so it
-        will be served to consumers
+   V.   POST the results summary document to the rest service.
+
+        From this point it will be served to consumers.
 
 
 .. _transform-api:
@@ -108,7 +118,7 @@ Here are the contents of this working directory when the transform is started:
   1. The ID of a document to process (as a base10 string)
 
   2. The full document as JSON, on the same line:
-     Any line breaks within strings are ecaped. Apart from formatting, this
+     Any line breaks within strings are escaped. Apart from formatting, this
      document is the same that the user submitted originally.
 
   Example:
@@ -126,12 +136,12 @@ Here are the contents of this working directory when the transform is started:
   the possible parameters from the transform home directory.
 
 
-When the algorithm succeeds, it produces these outputs in addition:
+When the transform succeeds, it produces these outputs in addition:
 
-* ``results.json``
+* ``output/results.json``
 
   This JSON documents will be visible to the result consumers through the REST
-  interface. It should contain all major results that the algorithm generates.
+  interface. It should contain all major results that the transform generates.
 
   The batch system will add a ``meta`` map before storing the result,
   containing the name of the transform configuration (``transform``), the date
@@ -141,7 +151,7 @@ When the algorithm succeeds, it produces these outputs in addition:
   The transform is also allowed to create the ``meta`` map, to add
   transform-specific diagnostics.
 
-* ``tags.json`` (optional)
+* ``output/tags.json`` (optional)
 
   The batch system will take this map from document IDs to tag names, and
   modify the documents in ElasticSearch, so they can be looked up using these
@@ -149,7 +159,7 @@ When the algorithm succeeds, it produces these outputs in addition:
 
 The transform should exit with status ``0`` on success, and ``1`` on failure.
 In the error case, the transform should put an error description in the
-``results.json``. If the algorithm cannot write the ``results.json`` (e.g. if
+``results.json``. If the transform cannot write the ``results.json`` (e.g. if
 there is a problem with accessing HDFS) it must write the error message to
 the standard error stream.
 
@@ -159,7 +169,7 @@ the standard error stream.
 Tagging
 -------
 
-When an algorithm produces a ``tags.json`` as part of its result, the batch
+When an transform produces a ``tags.json`` as part of its result, the batch
 system uses it to markup results in ElasticSearch. Transforms can output
 cluster membership or classification results as tags, which will allow clients
 to facet and scroll through the transform result using the full ElasticSearch
@@ -185,8 +195,8 @@ A document with added tags looks like this:
 The timestamps are necessary because old tags become invalid when tagged
 documents drop out of a result set (e.g. due to a date constraint). The
 grouperfish API ensures that searches for results take the timestamp of the
-last algorithm run into account.
+last transform run into account.
 
 .. note::
-   This format is not finalized yet.
+   This format is not finalized yet. We might use parent/child docs instead.
    Also, the necessary REST API that wraps ElasticSearch is not defined yet.

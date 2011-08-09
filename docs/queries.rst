@@ -37,7 +37,7 @@ All documents matching this query will be processed together in a batch run.
 Template Queries
 ----------------
 
-A template query will generate a bunch of concrete queries everytime it is
+A template query will generate a bunch of concrete queries every time it is
 evaluated. It is different in that it has an additional top-level field
 "facet_by", which is a list of field names.
 
