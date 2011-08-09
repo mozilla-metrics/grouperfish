@@ -26,7 +26,7 @@ Other
 Repository Layout
 -----------------
 
-``core``
+``service``
     The REST service and the batch system.
     This must not contain any code or dependencies that is related to specific
     algorithms/transforms.

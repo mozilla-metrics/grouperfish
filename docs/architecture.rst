@@ -40,7 +40,7 @@ cluster documents in the same language together.
 Storage
 -------
 
-The stoarge system stores everything
+The storage system stores everything
 It stores everything that is inserted into Grouperfish and
 makes it available for retrieval.
 Under the hood, the Bagheera_ component is

@@ -8,7 +8,7 @@ Rest API
 Primer
 ------
 
-Rest talks of *resources*, *entities* and *methods*:
+Rest talks about *resources*, *entities* and *methods*:
 
 * In grouperfish, each *entity* (*document*, *result*, *query*,
   *configuration*) is represented as a piece of JSON.
@@ -60,7 +60,7 @@ Methods      ``PUT``, ``GET``
 
 This allows to add documents, and also to look them up later.
 
-It may take some time (depending on system configurations, (seconds to
+It may take some time (depending on system configurations: seconds to
 minutes) for documents to become indexed and thus visible to the batch processing system.
 
 
@@ -135,8 +135,8 @@ transform configuration named *themes*, you can get results like this:
 
     curl -XGET /results/mike/themes/myQ?facets=product%3AFirefox%20version%3A5
 
-The entity type *result* is currently not fully specified. There will be
-variations depending on the algorithm that is actually used.
+**TBD:** The entity type *result* is currently not fully specified. There will be
+variations depending on the transform that is actually used.
 
 
 
