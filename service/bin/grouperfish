@@ -14,13 +14,16 @@ function usage() {
 bin=`dirname "$0"`
 bin=`cd "$bin"; pwd`
 
-SERVER_PORT=61732              # = 0xF124 (FISH)
-HAZELCAST_CONF=$bin/../conf/   # config is fixed for grouperfish
+# FISH = 0xF124 = 61732
+SERVER_PORT=61732
+# config is fixed for grouperfish
+HAZELCAST_CONF=$bin/../conf/hazelcast.xml
+
 SERVER_CLASS_NAME="com.mozilla.grouperfish.service.Grouperfish"
 JAVA_OPTS="-Xmx1000m -XX:+UseParNewGC -XX:+UseConcMarkSweepGC"
 
-if [ "$BAGHEERA_USER" = "" ]; then
-    BAGHEERA_USER="$USER"
+if [ "$GROUPERFISH_USER" = "" ]; then
+    GROUPERFISH_USER="$USER"
 fi
 
 if [ "$HADOOP_CONF" = "" ]; then
@@ -31,20 +34,21 @@ if [ "$HBASE_CONF" = "" ]; then
     HBASE_CONF="/etc/hbase/conf"
 fi
 
-if [ -d "/var/run/bagheera" ]; then
-    PIDFILE="/var/run/bagheera/bagheera.pid"
+if [ -d "/var/run/grouperfish" ]; then
+    PIDFILE="/var/run/grouperfish/grouperfish.pid"
 else
-    PIDFILE="$bin/../bagheera.pid"
+    PIDFILE="$bin/../grouperfish.pid"
 fi
 
-# if this is a developer then use the main jar in the build directory
 if [ -d $bin/../target ]; then
-    MAIN_JAR_PATH="$bin/../target/bagheera-*.jar"
+    # development: use the main jar in the build directory and run in foreground
+    MAIN_JAR_PATH="$bin/../target/grouperfish-*.jar"
     if [ "$DAEMON_DETACHED" = "" ]; then
         DAEMON_DETACHED=false
     fi
 else
-    MAIN_JAR_PATH="$bin/../bagheera-*.jar"
+    # distribution: use dist jar, and go to background
+    MAIN_JAR_PATH="$bin/../grouperfish-*.jar"
     if [ "$DAEMON_DETACHED" = "" ]; then
         DAEMON_DETACHED=true
     fi
@@ -54,11 +58,6 @@ CLASSPATH="$bin/../conf":"$HADOOP_CONF":"$HBASE_CONF"
 # add main jar
 for lib in `ls $MAIN_JAR_PATH`; do
     CLASSPATH=${CLASSPATH}:$lib
-done    
-
-# add dependency libs
-for lib in `ls $bin/../lib/*.jar`; do
-    CLASSPATH=${CLASSPATH}:$lib
 done
 
 # create logs dir if it doesn't exist
@@ -66,12 +65,15 @@ if [ ! -d $bin/../logs ]; then
     mkdir -p $bin/../logs
 fi
 
-BAGHEERA_OPTS=-Dhazelcast.config=$HAZELCAST_CONF -Dserver.port=$SERVER_PORT -Dbagheera.log.dir=$bin/../logs
+BAGHEERA_OPTS="-Dhazelcast.config=${HAZELCAST_CONF} -Dserver.port=${SERVER_PORT} -Dbagheera.log.dir=${bin}/../logs"
+
+echo "Using classpath: " $CLASSPATH
+
 if [ "$DAEMON_DETACHED" = false ]; then
     java $BAGHEERA_OPTS $JAVA_OPTS -cp $CLASSPATH $SERVER_CLASS_NAME
     RETVAL=$?
 else
-    nohup java $BAGHEERA_OPTS $JAVA_OPTS -cp $CLASSPATH $SERVER_CLASS_NAME > $bin/../logs/bagheera.out 2>&1 < /dev/null &
+    nohup java $BAGHEERA_OPTS $JAVA_OPTS -cp $CLASSPATH $SERVER_CLASS_NAME > $bin/../logs/grouperfish.out 2>&1 < /dev/null &
     PID=$!
     RETVAL=$?
 

@@ -2,14 +2,14 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
 <suite name="grouperfish-service" verbose="4">
-	<test name="run-all">
-	    <groups>
-            <run>
-                <include name="unit" />
-             </run>
-        </groups>
-		<packages>
-			<package name="org.mozilla.grouperfish.*" />
-		</packages>
-	</test>
+  <test name="run-all">
+	<groups>
+      <run>
+        <include name="unit" />
+      </run>
+    </groups>
+	<packages>
+	  <package name="org.mozilla.grouperfish.*" />
+	</packages>
+  </test>
 </suite>

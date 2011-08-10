@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
  
+  <!-- 
   <appender name="REST" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <encoder><pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern></encoder>
     <file>logs/rest.log</file>
@@ -23,6 +24,7 @@
     </rollingPolicy>
 
   </appender>
+  -->
 
 
   <appender name="GENERAL" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -36,8 +38,6 @@
   </appender>
   
   
-  <logger name="com.mozilla.grouperfish.rest" level="DEBUG"><appender-ref ref="REST"/></logger> 
-  <logger name="com.mozilla.grouperfish.batch" level="DEBUG"><appender-ref ref="BATCH"/></logger> 
-  <root level="TRACE"><appender-ref ref="GENERAL" /></root>
+  <root level="DEBUG"><appender-ref ref="GENERAL" /></root>
 
 </configuration>

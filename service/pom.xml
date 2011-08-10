@@ -6,7 +6,7 @@
   <artifactId>grouperfish-service</artifactId>
   <version>0.3-SNAPSHOT</version>
 
-  <name>grouperfish</name>
+  <name>grouperfish-service</name>
   <description>Clustering engine for the web</description>
   <url>https://github.com/mozilla-metrics/grouperfish</url>
 
@@ -20,6 +20,12 @@
 
   <repositories>
     <repository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2</url>
+      <name>java.net Maven Repository</name>
+    </repository>
+
+    <repository>
       <id>mozilla-metrics-snapshots</id>
       <url>http://mozilla-metrics.github.com/maven2/snapshots</url>
     </repository>
@@ -28,12 +34,6 @@
       <id>sonatype-nexus-public</id>
       <name>SonaType public snapshots and releases repository</name>
       <url>https://oss.sonatype.org/content/groups/public</url>
-    </repository>
-
-    <repository>
-      <id>java.net</id>
-      <url>http://download.java.net/maven/2</url>
-      <name>java.net Maven Repository</name>
     </repository>
 
     <repository>
@@ -51,6 +51,13 @@
       <groupId>com.mozilla</groupId>
       <artifactId>bagheera</artifactId>
       <version>0.3-SNAPSHOT</version>
+
+      <exclusions>
+        <exclusion>
+          <artifactId>log4j</artifactId>
+          <groupId>log4j</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -71,7 +78,13 @@
     <!-- Jersey JAX-RS build time dependencies -->
     <dependency>
       <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-bundle</artifactId>
+      <artifactId>jersey-server</artifactId>
+      <version>1.8</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-multipart</artifactId>
       <version>1.8</version>
     </dependency>
 
@@ -147,11 +160,97 @@
     </dependency>
     <!-- End of logging configuration. -->
 
+
+
+    <!-- Cloudera Hadoop, HBase -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>0.20.2-cdh3u0</version>
+      <exclusions>
+        <exclusion>
+            <artifactId>jasper-runtime</artifactId>
+            <groupId>tomcat</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>commons-httpclient</artifactId>
+            <groupId>commons-httpclient</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>hsqldb</artifactId>
+            <groupId>hsqldb</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>commons-cli</artifactId>
+            <groupId>commons-cli</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>commons-logging</artifactId>
+            <groupId>commons-logging</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>jsp-api</artifactId>
+            <groupId>javax.servlet</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>hadoop-ant</artifactId>
+            <groupId>com.cloudera.cdh</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>commons-net</artifactId>
+            <groupId>commons-net</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>jasper-compiler</artifactId>
+            <groupId>tomcat</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>commons-el</artifactId>
+            <groupId>commons-el</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>ant</artifactId>
+            <groupId>ant</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>jets3t</artifactId>
+            <groupId>net.java.dev.jets3t</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>xmlenc</artifactId>
+            <groupId>xmlenc</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>core</artifactId>
+            <groupId>org.eclipse.jdt</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>commons-codec</artifactId>
+            <groupId>commons-codec</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>oro</artifactId>
+            <groupId>oro</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>jsp-api</artifactId>
+            <groupId>javax.servlet.jsp</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- ElasticSearch -->
+    <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch</artifactId>
+      <version>0.16.2</version>
+    </dependency>
+
   </dependencies>
 
 
   <build>
-    <finalName>grouperfish</finalName>
+    <finalName>grouperfish-service</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -188,12 +287,24 @@
               <addClasspath>true</addClasspath>
               <classpathPrefix>${settings.localRepository}</classpathPrefix>
               <classpathLayoutType>repository</classpathLayoutType>
-              <mainClass>com.mozilla.grouperfish.cli.Grouperfish</mainClass>
+              <mainClass>com.mozilla.grouperfish.service.Grouperfish</mainClass>
             </manifest>
           </archive>
         </configuration>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <finalName>${project.name}-${project.version}</finalName>
+          <descriptors>
+            <descriptor>src/assembly/dist.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
     </plugins>
+
+
   </build>
 
 </project>

@@ -12,12 +12,12 @@
   <network>
     <port auto-increment="true">5701</port>
     <join>
-      <multicast enabled="true">
+      <multicast enabled="false">
         <!-- Default is ...3, ElasticSearch uses ....4 -->
         <multicast-group>224.2.2.5</multicast-group>
-        <multicast-port>54328</multicast-port>
+        <multicast-port>54327</multicast-port>
       </multicast>
-      <tcp-ip enabled="false">
+      <tcp-ip enabled="true">
         <interface>127.0.0.1</interface>
       </tcp-ip>
     </join>
@@ -32,21 +32,80 @@
     <keep-alive-seconds>60</keep-alive-seconds>
   </executor-service>
 
+
+  <!-- Family of maps used for documents received through REST.
+       The wildcard stands for the namespace.
+       It is backed by HBase (primary store) as well as ElasticSearch. -->
   <map name="documents_*">
-    <time-to-live-seconds>20</time-to-live-seconds>
-    <backup-count>1</backup-count>
-    <eviction-policy>NONE</eviction-policy>
-    <max-size>0</max-size>
+    <backup-count>0</backup-count>
+    <eviction-policy>LRU</eviction-policy>
+    <max-size policy="cluster_wide_map_size">10000</max-size>
     <eviction-percentage>25</eviction-percentage>
-    <merge-policy>hz.ADD_NEW_ENTRY</merge-policy>
-    <!-- HBaseMapStore -->
+
     <map-store enabled="true">
-      <class-name>com.mozilla.bagheera.hazelcast.persistence.ElasticSearchMapStore</class-name>
-      <write-delay-seconds>5</write-delay-seconds>
-      <property name="hazelcast.hbase.pool.size">20</property>
-      <property name="hazelcast.hbase.table">telemetry</property>
+      <class-name>com.mozilla.bagheera.hazelcast.persistence.MultiMapStore</class-name>
+      <write-delay-seconds>2</write-delay-seconds>
+      <property name="hazelcast.multi.store.class.name.1">com.mozilla.bagheera.hazelcast.persistence.HBaseMapStore</property>
+      <property name="hazelcast.hbase.pool.size">10</property>
+      <property name="hazelcast.hbase.table">documents</property>
       <property name="hazelcast.hbase.column.family">data</property>
-      <property name="hazelcast.hbase.column.qualifier">json</property>
+      <property name="hazelcast.multi.store.class.name.2">com.mozilla.bagheera.hazelcast.persistence.ElasticSearchMapStore</property>
+      <property name="hazelcast.elasticsearch.config.path">elasticsearch.yml</property>
+      <property name="hazelcast.elasticsearch.type.name">document</property>
+    </map-store>
+  </map>
+
+
+  <!-- For the results produced by the transforms. HBase only (key-only lookup). -->
+  <map name="results_*">
+    <backup-count>0</backup-count>
+    <time-to-live-seconds>0</time-to-live-seconds>
+    <eviction-policy>LRU</eviction-policy>
+    <max-size policy="cluster_wide_map_size">5000</max-size>
+    <eviction-percentage>25</eviction-percentage>
+
+    <map-store enabled="true">
+      <class-name>com.mozilla.bagheera.hazelcast.persistence.HBaseMapStore</class-name>
+      <write-delay-seconds>1</write-delay-seconds>
+      <property name="hazelcast.hbase.pool.size">5</property>
+      <property name="hazelcast.hbase.table">results</property>
+      <property name="hazelcast.hbase.column.family">data</property>
+    </map-store>
+  </map>
+
+
+  <!-- Used for the results produced by the transforms. HBase only (key-only lookup). -->
+  <map name="queries_*">
+    <backup-count>0</backup-count>
+    <time-to-live-seconds>0</time-to-live-seconds>
+    <eviction-policy>LRU</eviction-policy>
+    <max-size policy="cluster_wide_map_size">5000</max-size>
+    <eviction-percentage>25</eviction-percentage>
+
+    <map-store enabled="true">
+      <class-name>com.mozilla.bagheera.hazelcast.persistence.HBaseMapStore</class-name>
+      <write-delay-seconds>1</write-delay-seconds>
+      <property name="hazelcast.hbase.pool.size">3</property>
+      <property name="hazelcast.hbase.table">queries</property>
+      <property name="hazelcast.hbase.column.family">data</property>
+    </map-store>
+  </map>
+
+
+  <!-- Used for the results produced by the transforms. HBase only (key-only lookup). -->
+  <map name="configuration_*">
+    <backup-count>0</backup-count>
+    <time-to-live-seconds>0</time-to-live-seconds>
+    <eviction-policy>LRU</eviction-policy>
+    <max-size policy="cluster_wide_map_size">5000</max-size>
+    <eviction-percentage>25</eviction-percentage>
+
+    <map-store enabled="true">
+      <class-name>com.mozilla.bagheera.hazelcast.persistence.HBaseMapStore</class-name>
+      <write-delay-seconds>1</write-delay-seconds>
+      <property name="hazelcast.hbase.pool.size">3</property>
+      <property name="hazelcast.hbase.table">configuration</property>
+      <property name="hazelcast.hbase.column.family">data</property>
     </map-store>
   </map>
 

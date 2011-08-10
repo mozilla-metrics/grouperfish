@@ -1,0 +1,6 @@
+# Cluster Settings
+cluster:
+  name: grouperfish
+
+path:
+  data: data/elaticsearch
