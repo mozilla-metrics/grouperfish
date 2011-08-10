@@ -16,23 +16,23 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skip.tests>false</skip.tests>
   </properties>
-  
+
   <repositories>
     <repository>
       <id>sonatype-nexus-public</id>
       <name>SonaType public snapshots and releases repository</name>
       <url>https://oss.sonatype.org/content/groups/public</url>
-      <releases> 
+      <releases>
         <enabled>true</enabled>
       </releases>
     </repository>
-    
+
     <repository>
       <id>java.net</id>
       <url>http://download.java.net/maven/2</url>
       <name>java.net Maven Repository</name>
     </repository>
-    
+
     <repository>
       <id>cdh.release.repo</id>
       <url>https://repository.cloudera.com/content/repositories/releases</url>
@@ -113,7 +113,7 @@
       <artifactId>slf4j-api</artifactId>
       <version>1.5.11</version>
     </dependency>
-    
+
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
@@ -125,7 +125,7 @@
       <artifactId>logback-core</artifactId>
       <version>0.9.20</version>
     </dependency>
-        
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
@@ -162,7 +162,7 @@
         <scope>system</scope>
         <systemPath>${basedir}/lib/langdetect.jar</systemPath>
     </dependency>
-    
+
     <dependency>
         <groupId>org.apache.mahout</groupId>
         <artifactId>mahout-core</artifactId>
@@ -173,13 +173,13 @@
         <artifactId>mahout-utils</artifactId>
         <version>0.5</version>
     </dependency>
-    
+
     <dependency>
         <groupId>org.apache.pig</groupId>
         <artifactId>pig</artifactId>
         <version>0.8.0-cdh3u0</version>
     </dependency>
-    
+
     <!-- OpenCloud -->
     <dependency>
         <groupId>org.mcavallo</groupId>
@@ -197,26 +197,12 @@
         <systemPath>${basedir}/lib/akela-0.2-SNAPSHOT.jar</systemPath>
     </dependency>
 
-    
+
   </dependencies>
 
   <build>
     <finalName>grouperfish</finalName>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-          <skip>${skip.tests}</skip>
-          <argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
-          <parallel>false</parallel>
-          <suiteXmlFiles>
-            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
-          </suiteXmlFiles>
-        </configuration>
-      </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
