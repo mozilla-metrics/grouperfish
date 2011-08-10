@@ -19,12 +19,13 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mozilla.grouperfish.base.Helpers;
+import com.mozilla.grouperfish.base.StreamTool;
 import com.mozilla.grouperfish.json.JSONConverter;
 import com.mozilla.grouperfish.model.Entity;
 
 
 /** Helps loading a remote bagheera installation with documents. */
+//:TODO: Unit Test
 public class Loader<T extends Entity> {
 
     private final String mapUrl_;
@@ -176,8 +177,8 @@ public class Loader<T extends Entity> {
                             log.trace("HTTP response status code: {}", status);
                         }
                         else {
-
-                            log.warn("HTTP error status: {} ({})", status, Helpers.consume(conn.getErrorStream(), UTF8));
+                            log.warn("HTTP error status: {} ({})", status,
+                                     StreamTool.consume(conn.getErrorStream(), UTF8));
                         }
 
                         retriesLeft = 0;

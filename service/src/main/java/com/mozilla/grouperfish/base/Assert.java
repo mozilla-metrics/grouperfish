@@ -1,5 +1,6 @@
 package com.mozilla.grouperfish.base;
 
+//:TODO: Unit Test
 public class Assert {
 
 	public static final String PREFIX = "[ASSERTION FAILED] ";

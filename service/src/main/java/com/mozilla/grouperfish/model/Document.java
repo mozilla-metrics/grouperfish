@@ -6,6 +6,7 @@ import com.mozilla.grouperfish.base.Assert;
 
 
 /** Simple multi-field text document. Each document has at least id and (full) text. */
+//:TODO: Unit Test
 public class Document implements Entity {
 
 	private final String id_;
