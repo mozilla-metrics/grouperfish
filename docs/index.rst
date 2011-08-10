@@ -1,5 +1,5 @@
 ###########
-GrouperFish
+Grouperfish
 ###########
 
 .. note::
