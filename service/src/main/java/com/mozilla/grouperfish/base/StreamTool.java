@@ -6,15 +6,17 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 
-//:TODO: Unit Test
+
 public class StreamTool {
+
+    public static Charset UTF8 = Charset.forName("UTF-8");
 
     /**
      * @param stream The character source.
      * @param encoding An encoding, e.g. #UTF8
      */
     public static String consume(InputStream stream, Charset encoding) throws IOException {
-        return consume(stream, encoding, 0);
+        return maybeConsume(stream, encoding, 0);
     }
 
     /**
@@ -25,7 +27,10 @@ public class StreamTool {
      *
      * @throws IOException
      */
-    public static String consume(InputStream stream, Charset encoding, int limit) throws IOException {
+    public static String maybeConsume(InputStream stream, Charset encoding, int limit)
+    throws IOException {
+        Assert.nonNull(stream, encoding);
+
         final char[] buffer = new char[8192];
         final StringBuilder out = new StringBuilder();
         final Reader in = new InputStreamReader(stream, encoding);
@@ -36,7 +41,7 @@ public class StreamTool {
         do {
             read = in.read(buffer, 0, buffer.length);
             size += read;
-            if (limit != 0 || size > limit) return null;
+            if (limit != 0 && size > limit) return null;
             if (read>0) out.append(buffer, 0, read);
         } while (read>=0);
 

@@ -5,7 +5,7 @@ import java.text.Normalizer.Form;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-//:TODO: Unit Test
+
 public class SlugTool {
 
 	/**

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.mozilla.grouperfish.model.Document;
 
 
-//:TODO: Unit Test
 public class OpinionStream implements Iterable<Document> {
 
     public OpinionStream(final InputStream in) {

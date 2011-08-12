@@ -45,7 +45,7 @@ class RestHelper {
 
         final int maxLength = ns.maxLength(resourceType, request);
         if (maxLength < request.getContentLength()) return TOO_LARGE;
-        final String data = StreamTool.consume(request.getInputStream(), Charset.forName("UTF-8"), maxLength);
+        final String data = StreamTool.maybeConsume(request.getInputStream(), Charset.forName("UTF-8"), maxLength);
         if (data == null) return RestHelper.TOO_LARGE;
 
         if (!ns.validator(resourceType).isValid(data)) return BAD_REQUEST;

@@ -1,9 +1,9 @@
 package com.mozilla.grouperfish.base;
 
-//:TODO: Unit Test
+
 public class Assert {
 
-	public static final String PREFIX = "[ASSERTION FAILED] ";
+	private static final String PREFIX = "[ASSERTION FAILED]";
 
 	public static void nonNull(Object... values) {
 		int i = 0;

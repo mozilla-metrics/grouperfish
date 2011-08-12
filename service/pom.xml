@@ -14,7 +14,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <skip.tests>false</skip.tests>
+    <skip.tests.unit>false</skip.tests.unit>
   </properties>
 
 
@@ -131,6 +131,7 @@
       <version>0.9.20</version>
     </dependency>
 
+    <!-- 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
@@ -144,6 +145,7 @@
       <version>1.5.8</version>
       <scope>provided</scope>
     </dependency>
+     -->
 
     <dependency>
       <groupId>commons-logging</groupId>
@@ -246,26 +248,22 @@
       <version>0.16.2</version>
     </dependency>
 
+    <!-- 
+    <dependency>
+      <groupId>com.jayway.restassured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <version>1.2.2</version>
+      <scope>test</scope>
+    </dependency>
+    -->
   </dependencies>
 
 
   <build>
     <finalName>grouperfish-service</finalName>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-          <skip>${skip.tests}</skip>
-          <argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
-          <parallel>false</parallel>
-          <suiteXmlFiles>
-            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
-          </suiteXmlFiles>
-        </configuration>
-      </plugin>
 
+      <!--  Set compiler level to Java 6 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -276,6 +274,22 @@
         </configuration>
       </plugin>
 
+      <!-- Test-NG based unit tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <skip>${skip.tests.unit}</skip>
+          <argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
+          <parallel>false</parallel>
+          <suiteXmlFiles>
+            <suiteXmlFile>src/test/resources/ng_unit.xml</suiteXmlFile>
+          </suiteXmlFiles>
+        </configuration>
+      </plugin>
+
+      <!-- Standard jar packaging -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -293,15 +307,6 @@
         </configuration>
       </plugin>
 
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <finalName>${project.name}-${project.version}</finalName>
-          <descriptors>
-            <descriptor>src/assembly/dist.xml</descriptor>
-          </descriptors>
-        </configuration>
-      </plugin>
     </plugins>
 
 
