@@ -1,9 +1,9 @@
 package com.mozilla.grouperfish.model;
 
 import java.util.Map;
+import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.common.collect.ImmutableSet;
 import com.hazelcast.core.Hazelcast;
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.service.ConfigurationsResource.FilterConfigsResource;
@@ -12,10 +12,10 @@ import com.mozilla.grouperfish.service.DocumentsResource;
 import com.mozilla.grouperfish.service.QueriesResource;
 import com.mozilla.grouperfish.service.ResultsResource;
 
+
 /**
  * Read-only information on a namespace. Cacheable.
  */
-//:TODO: Unit Test
 public class Namespace {
 
     public static Namespace get(String namespace) {
@@ -25,8 +25,9 @@ public class Namespace {
     private final int MAX_LENGTH = 512 * 1024;
     private final String name;
 
+    static final Set<String> CONFIG_TYPES = ImmutableSet.of("filters", "transforms");
 
-    public Namespace(String name) {
+    private Namespace(String name) {
         this.name = name;
     }
 
@@ -34,11 +35,11 @@ public class Namespace {
         return name;
     }
 
-    public int maxLength(Class<?> resourceType, HttpServletRequest request) {
+    public int maxLength(Class<?> resourceType, Access access) {
         return MAX_LENGTH;
     }
 
-    public boolean allows(Class<?> resourceType, String method, HttpServletRequest request) {
+    public boolean allows(Class<?> resourceType, Access access) {
         return true;
     }
 
@@ -65,10 +66,11 @@ public class Namespace {
     }
 
     public Map<String, String> configurations(final String type) {
+        if (!CONFIG_TYPES.contains(type)) Assert.unreachable("No such configuration type: %s", type);
         return Hazelcast.getMap("config_" + type + "_" + name);
     }
 
-    public JsonValidator validator(Class<?> resourceType) {
+    public JsonValidator validator(final Class<?> resourceType) {
         return new JsonValidator();
     }
 }

@@ -8,7 +8,7 @@ import org.codehaus.jackson.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//:TODO: Unit Test
+
 public class JsonValidator {
 
     static Logger log = LoggerFactory.getLogger(JsonValidator.class);
@@ -16,6 +16,10 @@ public class JsonValidator {
     private final JsonFactory jsonFactory = new JsonFactory();
 
     public boolean isValid(String json) throws IOException {
+        if (json.length() == 0) {
+            return false;
+        }
+
         try {
             JsonParser parser = jsonFactory.createJsonParser(json);
             while (parser.nextToken() != null) { }
@@ -23,6 +27,7 @@ public class JsonValidator {
             log.error("Error parsing JSON", e);
             return false;
         }
+
         return true;
     }
 

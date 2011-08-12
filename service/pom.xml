@@ -131,22 +131,6 @@
       <version>0.9.20</version>
     </dependency>
 
-    <!-- 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.5.8</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jcl</artifactId>
-      <version>1.5.8</version>
-      <scope>provided</scope>
-    </dependency>
-     -->
-
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
@@ -248,6 +232,20 @@
       <version>0.16.2</version>
     </dependency>
 
+    <!-- Immutable Collections -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>r08</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>3.0</version>
+      <scope>test</scope>
+    </dependency>
+    
     <!-- 
     <dependency>
       <groupId>com.jayway.restassured</groupId>

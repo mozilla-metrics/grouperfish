@@ -1,18 +1,23 @@
 package com.mozilla.grouperfish.service;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;
+import javax.ws.rs.core.StreamingOutput;
 
 import com.mozilla.grouperfish.base.StreamTool;
 import com.mozilla.grouperfish.json.MapStreamer;
+import com.mozilla.grouperfish.model.Access;
+import com.mozilla.grouperfish.model.Access.Type;
 import com.mozilla.grouperfish.model.Namespace;
 
 
@@ -26,7 +31,7 @@ class RestHelper {
                            final String key,
                            final HttpServletRequest request) {
 
-        if (!ns.allows(resourceType, "GET", request)) return FORBIDDEN;
+        if (!ns.allows(resourceType, new HttpAccess(Type.READ, request))) return FORBIDDEN;
 
         final Map<String, String> map = ns.resourceMap(resourceType);
         if (!map.containsKey(key)) return NOT_FOUND;
@@ -41,9 +46,10 @@ class RestHelper {
                            final String key,
                            final HttpServletRequest request) throws IOException {
 
-        if (!ns.allows(resourceType, "PUT", request)) return FORBIDDEN;
+        Access access = new HttpAccess(Type.CREATE, request);
+        if (!ns.allows(resourceType, access)) return FORBIDDEN;
 
-        final int maxLength = ns.maxLength(resourceType, request);
+        final int maxLength = ns.maxLength(resourceType, access);
         if (maxLength < request.getContentLength()) return TOO_LARGE;
         final String data = StreamTool.maybeConsume(request.getInputStream(), Charset.forName("UTF-8"), maxLength);
         if (data == null) return RestHelper.TOO_LARGE;
@@ -65,11 +71,19 @@ class RestHelper {
                             final Namespace ns,
                             final HttpServletRequest request) {
 
-        if (!ns.allows(resourceType, "LIST", request)) return FORBIDDEN;
+        if (!ns.allows(resourceType, new HttpAccess(Type.LIST, request))) return FORBIDDEN;
 
-        final Map<String, String> map = ns.resourceMap(resourceType);
-        return Response.ok(new MapStreamer(map), MediaType.APPLICATION_JSON).build();
+        final MapStreamer streamer = new MapStreamer(ns.resourceMap(resourceType));
 
+        return Response.ok(
+                new StreamingOutput() {
+                    @Override
+                    public void write(OutputStream output) throws IOException, WebApplicationException {
+                        streamer.write(output);
+                    }
+                },
+                MediaType.APPLICATION_JSON
+            ).build();
     }
 
     /** Discard an item from the namespace. */
@@ -78,7 +92,7 @@ class RestHelper {
                               final String key,
                               final HttpServletRequest request) throws IOException {
 
-        if (!ns.allows(resourceType, "DELETE", request)) return FORBIDDEN;
+        if (!ns.allows(resourceType, new HttpAccess(Type.DELETE, request))) return FORBIDDEN;
 
         final Map<String, String> map = ns.resourceMap(resourceType);
         map.remove(key);

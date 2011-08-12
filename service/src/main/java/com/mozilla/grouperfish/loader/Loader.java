@@ -25,7 +25,7 @@ import com.mozilla.grouperfish.model.Entity;
 
 
 /** Helps loading a remote bagheera installation with documents. */
-//:TODO: Unit Test
+//:TODO: Integration Test
 public class Loader<T extends Entity> {
 
     private final String mapUrl_;
