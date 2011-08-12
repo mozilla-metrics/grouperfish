@@ -8,7 +8,7 @@ import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.AssertJUnit.assertFalse;
 
 
-@Test(groups = "unit")
+@Test(groups="unit")
 public class JsonValidatorTest {
 
     public void testInvalidDocument() throws IOException {

@@ -14,13 +14,13 @@ public class AssertTest {
         Assert.nonNull("a", 123, new Object());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expectedExceptions=IllegalArgumentException.class)
     public void testNonNullFailSingle() {
         final String nothing = null;
         Assert.nonNull(nothing);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expectedExceptions=IllegalArgumentException.class)
     public void testNonNullFailMulti() {
         Assert.nonNull("a", 123, new Object(), null);
     }
@@ -31,17 +31,17 @@ public class AssertTest {
         Assert.check(true, true, true);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expectedExceptions=IllegalArgumentException.class)
     public void testCheckFailSingle() {
         Assert.check(false);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expectedExceptions=IllegalArgumentException.class)
     public void testCheckFailMulti() {
         Assert.check(true, true, false);
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test(expectedExceptions=IllegalStateException.class)
     public void testUnreachable() {
         Assert.unreachable();
     }

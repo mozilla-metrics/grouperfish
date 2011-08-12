@@ -12,7 +12,7 @@ import java.util.List;
 import org.testng.annotations.Test;
 
 
-@Test(groups = "unit")
+@Test(groups="unit")
 public class TsvReaderTest {
 
     static private final Charset UTF8 = Charset.forName("UTF-8");

@@ -38,12 +38,13 @@ public class MapStreamer {
                 writer.append('\n');
             }
 
-            writer.append('"');
-            writer.append(JSONValue.escape(items.getKey()));
-            writer.append('"');
-            writer.append(':');
-            writer.append(' ');
-            writer.write(items.getValue());
+            writer
+                .append('"')
+                .append(JSONValue.escape(items.getKey()))
+                .append('"')
+                .append(':')
+                .append(' ')
+                .write(items.getValue());
         }
         writer.write('}');
         writer.flush();

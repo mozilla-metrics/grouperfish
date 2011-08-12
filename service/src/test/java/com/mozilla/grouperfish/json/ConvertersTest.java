@@ -12,7 +12,8 @@ import com.mozilla.grouperfish.model.Document;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
-@Test(groups = "unit")
+
+@Test(groups="unit")
 @SuppressWarnings("serial")
 public class ConvertersTest {
 

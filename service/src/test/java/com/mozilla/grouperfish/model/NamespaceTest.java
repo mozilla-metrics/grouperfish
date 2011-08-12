@@ -67,6 +67,12 @@ public class NamespaceTest {
                 ns.resourceMap(ConfigurationsResource.TransformConfigsResource.class));
     }
 
+    @Test(expectedExceptions=IllegalStateException.class)
+    public void testInvalidResourceMap() {
+        final Namespace ns = Namespace.get(NS);
+        ns.resourceMap(Object.class);
+    }
+
     public void testResults() {
         assertNotNull(Namespace.get(NS).results());
     }

@@ -22,7 +22,6 @@ import com.mozilla.grouperfish.model.Namespace;
 
 
 /** Bunch of internal helpers to cut down on resource specific code. */
-// :TODO: Unit Test
 class RestHelper {
 
     /** Get any known resource. */

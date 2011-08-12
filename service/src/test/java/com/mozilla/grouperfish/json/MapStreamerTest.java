@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
 
-@Test(groups = "unit")
+@Test(groups="unit")
 public class MapStreamerTest {
 
     @SuppressWarnings("serial")

@@ -12,7 +12,7 @@ import com.mozilla.grouperfish.json.JSONConverter;
 import static org.testng.AssertJUnit.assertEquals;
 
 
-@Test(groups = "unit")
+@Test(groups="unit")
 @SuppressWarnings("serial")
 public class DocumentTest {
 

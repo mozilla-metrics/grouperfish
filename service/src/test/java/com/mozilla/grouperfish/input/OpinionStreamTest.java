@@ -11,7 +11,7 @@ import com.mozilla.grouperfish.base.StreamTool;
 import com.mozilla.grouperfish.model.Document;
 
 
-@Test(groups = "unit")
+@Test(groups="unit")
 public class OpinionStreamTest {
 
     /** These are actual opinions from Firefox Input. */
