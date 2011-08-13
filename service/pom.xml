@@ -279,9 +279,11 @@
         <configuration>
           <skip>${skip.tests.unit}</skip>
           <argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
-          <parallel>false</parallel>
+          <parallel>methods</parallel>
+          <threadCount>1</threadCount>          
           <suiteXmlFiles>
             <suiteXmlFile>src/test/resources/ng_unit.xml</suiteXmlFile>
+            <suiteXmlFile>src/test/resources/ng_integration.xml</suiteXmlFile>
           </suiteXmlFiles>
         </configuration>
       </plugin>

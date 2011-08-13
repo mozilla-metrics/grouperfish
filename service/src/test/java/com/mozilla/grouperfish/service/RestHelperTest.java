@@ -24,7 +24,7 @@ public class RestHelperTest {
 
     private final Namespace NS = Namespace.get("unit-test");
 
-    public void putAny() throws IOException {
+    public void testPutAny() throws IOException {
         final HttpServletRequest mock = mock(HttpServletRequest.class);
 
         final String body = "{\"id\": \"mydoc\"}";
@@ -43,8 +43,8 @@ public class RestHelperTest {
         assertEquals(201, response.getStatus());
     }
 
-    @Test
-    public void deleteAny() throws IOException {
+
+    public void testDeleteAny() throws IOException {
         final HttpServletRequest mock = mock(HttpServletRequest.class);
         when(mock.getMethod()).thenReturn("DELETE");
 
@@ -53,8 +53,8 @@ public class RestHelperTest {
         assertEquals(204, response.getStatus());
     }
 
-    @Test
-    public void getAny() {
+
+    public void testGetAny() {
         // Put stuff in, to get afterwards:
         NS.documents().put("myGetDoc", "{\"id\": \"myGetDoc\"}");
 
@@ -68,8 +68,8 @@ public class RestHelperTest {
         assertEquals(404, response404.getStatus());
     }
 
-    @Test
-    public void listAny() {
+
+    public void testListAny() {
         final HttpServletRequest mock = mock(HttpServletRequest.class);
         final Response response = RestHelper.listAny(TransformConfigsResource.class, NS, mock);
         assertNotNull(response);

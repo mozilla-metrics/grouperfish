@@ -9,7 +9,7 @@
       </run>
     </groups>
     <packages>
-      <package name="com.mozilla.grouperfish.service.*" />
+      <package name="com.mozilla.grouperfish.integration.*" />
     </packages>
   </test>
 </suite>
