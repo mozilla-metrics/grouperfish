@@ -1,0 +1,148 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.mozilla</groupId>
+  <artifactId>grouperfish-integration-test</artifactId>
+  <version>0.1-SNAPSHOT</version>
+
+  <name>grouperfish-service</name>
+  <description>Clustering engine for the web</description>
+  <url>https://github.com/mozilla-metrics/grouperfish</url>
+
+  <packaging>jar</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <skip.tests.unit>false</skip.tests.unit>
+  </properties>
+
+
+  <repositories>
+    <repository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2</url>
+      <name>java.net Maven Repository</name>
+    </repository>
+
+    <repository>
+      <id>mozilla-metrics-snapshots</id>
+      <url>http://mozilla-metrics.github.com/maven2/snapshots</url>
+    </repository>
+
+    <repository>
+      <id>sonatype-nexus-public</id>
+      <name>SonaType public snapshots and releases repository</name>
+      <url>https://oss.sonatype.org/content/groups/public</url>
+    </repository>
+
+    <repository>
+      <id>cdh.release.repo</id>
+      <url>https://repository.cloudera.com/content/repositories/releases</url>
+      <name>Cloudera Releases Repository</name>
+      <snapshots><enabled>true</enabled></snapshots>
+    </repository>
+  </repositories>
+
+
+  <dependencies>
+
+    <dependency>
+      <groupId>com.mozilla</groupId>
+      <artifactId>grouperfish-service</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jayway.restassured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <version>1.2.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>5.6</version>
+      <classifier>jdk15</classifier>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Cloudera Hadoop, HBase -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>0.20.2-cdh3u0</version>
+    </dependency>
+
+    <!-- ElasticSearch -->
+    <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch</artifactId>
+      <version>0.16.2</version>
+    </dependency>
+
+  </dependencies>
+
+
+  <build>
+    <finalName>grouperfish-service</finalName>
+    <plugins>
+
+      <!--  Set compiler level to Java 6 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <!-- Test-NG based integration tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <skip>${skip.tests.unit}</skip>
+          <argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
+          <parallel>methods</parallel>
+          <threadCount>1</threadCount>
+          <suiteXmlFiles>
+            <suiteXmlFile>src/test/resources/ng_integration.xml</suiteXmlFile>
+          </suiteXmlFiles>
+        </configuration>
+      </plugin>
+
+      <!-- Standard jar packaging -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.1</version>
+        <configuration>
+          <finalName>${project.name}-${project.version}</finalName>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>${settings.localRepository}</classpathPrefix>
+              <classpathLayoutType>repository</classpathLayoutType>
+              <mainClass>com.mozilla.grouperfish.service.Grouperfish</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+
+  </build>
+
+</project>

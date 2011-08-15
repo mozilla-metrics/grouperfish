@@ -1,23 +1,33 @@
 #!/bin/bash
 
 # Startup a grouperfish instance.
-# Internally, this wraps a bagheera service, but uses custom JAX-RS resources.
+# Internally, this starts a bagheera service, but uses custom JAX-RS resources.
 
 function usage() {
-  echo "Usage: $0"
+  echo "Usage: $0 [server-port] [hazelcast-config-path]"
   exit 1
 }
 
-# Print usage if incorrect number of args
-[[ $# -ne 0 ]] && usage
-
+# Set defaults:
+#   port = FISH = 0xF124 = 61732
+SERVER_PORT=61732
+#   config is fixed for grouperfish
 bin=`dirname "$0"`
 bin=`cd "$bin"; pwd`
-
-# FISH = 0xF124 = 61732
-SERVER_PORT=61732
-# config is fixed for grouperfish
 HAZELCAST_CONF=$bin/../conf/hazelcast.xml
+
+# Print usage if incorrect number of args
+[[ $# -gt 2 ]] && usage
+
+# User override:
+if [[ $# -gt 0 ]]; then
+    SERVER_PORT=$1
+    if [[ $# -gt 1 ]]; then
+        HAZELCAST_CONF=$bin/../conf/hazelcast.xml
+    fi
+fi
+
+
 
 SERVER_CLASS_NAME="com.mozilla.grouperfish.service.Grouperfish"
 JAVA_OPTS="-Xmx1000m -XX:+UseParNewGC -XX:+UseConcMarkSweepGC"

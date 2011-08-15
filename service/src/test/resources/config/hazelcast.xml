@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hazelcast
+ xmlns="http://www.hazelcast.com/schema/config"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-basic.xsd">
+
+  <!-- HazelCast for unit tests: No map stores, no backups, no multicast. -->
+  <group>
+    <name>grouperfish-unit</name>
+    <password>grouperfish-unit</password>
+  </group>
+
+  <network>
+    <port auto-increment="true">5701</port>
+    <join>
+      <multicast enabled="false"></multicast>
+      <tcp-ip enabled="true">
+        <interface>127.0.0.1</interface>
+      </tcp-ip>
+    </join>
+    <interfaces enabled="false">
+      <interface>*</interface>
+    </interfaces>
+  </network>
+
+  <executor-service>
+    <core-pool-size>16</core-pool-size>
+    <max-pool-size>64</max-pool-size>
+    <keep-alive-seconds>60</keep-alive-seconds>
+  </executor-service>
+
+
+  <!-- Family of maps used for documents received through REST.
+       The wildcard stands for the namespace. -->
+  <map name="documents_*">
+    <backup-count>0</backup-count>
+    <eviction-policy>LRU</eviction-policy>
+    <max-size policy="cluster_wide_map_size">10000</max-size>
+    <eviction-percentage>25</eviction-percentage>
+  </map>
+
+
+  <!-- For the results produced by the transforms. HBase only (key-only lookup). -->
+  <map name="results_*">
+    <backup-count>0</backup-count>
+    <time-to-live-seconds>0</time-to-live-seconds>
+    <eviction-policy>LRU</eviction-policy>
+    <max-size policy="cluster_wide_map_size">5000</max-size>
+    <eviction-percentage>25</eviction-percentage>
+  </map>
+
+
+  <!-- Used for the results produced by the transforms. HBase only (key-only lookup). -->
+  <map name="queries_*">
+    <backup-count>0</backup-count>
+    <time-to-live-seconds>0</time-to-live-seconds>
+    <eviction-policy>LRU</eviction-policy>
+    <max-size policy="cluster_wide_map_size">5000</max-size>
+    <eviction-percentage>25</eviction-percentage>
+  </map>
+
+
+  <!-- Used for the results produced by the transforms. HBase only (key-only lookup). -->
+  <map name="configuration_*">
+    <backup-count>0</backup-count>
+    <time-to-live-seconds>0</time-to-live-seconds>
+    <eviction-policy>LRU</eviction-policy>
+    <max-size policy="cluster_wide_map_size">5000</max-size>
+    <eviction-percentage>25</eviction-percentage>
+  </map>
+
+</hazelcast>
+

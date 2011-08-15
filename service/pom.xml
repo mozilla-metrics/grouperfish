@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.mozilla.metrics</groupId>
+  <groupId>com.mozilla</groupId>
   <artifactId>grouperfish-service</artifactId>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.1-SNAPSHOT</version>
 
   <name>grouperfish-service</name>
   <description>Clustering engine for the web</description>
@@ -280,10 +280,10 @@
           <skip>${skip.tests.unit}</skip>
           <argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
           <parallel>methods</parallel>
-          <threadCount>1</threadCount>          
+          <threadCount>1</threadCount>
+          <workingDirectory>${project.build.directory}/test-classes</workingDirectory>
           <suiteXmlFiles>
             <suiteXmlFile>src/test/resources/ng_unit.xml</suiteXmlFile>
-            <suiteXmlFile>src/test/resources/ng_integration.xml</suiteXmlFile>
           </suiteXmlFiles>
         </configuration>
       </plugin>

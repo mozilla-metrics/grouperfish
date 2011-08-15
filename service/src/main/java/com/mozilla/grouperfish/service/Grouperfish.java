@@ -18,7 +18,7 @@ public class Grouperfish {
      * - port number for the Grouperfish/Bagheera REST service
      * - HazelCast config file
      *
-     * @param arguments
+     * @param arguments Something like <tt>String[]{"path/to/hazelcast.xml", "port"}</tt>
      * @throws Exception
      */
 	public static void main(String[] arguments) throws Exception {

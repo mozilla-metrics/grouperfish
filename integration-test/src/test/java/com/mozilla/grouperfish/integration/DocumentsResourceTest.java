@@ -38,7 +38,6 @@ public class DocumentsResourceTest {
         }});
     }}).toJSONString();
 
-
     public void testPutDocument() {
         given().body(DOC_A).
             expect().statusCode(201).
