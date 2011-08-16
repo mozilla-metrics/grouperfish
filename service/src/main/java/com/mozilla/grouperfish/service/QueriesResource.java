@@ -17,7 +17,6 @@ import javax.ws.rs.core.Response;
 import com.mozilla.grouperfish.model.Namespace;
 
 @Path("/queries/{namespace}")
-//:TODO: Integration Test
 public class QueriesResource {
 
     @GET

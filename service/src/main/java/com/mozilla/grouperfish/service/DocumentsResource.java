@@ -16,8 +16,7 @@ import javax.ws.rs.core.Response;
 
 import com.mozilla.grouperfish.model.Namespace;
 
-@Path("documents/{namespace}/{id}")
-//:TODO: Integration Test
+@Path("/documents/{namespace}/{id}")
 public class DocumentsResource {
 
     @GET

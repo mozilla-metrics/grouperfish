@@ -16,7 +16,6 @@ import javax.ws.rs.core.Response;
 
 import com.mozilla.grouperfish.model.Namespace;
 
-//:TODO: Integration Test
 //:TODO: Integrate facet query parameters
 @Path("/results/{namespace}/{transform}/{query}")
 public class ResultsResource {

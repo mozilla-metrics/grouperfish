@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.model.Access;
 
+
 public class HttpAccess implements Access {
 
     private final Access.Type type;
