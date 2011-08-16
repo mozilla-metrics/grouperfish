@@ -10,8 +10,8 @@ import com.mozilla.grouperfish.model.Document;
 
 public class Converters {
 
-	public static JSONConverter<Document> forDocuments() {
-        return new JSONConverter<Document>() {
+	public static JsonConverter<Document> forDocuments() {
+        return new JsonConverter<Document>() {
 
             public String encode(final Document item) {
                 return JSONObject.toJSONString(item.fields());

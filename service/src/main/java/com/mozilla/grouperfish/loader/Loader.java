@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mozilla.grouperfish.base.StreamTool;
-import com.mozilla.grouperfish.json.JSONConverter;
+import com.mozilla.grouperfish.json.JsonConverter;
 import com.mozilla.grouperfish.model.Entity;
 
 
@@ -29,14 +29,14 @@ import com.mozilla.grouperfish.model.Entity;
 public class Loader<T extends Entity> {
 
     private final String mapUrl_;
-    private final JSONConverter<T> converter_;
+    private final JsonConverter<T> converter_;
     private static Logger log = LoggerFactory.getLogger(Loader.class);
 
     /**
      * @param mapUrl The url to a bagheera map resource to use as destination.
      *               Example: http://localhost:8080/map/grouperfish-docs
      */
-    public Loader(final String mapUrl, final JSONConverter<T> converter) {
+    public Loader(final String mapUrl, final JsonConverter<T> converter) {
         converter_ = converter;
         mapUrl_ = mapUrl;
     }
@@ -143,9 +143,9 @@ public class Loader<T extends Entity> {
 
         private final String mapUrl_;
         private final List<T> items_;
-        private final JSONConverter<T> converter_;
+        private final JsonConverter<T> converter_;
 
-        InsertTask(final String mapUrl, final JSONConverter<T> converter, final List<T> items) {
+        InsertTask(final String mapUrl, final JsonConverter<T> converter, final List<T> items) {
             mapUrl_ = mapUrl;
             items_ = items;
             converter_ = converter;

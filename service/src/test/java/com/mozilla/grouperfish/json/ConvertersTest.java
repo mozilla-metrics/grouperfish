@@ -18,7 +18,7 @@ import static org.testng.AssertJUnit.assertTrue;
 public class ConvertersTest {
 
     public void testEncodeSimpleDocument() {
-        JSONConverter<Document> converter = Converters.forDocuments();
+        JsonConverter<Document> converter = Converters.forDocuments();
         final Map<String, Object> simple = new HashMap<String, Object>() {{
             put("id", "12345");
         }};
@@ -26,7 +26,7 @@ public class ConvertersTest {
     }
 
     public void testEncodeDocument() {
-        JSONConverter<Document> converter = Converters.forDocuments();
+        JsonConverter<Document> converter = Converters.forDocuments();
         final Map<String, Object> fields = new TreeMap<String, Object>() {{
             put("A", 1234);
             put("id", "XYZ");
@@ -48,7 +48,7 @@ public class ConvertersTest {
     }
 
     public void testDecodeDocument() {
-        JSONConverter<Document> converter = Converters.forDocuments();
+        JsonConverter<Document> converter = Converters.forDocuments();
         Document d = converter.decode("{\"id\":\"12345\"}");
         assertTrue(d.fields().containsKey("id"));
     }

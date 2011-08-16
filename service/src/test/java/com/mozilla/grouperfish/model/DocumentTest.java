@@ -7,7 +7,7 @@ import java.util.Map;
 import org.testng.annotations.Test;
 
 import com.mozilla.grouperfish.json.Converters;
-import com.mozilla.grouperfish.json.JSONConverter;
+import com.mozilla.grouperfish.json.JsonConverter;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -18,7 +18,7 @@ public class DocumentTest {
 
     @Test(expectedExceptions=IllegalArgumentException.class)
     public void testEmptyDocument() {
-        JSONConverter<Document> converter = Converters.forDocuments();
+        JsonConverter<Document> converter = Converters.forDocuments();
         final Map<String, Object> empty = Collections.emptyMap();
         converter.encode(new Document(empty));
     }
