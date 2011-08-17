@@ -25,30 +25,38 @@ import com.mozilla.grouperfish.model.Entity;
 
 
 /** Helps loading a remote bagheera installation with documents. */
-//:TODO: Integration Test
 public class Loader<T extends Entity> {
 
-    private final String mapUrl_;
+    private final String baseUrl_;
     private final JsonConverter<T> converter_;
     private static Logger log = LoggerFactory.getLogger(Loader.class);
 
     /**
-     * @param mapUrl The url to a bagheera map resource to use as destination.
-     *               Example: http://localhost:8080/map/grouperfish-docs
+     * @param baseUrl The url to a grouperfish resource to use as destination.
+     *                Example: http://localhost:61732/documents/mynamespace
      */
-    public Loader(final String mapUrl, final JsonConverter<T> converter) {
+    public Loader(final String baseUrl, final JsonConverter<T> converter) {
         converter_ = converter;
-        mapUrl_ = mapUrl;
+        baseUrl_ = baseUrl;
     }
 
     /**
-     * Loads document into bagheera using a multithreaded client. Returns the
+     * Load a single item into Grouperfish.
+     * Whenever multiple items need to be loaded, clients should make use of {@link #load(Iterable)}.
+     */
+    public void load(T item) {
+        final List<T> wrapper = new ArrayList<T>();
+        wrapper.add(item);
+        new InsertTask<T>(baseUrl_, converter_, wrapper).run();
+    }
+
+    /**
+     * Loads document into Grouperfish using a multithreaded client. Returns the
      * number of document loaded.
      */
-
     public int load(Iterable<T> stream) {
 
-        log.debug("Starting import into map '{}'", mapUrl_);
+        log.debug("Starting import into map '{}'", baseUrl_);
         final ExecutorService workers = workers();
 
         // So modulo does not match right away, we set i != 0
@@ -57,21 +65,21 @@ public class Loader<T extends Entity> {
         for (T item : stream) {
             batch.add(item);
             if (i % BATCH_SIZE == 0) {
-                workers.submit(new InsertTask<T>(mapUrl_, converter_, batch));
+                workers.submit(new InsertTask<T>(baseUrl_, converter_, batch));
                 batch = new ArrayList<T>(BATCH_SIZE);
             }
-            if (i % 50000 == 0) {
-                log.info("Queued {} items into map {}", i, mapUrl_);
+            if (i % 5000 == 0) {
+                log.info("Queued {} items into map {}", i, baseUrl_);
             }
             ++i;
         }
         if (!batch.isEmpty()) {
-            workers.submit(new InsertTask<T>(mapUrl_, converter_, batch));
+            workers.submit(new InsertTask<T>(baseUrl_, converter_, batch));
         }
 
         // Submit will block until it is safe to shut down:
         shutdownGracefully(workers);
-        return i;
+        return i - 1;
     }
 
     /**
@@ -141,12 +149,12 @@ public class Loader<T extends Entity> {
 
         private static final Charset UTF8 = Charset.forName("UTF8");
 
-        private final String mapUrl_;
+        private final String baseUrl_;
         private final List<T> items_;
         private final JsonConverter<T> converter_;
 
-        InsertTask(final String mapUrl, final JsonConverter<T> converter, final List<T> items) {
-            mapUrl_ = mapUrl;
+        InsertTask(final String baseUrl, final JsonConverter<T> converter, final List<T> items) {
+            baseUrl_ = baseUrl;
             items_ = items;
             converter_ = converter;
         }
@@ -157,15 +165,18 @@ public class Loader<T extends Entity> {
             if (items_.size() == 0)
                 return;
             for (T item : items_) {
-                log.trace("Writing '{}' to '{}'", converter_.encode(item), mapUrl_ + "/" + item.id());
+                log.trace("Writing '{}' to '{}'", converter_.encode(item), baseUrl_ + "/" + item.id());
                 int retriesLeft = 5;
-                while (retriesLeft > 0) {
+                boolean done = false;
+                while (!done && retriesLeft > 0) {
+                    final String resource = baseUrl_ + "/" + item.id();
                     try {
                         final HttpURLConnection conn =
-                            (HttpURLConnection) new URL(mapUrl_ + "/" + item.id()).openConnection();
+                            (HttpURLConnection) new URL(resource).openConnection();
+                        conn.setRequestMethod("PUT");
                         conn.setDoInput(true);
                         conn.setDoOutput(true);
-                        conn.setUseCaches (false);
+                        conn.setUseCaches(false);
                         conn.setRequestProperty("Content-Type", "application/json");
                         Writer wr = new OutputStreamWriter(conn.getOutputStream(), UTF8);
                         wr.write(converter_.encode(item));
@@ -177,19 +188,20 @@ public class Loader<T extends Entity> {
                             log.trace("HTTP response status code: {}", status);
                         }
                         else {
-                            log.warn("HTTP error status: {} ({})", status,
-                                     StreamTool.consume(conn.getErrorStream(), UTF8));
+                            log.warn("Putting resource '" + resource + "': HTTP status: {} ({})",
+                                     status, StreamTool.consume(conn.getErrorStream(), UTF8));
                         }
-
-                        retriesLeft = 0;
-                    } catch (IOException e) {
+                        done = true;
+                    }
+                    catch (IOException e) {
                         final Entity from = items_.get(0);
                         final Entity to = items_.get(items_.size() - 1);
                         log.error(String.format("While inserting batch %s,%s", from.id(), to.id()));
                         log.error("IO Error in importer", e);
                         --retriesLeft;
                         if (retriesLeft == 0) {
-                            log.error("No retries left. Giving up.", e);
+                            log.error("No retries left (putting resource '" + resource + "'). Giving up.", e);
+                            throw new RuntimeException(e);
                         }
                     }
                 }

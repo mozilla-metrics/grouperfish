@@ -25,7 +25,7 @@ public class ConfigurationsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFullConfiguration(@PathParam("namespace") String namespace,
                                          @Context HttpServletRequest request) {
-        // :TODO: implement
+        // :TODO: Next:
         // ... stream out all config entries ...
         return null;
     }
@@ -34,7 +34,7 @@ public class ConfigurationsResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response putFullConfiguration(@PathParam("namespace") String namespace,
                                          @Context HttpServletRequest request) {
-        // :TODO: implement
+        // :TODO: Next:
         // ... replace all config entries ...
         return null;
     }
