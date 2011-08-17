@@ -8,6 +8,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
+import static com.mozilla.grouperfish.integration.IntegrationTestHelper.NS;
 
 
 @Test(groups="integration")
@@ -15,7 +16,6 @@ import org.testng.annotations.Test;
 public class DocumentsResourceTest {
 
     final IntegrationTestHelper helper = new IntegrationTestHelper();
-    final String NS = IntegrationTestHelper.NS;
 
     private static final String DOC_A = (new JSONObject() {{
         put("id", "A");

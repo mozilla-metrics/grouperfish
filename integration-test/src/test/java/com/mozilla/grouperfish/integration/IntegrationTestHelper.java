@@ -19,9 +19,12 @@ import com.mozilla.grouperfish.service.Grouperfish;
 @Test(groups="integration")
 public class IntegrationTestHelper {
 
-    private final int port = Grouperfish.DEFAULT_PORT + 100;
+    public static final int port = Grouperfish.DEFAULT_PORT + 100;
+    static {
+        setUpRestAssured();
+    }
 
-    public static String NS = "_integrationTest_";
+    public static String NS = "integration";
 
     // private LocalHBaseCluster hbase;
 
@@ -34,7 +37,7 @@ public class IntegrationTestHelper {
                 Grouperfish.main(new String[]{});
             }
             catch (InterruptedException interrupt) {
-                Hazelcast.getMap("documents_integrationTest").destroy();
+                Hazelcast.getMap("documents_" + NS).destroy();
                 Thread.currentThread().interrupt();
             }
             catch (Exception e) {
@@ -58,18 +61,7 @@ public class IntegrationTestHelper {
         grouperfish.start();
         Thread.sleep(10000);
 
-        RestAssured.baseURI = "http://127.0.0.1";
-        RestAssured.port = port;
-        RestAssured.basePath = "";
-        RestAssured.requestContentType(ContentType.JSON);
-    }
-
-    @BeforeTest(groups="integration")
-    void setUpRest() {
-        RestAssured.baseURI = "http://127.0.0.1";
-        RestAssured.port = port;
-        RestAssured.basePath = "";
-        RestAssured.requestContentType(ContentType.JSON);
+        setUpRestAssured();
     }
 
 
@@ -79,6 +71,15 @@ public class IntegrationTestHelper {
         Thread.sleep(2000);
         //hbase.shutdown();
         //hbase.join();
+    }
+
+
+    @BeforeTest(groups="integration")
+    static void setUpRestAssured() {
+        RestAssured.baseURI = "http://127.0.0.1";
+        RestAssured.port = port;
+        RestAssured.basePath = "";
+        RestAssured.requestContentType(ContentType.JSON);
     }
 
 }
