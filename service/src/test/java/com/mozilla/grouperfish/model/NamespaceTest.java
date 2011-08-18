@@ -3,10 +3,10 @@ package com.mozilla.grouperfish.model;
 import org.testng.annotations.Test;
 
 import com.mozilla.grouperfish.model.Access.Type;
-import com.mozilla.grouperfish.service.ConfigurationsResource;
-import com.mozilla.grouperfish.service.DocumentsResource;
-import com.mozilla.grouperfish.service.QueriesResource;
-import com.mozilla.grouperfish.service.ResultsResource;
+import com.mozilla.grouperfish.rest.ConfigurationsResource;
+import com.mozilla.grouperfish.rest.DocumentsResource;
+import com.mozilla.grouperfish.rest.QueriesResource;
+import com.mozilla.grouperfish.rest.ResultsResource;
 
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
@@ -28,14 +28,14 @@ public class NamespaceTest {
     }
 
     public void testExistingConfigurations() {
-        for (final String configType : Namespace.CONFIG_TYPES) {
-            assertNotNull(Namespace.get(NS).configurations(configType));
+        for (final ConfigurationType type : ConfigurationType.values()) {
+            assertNotNull(Namespace.get(NS).configurations(type));
         }
     }
 
     @Test(expectedExceptions=IllegalStateException.class)
     public void testInvalidConfigurations() {
-        Namespace.get(NS).configurations("other");
+        Namespace.get(NS).configurations(null);
     }
 
     public void testDocuments() {
@@ -60,10 +60,10 @@ public class NamespaceTest {
         assertEquals(
                 ns.results(), ns.resourceMap(ResultsResource.class));
         assertEquals(
-                ns.configurations("filters"),
+                ns.configurations(ConfigurationType.FILTERS),
                 ns.resourceMap(ConfigurationsResource.FilterConfigsResource.class));
         assertEquals(
-                ns.configurations("transforms"),
+                ns.configurations(ConfigurationType.TRANSFOMS),
                 ns.resourceMap(ConfigurationsResource.TransformConfigsResource.class));
     }
 

@@ -1,16 +1,16 @@
 package com.mozilla.grouperfish.model;
 
 import java.util.Map;
-import java.util.Set;
 
-import com.google.common.collect.ImmutableSet;
-import com.hazelcast.core.Hazelcast;
 import com.mozilla.grouperfish.base.Assert;
-import com.mozilla.grouperfish.service.ConfigurationsResource.FilterConfigsResource;
-import com.mozilla.grouperfish.service.ConfigurationsResource.TransformConfigsResource;
-import com.mozilla.grouperfish.service.DocumentsResource;
-import com.mozilla.grouperfish.service.QueriesResource;
-import com.mozilla.grouperfish.service.ResultsResource;
+import com.mozilla.grouperfish.batch.BatchScheduler;
+import com.mozilla.grouperfish.bootstrap.Grouperfish;
+import com.mozilla.grouperfish.rest.DocumentsResource;
+import com.mozilla.grouperfish.rest.QueriesResource;
+import com.mozilla.grouperfish.rest.ResultsResource;
+import com.mozilla.grouperfish.rest.ConfigurationsResource.FilterConfigsResource;
+import com.mozilla.grouperfish.rest.ConfigurationsResource.TransformConfigsResource;
+import com.mozilla.grouperfish.services.Grid;
 
 
 /**
@@ -24,11 +24,11 @@ public class Namespace {
 
     private final int MAX_LENGTH = 512 * 1024;
     private final String name;
-
-    static final Set<String> CONFIG_TYPES = ImmutableSet.of("filters", "transforms");
+    private final Grid grid;
 
     private Namespace(String name) {
         this.name = name;
+        grid = Grouperfish.services().grid();
     }
 
     public String toString() {
@@ -44,30 +44,35 @@ public class Namespace {
     }
 
     public Map<String, String> resourceMap(Class<?> resourceType) {
+        Assert.nonNull(resourceType);
         if (resourceType == ResultsResource.class) return results();
         if (resourceType == DocumentsResource.class) return documents();
         if (resourceType == QueriesResource.class) return queries();
-        if (resourceType == TransformConfigsResource.class) return configurations("transforms");
-        if (resourceType == FilterConfigsResource.class) return configurations("filters");
+        if (resourceType == TransformConfigsResource.class) return configurations(ConfigurationType.TRANSFOMS);
+        if (resourceType == FilterConfigsResource.class) return configurations(ConfigurationType.FILTERS);
         Assert.unreachable("Unhandled resource type: %s", resourceType.getName());
         return null;
     }
 
+    public BatchScheduler batchStarter() {
+        return new BatchScheduler(this);
+    }
+
     public Map<String, String> documents() {
-        return Hazelcast.getMap("documents_" + name);
+        return grid.map("documents_" + name);
     }
 
     public Map<String, String> queries() {
-        return Hazelcast.getMap("queries_" + name);
+        return grid.map("queries_" + name);
     }
 
     public Map<String, String> results() {
-        return Hazelcast.getMap("results_" + name);
+        return grid.map("results_" + name);
     }
 
-    public Map<String, String> configurations(final String type) {
-        if (!CONFIG_TYPES.contains(type)) Assert.unreachable("No such configuration type: %s", type);
-        return Hazelcast.getMap("config_" + type + "_" + name);
+    public Map<String, String> configurations(final ConfigurationType type) {
+        Assert.nonNull(type);
+        return grid.map("config_" + type.name().toLowerCase() + "_" + name);
     }
 
     public JsonValidator validator(final Class<?> resourceType) {

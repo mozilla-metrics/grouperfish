@@ -6,9 +6,6 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
-import com.mozilla.grouperfish.json.Converters;
-import com.mozilla.grouperfish.json.JsonConverter;
-
 import static org.testng.AssertJUnit.assertEquals;
 
 
@@ -18,11 +15,19 @@ public class DocumentTest {
 
     @Test(expectedExceptions=IllegalArgumentException.class)
     public void testEmptyDocument() {
-        JsonConverter<Document> converter = Converters.forDocuments();
         final Map<String, Object> empty = Collections.emptyMap();
-        converter.encode(new Document(empty));
+        new Document(empty).source();
     }
 
+    public void testVerySimpleDocument() {
+        final Map<String, Object> fields = new HashMap<String, Object>() {{
+            put("id", 1323);
+        }};
+        Document doc = new Document(fields);
+        assertEquals("{\"id\":1323}", doc.source());
+        assertEquals("1323", doc.name());
+        assertEquals("1323", doc.id());
+    }
 
     public void testSimpleDocument() {
         final Map<String, Object> fields = new HashMap<String, Object>() {{
