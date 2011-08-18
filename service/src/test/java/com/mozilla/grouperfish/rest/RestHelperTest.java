@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.service;
+package com.mozilla.grouperfish.rest;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -10,7 +10,9 @@ import javax.ws.rs.core.Response;
 import org.testng.annotations.Test;
 
 import com.mozilla.grouperfish.model.Namespace;
-import com.mozilla.grouperfish.service.ConfigurationsResource.TransformConfigsResource;
+import com.mozilla.grouperfish.rest.DocumentsResource;
+import com.mozilla.grouperfish.rest.RestHelper;
+import com.mozilla.grouperfish.rest.ConfigurationsResource.TransformConfigsResource;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.service;
+package com.mozilla.grouperfish.rest;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -116,6 +116,12 @@ class RestHelper {
 
     static final Response NOT_FOUND =
         Response.status(Status.NOT_FOUND).build();
+
+    static final Response ACCEPTED =
+        Response.status(Status.ACCEPTED).build();
+
+    static final Response FAIL =
+        Response.serverError().build();
 
     static final Response NO_CONTENT =
         Response.noContent().build();

@@ -6,27 +6,25 @@ import java.io.Writer;
 
 import com.mozilla.grouperfish.model.Document;
 
+
+/** If using a buffered writer, make sure to {@link #flush()} when you are done. */
 public class TsvJsonWriter {
 
     private final Writer writer;
 
-    private final JsonConverter<Document> docConverter;
-
-    /** You can put in a buffered writer, but you need to {@link #flush()} manually. */
-    public TsvJsonWriter(final BufferedWriter writer) {
-        this.writer = writer;
-        this.docConverter = Converters.forDocuments();
+    public TsvJsonWriter(final Writer writer) {
+        this.writer = new BufferedWriter(writer);
     }
 
-    public void write(final String key, final String jsonValue) throws IOException {
+    public void write(final String key, final String source) throws IOException {
         writer.write(key.replace("\t", "\\t").replace("\n", "\\n"));
         writer.write("\t");
-        writer.write(jsonValue.replace("\n", ""));
+        writer.write(source.replace("\n", ""));
         writer.write("\n");
     }
 
-    public void write(final Document doc) throws IOException {
-        write(doc.id(), docConverter.encode(doc));
+    public void write(final Document document) throws IOException {
+        write(document.id(), document.source());
     }
 
     public void flush() throws IOException {

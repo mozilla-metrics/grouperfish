@@ -148,7 +148,7 @@
 
 
 
-    <!-- Cloudera Hadoop, HBase -->
+    <!-- Cloudera Hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
@@ -300,7 +300,7 @@
               <addClasspath>true</addClasspath>
               <classpathPrefix>${settings.localRepository}</classpathPrefix>
               <classpathLayoutType>repository</classpathLayoutType>
-              <mainClass>com.mozilla.grouperfish.service.Grouperfish</mainClass>
+              <mainClass>com.mozilla.grouperfish.bootstrap.Grouperfish</mainClass>
             </manifest>
           </archive>
         </configuration>

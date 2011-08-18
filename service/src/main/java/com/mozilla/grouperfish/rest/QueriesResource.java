@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.service;
+package com.mozilla.grouperfish.rest;
 
 import java.io.IOException;
 

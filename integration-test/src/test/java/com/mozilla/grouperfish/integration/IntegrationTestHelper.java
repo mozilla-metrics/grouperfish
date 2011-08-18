@@ -10,10 +10,11 @@ import org.testng.annotations.Test;
 
 import groovyx.net.http.ContentType;
 
+import bootstrap.Grouperfish;
+
 import com.hazelcast.core.Hazelcast;
 import com.jayway.restassured.RestAssured;
 import com.mozilla.grouperfish.base.Assert;
-import com.mozilla.grouperfish.service.Grouperfish;
 
 
 @Test(groups="integration")
