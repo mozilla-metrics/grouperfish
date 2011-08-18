@@ -1,0 +1,3 @@
+#!/bin/bash
+# Call python script that performs co-clustering.
+exec python cocluster.py $1
