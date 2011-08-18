@@ -1,28 +1,26 @@
 package com.mozilla.grouperfish.base;
 
-import java.util.LinkedList;
-import java.util.List;
 
 public class Result<T> extends Box<T> {
 
-    private final List<Exception> errors = new LinkedList<Exception>();
+    private final Box<Exception> error = new Box<Exception>();
 
-    public Result<T> error(String error) {
-        errors.add(new Exception(error));
+    public Result<T> error(final String message) {
+        error.put(new Exception(message));
         return this;
     }
 
-    public Result<T> error(Exception error) {
-        errors.add(error);
+    public Result<T> error(final Exception e) {
+        error.put(e);
         return this;
     }
 
     public boolean hasErrors() {
-        return !errors.isEmpty();
+        return !error.empty();
     }
 
-    public Iterable<Exception> errors() {
-        return errors;
+    public Box<Exception> error() {
+        return error;
     }
 
 }

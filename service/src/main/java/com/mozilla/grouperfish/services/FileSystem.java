@@ -11,8 +11,12 @@ public interface FileSystem {
     /** Result: The absolute path that was removed. */
     Result<String> removeRecursively(String relativePath);
 
-    /** Result: The absolute path that was created. */
-    Result<String> createWithParents(String relativePath);
+    /**
+     * Creates the given directory if it does not exist already.
+     * Fails if path exists but is not a directory.
+     * Result: The absolute path that was created.
+     */
+    Result<String> makeDirectory(String relativePath);
 
     /**
      * Opens a file for writing (creates the file if not present).
@@ -25,5 +29,8 @@ public interface FileSystem {
      * Result: A suitable reader for string data.
      */
     Result<Reader> reader(String path);
+
+    /** Generate a url that can be used to reference this relative path externally. */
+    String uri(String path);
 
 }
