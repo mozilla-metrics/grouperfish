@@ -17,8 +17,8 @@ import javax.ws.rs.core.StreamingOutput;
 import com.mozilla.grouperfish.base.StreamTool;
 import com.mozilla.grouperfish.json.MapStreamer;
 import com.mozilla.grouperfish.model.Access;
-import com.mozilla.grouperfish.model.Access.Type;
 import com.mozilla.grouperfish.model.Namespace;
+import com.mozilla.grouperfish.model.Access.Type;
 
 
 /** Bunch of internal helpers to cut down on resource specific code. */

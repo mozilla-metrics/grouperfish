@@ -2,6 +2,7 @@ package com.mozilla.grouperfish.model;
 
 import static com.mozilla.grouperfish.base.ImmutableTools.immutable;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
@@ -10,15 +11,15 @@ import org.json.simple.parser.JSONParser;
 import com.mozilla.grouperfish.base.Assert;
 
 
-public abstract class NamedSource {
+public abstract class NamedSource implements Serializable {
 
     private final String name;
-    private String source;
-    private Map<String, ? extends Object> fields;
-
+    private final String source;
+    private transient Map<String, ? extends Object> fields;
 
     NamedSource(final String name, final String source) {
         Assert.nonNull(name, source);
+        Assert.check(!name.isEmpty(), !source.isEmpty());
         this.name = name;
         this.source = source;
     }
@@ -29,17 +30,19 @@ public abstract class NamedSource {
      */
     NamedSource(final String name, final Map<String, ? extends Object> fields) {
         Assert.nonNull(name, fields);
+        Assert.check(!name.isEmpty());
         this.name = name;
         this.fields = fields;
+        this.source = JSONObject.toJSONString(fields);
     }
 
-    public String source() {
-        if (source == null) source = JSONObject.toJSONString(fields);
-        return source;
-    }
 
     public String name() {
         return name;
+    }
+
+    public String source() {
+        return source;
     }
 
     @SuppressWarnings("unchecked")
@@ -55,5 +58,7 @@ public abstract class NamedSource {
         Assert.check(fields instanceof JSONObject);
         return fields;
     }
+
+    private static final long serialVersionUID = 0;
 
 }

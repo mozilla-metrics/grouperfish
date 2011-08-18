@@ -17,5 +17,6 @@ public class Query extends NamedSource {
         return false;
     }
 
+    private static final long serialVersionUID = 0;
 
 }

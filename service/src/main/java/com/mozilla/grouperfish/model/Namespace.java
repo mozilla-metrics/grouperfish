@@ -3,8 +3,9 @@ package com.mozilla.grouperfish.model;
 import java.util.Map;
 
 import com.mozilla.grouperfish.base.Assert;
-import com.mozilla.grouperfish.batch.BatchScheduler;
+import com.mozilla.grouperfish.batch.BatchSystem;
 import com.mozilla.grouperfish.bootstrap.Grouperfish;
+import com.mozilla.grouperfish.json.JsonValidator;
 import com.mozilla.grouperfish.rest.DocumentsResource;
 import com.mozilla.grouperfish.rest.QueriesResource;
 import com.mozilla.grouperfish.rest.ResultsResource;
@@ -14,7 +15,7 @@ import com.mozilla.grouperfish.services.Grid;
 
 
 /**
- * Read-only information on a namespace. Cacheable.
+ * Immutable information on a namespace. Locally cacheable.
  */
 public class Namespace {
 
@@ -54,8 +55,8 @@ public class Namespace {
         return null;
     }
 
-    public BatchScheduler batchStarter() {
-        return new BatchScheduler(this);
+    public BatchSystem batchStarter() {
+        return new BatchSystem(this);
     }
 
     public Map<String, String> documents() {

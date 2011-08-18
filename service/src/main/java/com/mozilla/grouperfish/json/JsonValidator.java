@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.model;
+package com.mozilla.grouperfish.json;
 
 import java.io.IOException;
 

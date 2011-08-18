@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import com.mozilla.grouperfish.base.Box;
 import com.mozilla.grouperfish.model.ConfigurationType;
-import com.mozilla.grouperfish.model.Namespace;
 import com.mozilla.grouperfish.model.Access.Type;
+import com.mozilla.grouperfish.model.Namespace;
 import com.mozilla.grouperfish.model.Query;
 import com.mozilla.grouperfish.model.TransformConfig;
 

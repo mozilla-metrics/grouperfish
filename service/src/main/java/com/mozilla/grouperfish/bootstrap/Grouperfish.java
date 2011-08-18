@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.mozilla.bagheera.rest.Bagheera;
 import com.mozilla.grouperfish.services.FileSystem;
 import com.mozilla.grouperfish.services.Grid;
-import com.mozilla.grouperfish.services.Search;
+import com.mozilla.grouperfish.services.Index;
 import com.mozilla.grouperfish.services.Services;
 import com.mozilla.grouperfish.services.elasticsearch.ElasticSearchIndex;
 import com.mozilla.grouperfish.services.hadoop.HadoopFileSystem;
@@ -38,13 +38,14 @@ public class Grouperfish {
 
 	        private Grid grid = new HazelcastGrid();
             private FileSystem fs = new HadoopFileSystem(new Configuration(), "/grouperfish");
-            private Search index = new ElasticSearchIndex();
+            private Index index =
+                new ElasticSearchIndex(System.getProperty("grouperfish.elasticsearch.cluster", "grouperfish"));
 
             @Override
             public Grid grid() { return grid; }
 
             @Override
-            public Search index() { return index; }
+            public Index index() { return index; }
 
             @Override
             public FileSystem fs() { return fs; }

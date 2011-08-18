@@ -5,8 +5,10 @@ import com.mozilla.grouperfish.model.Namespace;
 import com.mozilla.grouperfish.model.Query;
 
 
-public interface Search {
+public interface Index {
 
     Iterable<Document> find(Namespace ns, Query query);
+
+    Iterable<Query> resolve(Namespace ns, Query query);
 
 }

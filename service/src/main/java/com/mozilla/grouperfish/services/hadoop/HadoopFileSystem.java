@@ -27,6 +27,11 @@ public class HadoopFileSystem implements com.mozilla.grouperfish.services.FileSy
     }
 
     @Override
+    public String uri(final String relativePath) {
+        return abs(relativePath).toUri().toString();
+    }
+
+    @Override
     public Result<String> removeRecursively(final String relativePath) {
         Assert.nonNull(relativePath);
         Assert.check(!relativePath.isEmpty());
@@ -42,12 +47,15 @@ public class HadoopFileSystem implements com.mozilla.grouperfish.services.FileSy
     }
 
     @Override
-    public Result<String> createWithParents(final String relativePath) {
+    public Result<String> makeDirectory(final String relativePath) {
         Assert.nonNull(relativePath);
         Assert.check(!relativePath.isEmpty());
         final Result<String> result = new Result<String>();
         try {
             final Path absolutePath = abs(relativePath);
+            if (!hdfs.getFileStatus(absolutePath).isDir()) {
+                return result.error("makeDirectory: Path exists but is not a directory!");
+            }
             hdfs.mkdirs(absolutePath);
             result.put(absolutePath.toString());
         } catch (IOException e) {
@@ -80,8 +88,8 @@ public class HadoopFileSystem implements com.mozilla.grouperfish.services.FileSy
         Assert.check(!path.isEmpty());
         final Path filePath = abs(path);
         try {
-            if (hdfs.exists(filePath)) {
-                result.error("Path to read does not exist: '" + filePath + "'");
+            if (!hdfs.exists(filePath)) {
+                return result.error("Path to read does not exist: '" + filePath + "'");
             }
             result.put(new InputStreamReader(hdfs.open(filePath)));
         }
