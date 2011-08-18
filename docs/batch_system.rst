@@ -135,6 +135,33 @@ Here are the contents of this working directory when the transform is started:
   The parameters section from the transform configuration. This corresponds to
   the possible parameters from the transform home directory.
 
+  Example:
+
+  ::
+    {
+     "text" : {
+                "STOPWORDS" : [ "the", "cat" ]
+                "STEM": "false",
+        	"MIN_WORD_LEN": "2",
+        	"MIN_DF": "1",
+        	"MAX_DF_PERCENT": "0.99",
+        	"DOC_COL_ID" : "id",
+        	"TEXT_COL_ID" : "text"
+              },
+    "mapreduce":{
+        	"NUM_REDUCERS": "7"
+             },
+    "transform":{
+                "KMEANS_NUM_CLUSTERS": "10",
+                "KMEANS_NUM_ITERATIONS": "20",
+                "SSVD_MULTIPLIER": "5",
+                "SSVD_BLOCK_HEIGHT": "30000",
+                "KMEANS_DELTA": "0.1",
+                "KMEANS_DISTANCE" : "CosineDistanceMeasure"
+               }
+    }
+
+
 
 When the transform succeeds, it produces these outputs in addition:
 
@@ -158,10 +185,7 @@ When the transform succeeds, it produces these outputs in addition:
   labels. See :ref:`tagging` for details.
 
 The transform should exit with status ``0`` on success, and ``1`` on failure.
-In the error case, the transform should put an error description in the
-``results.json``. If the transform cannot write the ``results.json`` (e.g. if
-there is a problem with accessing HDFS) it must write the error message to
-the standard error stream.
+Errors will be logged to standard error.
 
 
 .. _tagging:
