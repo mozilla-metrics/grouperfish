@@ -14,8 +14,8 @@ import org.elasticsearch.search.SearchHit;
 import com.google.common.collect.ImmutableList;
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.model.Document;
-import com.mozilla.grouperfish.model.Namespace;
 import com.mozilla.grouperfish.model.Query;
+import com.mozilla.grouperfish.naming.Namespace;
 
 
 public class ElasticSearchIndex implements com.mozilla.grouperfish.services.Index {
@@ -24,7 +24,8 @@ public class ElasticSearchIndex implements com.mozilla.grouperfish.services.Inde
 
     private final Client client;
 
-    public ElasticSearchIndex(final String clusterName) {
+    public ElasticSearchIndex() {
+        final String clusterName = System.getProperty("grouperfish.elasticsearch.cluster", "grouperfish");
         Node node = NodeBuilder.nodeBuilder().client(true).clusterName(clusterName).build();
         client = node.client();
     }
@@ -32,7 +33,7 @@ public class ElasticSearchIndex implements com.mozilla.grouperfish.services.Inde
     @Override
     public Iterable<Document> find(final Namespace ns, final Query query) {
         final SearchRequestBuilder requestBuilder =
-            client.prepareSearch(ns.toString()).setTypes(DOCUMENT_TYPE_NAME).setSource(query.source());
+            client.prepareSearch(ns.raw()).setTypes(DOCUMENT_TYPE_NAME).setSource(query.source());
         final SearchRequest request = requestBuilder.request();
         final SearchResponse response = client.search(request).actionGet();
 

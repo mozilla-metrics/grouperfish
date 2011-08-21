@@ -5,7 +5,6 @@ import java.util.Map;
 import com.mozilla.grouperfish.base.Assert;
 
 
-
 /** Simple multi-field text document. Each document has at least id and (full) text. */
 public class Document extends NamedSource {
 

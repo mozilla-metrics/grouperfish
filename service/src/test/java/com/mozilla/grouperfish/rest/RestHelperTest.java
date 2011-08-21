@@ -1,5 +1,10 @@
 package com.mozilla.grouperfish.rest;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -9,22 +14,17 @@ import javax.ws.rs.core.Response;
 
 import org.testng.annotations.Test;
 
-import com.mozilla.grouperfish.model.Namespace;
-import com.mozilla.grouperfish.rest.DocumentsResource;
-import com.mozilla.grouperfish.rest.RestHelper;
+import com.mozilla.grouperfish.naming.Scope;
 import com.mozilla.grouperfish.rest.ConfigurationsResource.TransformConfigsResource;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertEquals;
+import com.mozilla.grouperfish.services.Grid;
+import com.mozilla.grouperfish.services.mock.MockGrid;
 
 
 @Test(groups="unit")
 public class RestHelperTest {
 
-    private final Namespace NS = Namespace.get("unit-test");
+    private final Grid grid = new MockGrid();
+    private final Scope NS = new Scope("unit-test", grid);
 
     public void testPutAny() throws IOException {
         final HttpServletRequest mock = mock(HttpServletRequest.class);

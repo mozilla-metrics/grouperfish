@@ -14,18 +14,22 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.mozilla.grouperfish.model.Namespace;
+import com.google.inject.Inject;
+import com.mozilla.grouperfish.services.Grid;
+
 
 @Path("/documents/{namespace}/{id}")
-public class DocumentsResource {
+public class DocumentsResource extends ResourceBase {
+
+    @Inject
+    public DocumentsResource(final Grid grid) { super(grid); }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDocument(@PathParam("namespace") String namespace,
                                 @PathParam("id") String id,
                                 @Context HttpServletRequest request) {
-        final Namespace ns = Namespace.get(namespace);
-        return RestHelper.getAny(getClass(), ns, id, request);
+        return RestHelper.getAny(getClass(), scope(namespace), id, request);
     }
 
     @PUT
@@ -33,16 +37,14 @@ public class DocumentsResource {
     public Response putDocument(@PathParam("namespace") String namespace,
                                 @PathParam("id") String id,
                                 @Context HttpServletRequest request) throws IOException {
-        final Namespace ns = Namespace.get(namespace);
-        return RestHelper.putAny(getClass(), ns, id, request);
+        return RestHelper.putAny(getClass(), scope(namespace), id, request);
     }
 
     @DELETE
     public Response deleteDocument(@PathParam("namespace") String namespace,
                                    @PathParam("id") String id,
                                    @Context HttpServletRequest request) throws IOException {
-        final Namespace ns = Namespace.get(namespace);
-        return RestHelper.deleteAny(getClass(), ns, id, request);
+        return RestHelper.deleteAny(getClass(), scope(namespace), id, request);
     }
 
 }

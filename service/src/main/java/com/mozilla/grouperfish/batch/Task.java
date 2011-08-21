@@ -7,9 +7,9 @@ import org.joda.time.Instant;
 
 import com.google.common.collect.ImmutableList;
 import com.mozilla.grouperfish.base.Assert;
-import com.mozilla.grouperfish.model.Namespace;
 import com.mozilla.grouperfish.model.Query;
 import com.mozilla.grouperfish.model.TransformConfig;
+import com.mozilla.grouperfish.naming.Namespace;
 
 
 /** Immutable task description. */
@@ -42,7 +42,7 @@ public class Task implements Serializable {
     }
 
     public Namespace namespace() {
-        return Namespace.get(namespace);
+        return new Namespace(namespace);
     }
 
     public Query query() {

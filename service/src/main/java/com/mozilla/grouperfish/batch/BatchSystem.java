@@ -1,20 +1,19 @@
 package com.mozilla.grouperfish.batch;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.batch.handlers.CleanupHandler;
 import com.mozilla.grouperfish.batch.handlers.FetchHandler;
 import com.mozilla.grouperfish.batch.handlers.PutHandler;
 import com.mozilla.grouperfish.batch.handlers.RunHandler;
-import com.mozilla.grouperfish.bootstrap.Grouperfish;
 import com.mozilla.grouperfish.model.ConfigurationType;
-import com.mozilla.grouperfish.model.Namespace;
 import com.mozilla.grouperfish.model.Query;
 import com.mozilla.grouperfish.model.TransformConfig;
+import com.mozilla.grouperfish.naming.Scope;
 import com.mozilla.grouperfish.services.FileSystem;
 import com.mozilla.grouperfish.services.Grid;
 import com.mozilla.grouperfish.services.Index;
-import com.mozilla.grouperfish.services.Services;
 
 import java.util.List;
 import java.util.Map;
@@ -37,19 +36,14 @@ import java.util.concurrent.BlockingQueue;
  */
 public class BatchSystem {
 
-    private final Namespace ns;
-    private final Grid grid;
     private final Index index;
 
     private final List<Worker> workers;
     private final BlockingQueue<Task> prepareQueue;
 
-    public BatchSystem(final Namespace ns) {
-        this.ns = ns;
-        final Services services = Grouperfish.services();
-        grid = services.grid();
-        index = services.index();
-        final FileSystem fs = services.fs();
+    @Inject
+    public BatchSystem(final Grid grid, final Index index, final FileSystem fs) {
+        this.index = index;
 
         final BlockingQueue<Task> prepQ = grid.queue("grouperfish_prepare");
         final BlockingQueue<Task> runQ = grid.queue("grouperfish_run");
@@ -78,7 +72,7 @@ public class BatchSystem {
     }
 
     /** Run the configured transform over the query results. */
-    public void schedule(final Query query, final TransformConfig transform) {
+    public void schedule(final Scope ns, final Query query, final TransformConfig transform) {
         Assert.nonNull(query, transform);
         final BlockingQueue<Task> queue = prepareQueue;
         for (final Query concreteQuery : index.resolve(ns, query)) {
@@ -87,21 +81,21 @@ public class BatchSystem {
     }
 
     /** Run all configured transforms over the query results. */
-    public void schedule(final Query query) {
+    public void schedule(final Scope ns, final Query query) {
         final Map<String, String> transforms = ns.configurations(ConfigurationType.TRANSFOMS);
         for (final Map.Entry<String, String> item : transforms.entrySet()) {
-            schedule(query, new TransformConfig(item.getKey(), item.getValue()));
+            schedule(ns, query, new TransformConfig(item.getKey(), item.getValue()));
         }
     }
 
     /** Run all transforms configurations of this namespace over the results of all queries. */
-    public void schedule() {
+    public void schedule(final Scope ns) {
         final Map<String, String> queries = ns.queries();
         final Map<String, String> transforms = ns.configurations(ConfigurationType.TRANSFOMS);
         for (final Map.Entry<String, String> queryEntry : queries.entrySet()) {
             final Query query = new Query(queryEntry.getKey(), queryEntry.getValue());
             for (final Map.Entry<String, String> item : transforms.entrySet()) {
-                schedule(query, new TransformConfig(item.getKey(), item.getValue()));
+                schedule(ns, query, new TransformConfig(item.getKey(), item.getValue()));
             }
         }
     }

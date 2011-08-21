@@ -17,8 +17,8 @@ import javax.ws.rs.core.StreamingOutput;
 import com.mozilla.grouperfish.base.StreamTool;
 import com.mozilla.grouperfish.json.MapStreamer;
 import com.mozilla.grouperfish.model.Access;
-import com.mozilla.grouperfish.model.Namespace;
 import com.mozilla.grouperfish.model.Access.Type;
+import com.mozilla.grouperfish.naming.Scope;
 
 
 /** Bunch of internal helpers to cut down on resource specific code. */
@@ -26,7 +26,7 @@ class RestHelper {
 
     /** Get any known resource. */
     static Response getAny(final Class<?> resourceType,
-                           final Namespace ns,
+                           final Scope ns,
                            final String key,
                            final HttpServletRequest request) {
 
@@ -41,7 +41,7 @@ class RestHelper {
 
     /** Put any known resource. */
     static Response putAny(final Class<?> resourceType,
-                           final Namespace ns,
+                           final Scope ns,
                            final String key,
                            final HttpServletRequest request) throws IOException {
 
@@ -67,7 +67,7 @@ class RestHelper {
      * @return a JSON map listing all named entities in this namespace and of this type.
      */
     static Response listAny(final Class<?> resourceType,
-                            final Namespace ns,
+                            final Scope ns,
                             final HttpServletRequest request) {
 
         if (!ns.allows(resourceType, new HttpAccess(Type.LIST, request))) return FORBIDDEN;
@@ -87,7 +87,7 @@ class RestHelper {
 
     /** Discard an item from the namespace. */
     static Response deleteAny(final Class<?> resourceType,
-                              final Namespace ns,
+                              final Scope ns,
                               final String key,
                               final HttpServletRequest request) throws IOException {
 
