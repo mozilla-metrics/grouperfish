@@ -48,9 +48,22 @@
   <dependencies>
 
     <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>3.0</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-guice</artifactId>
+      <version>1.8</version>
+    </dependency>
+    
+    <dependency>
       <groupId>com.mozilla</groupId>
       <artifactId>bagheera</artifactId>
       <version>0.3-SNAPSHOT</version>
+      <scope>runtime</scope>
 
       <exclusions>
         <exclusion>
@@ -251,14 +264,7 @@
       <version>1.8.5</version> 
       <scope>test</scope>
     </dependency>
-    
-    <dependency>
-      <groupId>com.jayway.restassured</groupId>
-      <artifactId>rest-assured</artifactId>
-      <version>1.2.2</version>
-      <scope>test</scope>
-    </dependency>
-    
+
   </dependencies>
 
 

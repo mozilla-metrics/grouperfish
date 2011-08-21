@@ -14,16 +14,21 @@ import org.apache.hadoop.fs.Path;
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.base.Result;
 
+
 public class HadoopFileSystem implements com.mozilla.grouperfish.services.FileSystem {
 
     private final FileSystem hdfs;
     private final Path basePath;
 
-    public HadoopFileSystem(final Configuration hadoopConfig, final String basePath) throws IOException {
-        Assert.nonNull(hadoopConfig, basePath);
-        Assert.check(!basePath.isEmpty());
-        hdfs = FileSystem.get(hadoopConfig);
-        this.basePath = new Path(basePath);
+    public HadoopFileSystem() {
+        final String hdfsRoot = System.getProperty("grouperfish.hdfs.root", "grouperfish");
+        try {
+            hdfs = FileSystem.get(new Configuration());
+            this.basePath = new Path(hdfsRoot);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

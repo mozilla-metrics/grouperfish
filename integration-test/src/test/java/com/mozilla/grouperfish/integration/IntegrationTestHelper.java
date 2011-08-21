@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import groovyx.net.http.ContentType;
 
-import bootstrap.Grouperfish;
+import com.mozilla.grouperfish.bootstrap.Grouperfish;
 
 import com.hazelcast.core.Hazelcast;
 import com.jayway.restassured.RestAssured;
@@ -33,7 +33,7 @@ public class IntegrationTestHelper {
         @Override
         public void run() {
             System.setProperty("hazelcast.config", "config/hazelcast.xml");
-            System.setProperty("server.port", String.valueOf(port));
+            System.setProperty("grouperfish.rest.port", String.valueOf(port));
             try {
                 Grouperfish.main(new String[]{});
             }

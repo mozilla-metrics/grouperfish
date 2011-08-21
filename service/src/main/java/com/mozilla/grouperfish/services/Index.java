@@ -1,8 +1,8 @@
 package com.mozilla.grouperfish.services;
 
 import com.mozilla.grouperfish.model.Document;
-import com.mozilla.grouperfish.model.Namespace;
 import com.mozilla.grouperfish.model.Query;
+import com.mozilla.grouperfish.naming.Namespace;
 
 
 public interface Index {

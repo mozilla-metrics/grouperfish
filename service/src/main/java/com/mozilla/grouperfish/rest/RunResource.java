@@ -12,12 +12,15 @@ import javax.ws.rs.core.Response.Status.Family;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
 import com.mozilla.grouperfish.base.Box;
+import com.mozilla.grouperfish.batch.BatchSystem;
 import com.mozilla.grouperfish.model.ConfigurationType;
 import com.mozilla.grouperfish.model.Access.Type;
-import com.mozilla.grouperfish.model.Namespace;
 import com.mozilla.grouperfish.model.Query;
 import com.mozilla.grouperfish.model.TransformConfig;
+import com.mozilla.grouperfish.naming.Scope;
+import com.mozilla.grouperfish.services.Grid;
 
 import static com.mozilla.grouperfish.rest.RestHelper.ACCEPTED;
 import static com.mozilla.grouperfish.rest.RestHelper.FAIL;
@@ -28,20 +31,24 @@ public class RunResource {
 
     private static Logger log = LoggerFactory.getLogger(RunResource.class);
 
+
     @Path("/run/{namespace}")
-    public static class ForAll {
+    public static class ForAll extends RunResourceBase {
+
+        @Inject
+        public ForAll(final Grid grid, final BatchSystem system) { super(grid, system); }
 
         @POST
         public Response runTransformsForQuery(@PathParam("namespace") final String namespace,
                                               @Context final HttpServletRequest request) {
-            final Namespace ns = Namespace.get(namespace);
+            final Scope ns = scope(namespace);
 
             if (!ns.allows(RunResource.class, new HttpAccess(Type.RUN, request))) {
                 return FORBIDDEN;
             }
 
             try {
-                ns.batchStarter().schedule();
+                batchSystem().schedule(ns);
             }
             catch (final Exception e) {
                 log.error("Error initiating run request '{}': {}", request.getPathInfo(), e);
@@ -54,14 +61,17 @@ public class RunResource {
 
 
     @Path("/run/{namespace}/{queryName}")
-    public static class ForQuery {
+    public static class ForQuery extends RunResourceBase {
+
+        @Inject
+        public ForQuery(final Grid grid, final BatchSystem system) { super(grid, system); }
 
         @POST
         public Response runTransformsForQuery(@PathParam("namespace") final String namespace,
                                               @PathParam("transformName") final String transformName,
                                               @PathParam("queryName") final String queryName,
                                               @Context final HttpServletRequest request) {
-            final Namespace ns = Namespace.get(namespace);
+            final Scope ns = scope(namespace);
 
             if (!ns.allows(RunResource.class, new HttpAccess(Type.RUN, request))) {
                 return FORBIDDEN;
@@ -72,7 +82,7 @@ public class RunResource {
             for (final Response some404 : any404) return some404;
 
             try {
-                ns.batchStarter().schedule(q);
+                batchSystem().schedule(ns, q);
             }
             catch (final Exception e) {
                 log.error("Error initiating run request '{}': {}", request.getPathInfo(), e);
@@ -85,14 +95,16 @@ public class RunResource {
     }
 
     @Path("/run/{namespace}/{transformName}/{queryName}")
-    public static class ForQueryWithTransform {
+    public static class ForQueryWithTransform extends RunResourceBase {
 
-        @POST
+        @Inject
+        public ForQueryWithTransform(final Grid grid, final BatchSystem system) { super(grid, system); }
+
         public Response runOneTransformForQuery(@PathParam("namespace") final String namespace,
                                                 @PathParam("transformName") final String transformName,
                                                 @PathParam("queryName") final String queryName,
                                                 @Context final HttpServletRequest request) {
-            final Namespace ns = Namespace.get(namespace);
+            final Scope ns = scope(namespace);
 
             if (!ns.allows(RunResource.class, new HttpAccess(Type.RUN, request))) {
                 return FORBIDDEN;
@@ -107,7 +119,7 @@ public class RunResource {
             for (final Response some404 : any404) return some404;
 
             try {
-                ns.batchStarter().schedule(q, config);
+                batchSystem().schedule(ns, q, config);
             }
             catch (final Exception e) {
                 log.error("Error initiating run request '{}': {}", request.getPathInfo(), e);
@@ -120,7 +132,7 @@ public class RunResource {
     }
 
 
-    private static final Query fetchQuery(final Namespace ns, final String name, final Box<Response> failure) {
+    private static final Query fetchQuery(final Scope ns, final String name, final Box<Response> failure) {
         final String json = ns.queries().get(name);
         if (json != null) {
             return new Query(name, json);
@@ -135,7 +147,7 @@ public class RunResource {
     }
 
 
-    private static final TransformConfig fetchTransformConfig(final Namespace ns,
+    private static final TransformConfig fetchTransformConfig(final Scope ns,
                                                     final String name,
                                                     final Box<Response> failure) {
         final String json = ns.configurations(ConfigurationType.TRANSFOMS).get(name);
@@ -150,6 +162,21 @@ public class RunResource {
         }).build());
 
         return null;
+    }
+
+
+    private static abstract class RunResourceBase extends ResourceBase {
+
+        private final BatchSystem batchSystem;
+
+        RunResourceBase(final Grid grid, final BatchSystem batchSystem) {
+            super(grid);
+            this.batchSystem = batchSystem;
+        }
+
+        protected BatchSystem batchSystem() {
+            return batchSystem;
+        }
     }
 
 }

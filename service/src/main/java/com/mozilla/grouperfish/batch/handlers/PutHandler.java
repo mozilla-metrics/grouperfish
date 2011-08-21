@@ -11,6 +11,9 @@ import com.mozilla.grouperfish.services.Grid;
 import static com.mozilla.grouperfish.batch.handlers.Helpers.resultsFilename;
 
 
+/**
+ * Loads run results into storage.
+ */
 public class PutHandler implements TaskHandler {
 
 

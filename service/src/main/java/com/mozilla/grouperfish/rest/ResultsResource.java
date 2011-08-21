@@ -14,12 +14,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.mozilla.grouperfish.model.Namespace;
+import com.google.inject.Inject;
+import com.mozilla.grouperfish.services.Grid;
+
 
 //:TODO: v0.1
 // Integrate facet query parameters
 @Path("/results/{namespace}/{transform}/{query}")
-public class ResultsResource {
+public class ResultsResource extends ResourceBase {
+
+    @Inject
+    public ResultsResource(final Grid grid) { super(grid); }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -27,8 +32,7 @@ public class ResultsResource {
                               @PathParam("transform") String transformName,
                               @PathParam("query") String queryName,
                               @Context HttpServletRequest request) {
-        final Namespace ns = Namespace.get(namespace);
-        return RestHelper.getAny(getClass(), ns, key(transformName, queryName), request);
+        return RestHelper.getAny(getClass(), scope(namespace), key(transformName, queryName), request);
     }
 
     @PUT
@@ -37,17 +41,15 @@ public class ResultsResource {
                               @PathParam("transform") String transformName,
                               @PathParam("query") String queryName,
                               @Context HttpServletRequest request) throws IOException {
-        final Namespace ns = Namespace.get(namespace);
-        return RestHelper.putAny(getClass(), ns, key(transformName, queryName), request);
+        return RestHelper.putAny(getClass(), scope(namespace), key(transformName, queryName), request);
     }
 
     @DELETE
-    public Response deleteDocument(@PathParam("namespace") String namespace,
-                                   @PathParam("transform") String transformName,
-                                   @PathParam("query") String queryName,
-                                   @Context HttpServletRequest request) throws IOException {
-        final Namespace ns = Namespace.get(namespace);
-        return RestHelper.deleteAny(getClass(), ns, key(transformName, queryName), request);
+    public Response deleteResult(@PathParam("namespace") String namespace,
+                                 @PathParam("transform") String transformName,
+                                 @PathParam("query") String queryName,
+                                 @Context HttpServletRequest request) throws IOException {
+        return RestHelper.deleteAny(getClass(), scope(namespace), key(transformName, queryName), request);
     }
 
     private String key(String transformName, String queryName) {
