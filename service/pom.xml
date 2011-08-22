@@ -48,9 +48,22 @@
   <dependencies>
 
     <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>3.0</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-guice</artifactId>
+      <version>1.8</version>
+    </dependency>
+    
+    <dependency>
       <groupId>com.mozilla</groupId>
       <artifactId>bagheera</artifactId>
       <version>0.3-SNAPSHOT</version>
+      <scope>runtime</scope>
 
       <exclusions>
         <exclusion>
@@ -64,6 +77,12 @@
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
       <version>1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>2.0</version>
     </dependency>
 
     <dependency>
@@ -148,7 +167,7 @@
 
 
 
-    <!-- Cloudera Hadoop, HBase -->
+    <!-- Cloudera Hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
@@ -245,14 +264,7 @@
       <version>1.8.5</version> 
       <scope>test</scope>
     </dependency>
-    
-    <dependency>
-      <groupId>com.jayway.restassured</groupId>
-      <artifactId>rest-assured</artifactId>
-      <version>1.2.2</version>
-      <scope>test</scope>
-    </dependency>
-    
+
   </dependencies>
 
 
@@ -300,7 +312,7 @@
               <addClasspath>true</addClasspath>
               <classpathPrefix>${settings.localRepository}</classpathPrefix>
               <classpathLayoutType>repository</classpathLayoutType>
-              <mainClass>com.mozilla.grouperfish.service.Grouperfish</mainClass>
+              <mainClass>com.mozilla.grouperfish.bootstrap.Grouperfish</mainClass>
             </manifest>
           </archive>
         </configuration>

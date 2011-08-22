@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.testng.annotations.Test;
 
+import com.mozilla.grouperfish.json.JsonValidator;
+
 import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.AssertJUnit.assertFalse;
 

@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.service;
+package com.mozilla.grouperfish.rest;
 
 import java.io.IOException;
 
@@ -14,17 +14,21 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.mozilla.grouperfish.model.Namespace;
+import com.google.inject.Inject;
+import com.mozilla.grouperfish.services.Grid;
+
 
 @Path("/queries/{namespace}")
-public class QueriesResource {
+public class QueriesResource extends ResourceBase {
+
+    @Inject
+    public QueriesResource(final Grid grid) { super(grid); }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response list(@PathParam("namespace") String namespace,
                          @Context HttpServletRequest request) {
-        final Namespace ns = Namespace.get(namespace);
-        return RestHelper.listAny(getClass(), ns, request);
+        return RestHelper.listAny(getClass(), scope(namespace), request);
     }
 
     @GET
@@ -33,8 +37,7 @@ public class QueriesResource {
     public Response getQuery(@PathParam("namespace") String namespace,
                              @PathParam("queryName") String queryName,
                              @Context HttpServletRequest request) {
-        final Namespace ns = Namespace.get(namespace);
-        return RestHelper.getAny(getClass(), ns, queryName, request);
+        return RestHelper.getAny(getClass(), scope(namespace), queryName, request);
     }
 
     @PUT
@@ -43,18 +46,16 @@ public class QueriesResource {
     public Response putQuery(@PathParam("namespace") String namespace,
                              @PathParam("queryName") String queryName,
                              @Context HttpServletRequest request) throws IOException {
-        final Namespace ns = Namespace.get(namespace);
-        return RestHelper.putAny(getClass(), ns, queryName, request);
+        return RestHelper.putAny(getClass(), scope(namespace), queryName, request);
     }
 
 
     @DELETE
     @Path("/{queryName}")
-    public Response deleteDocument(@PathParam("namespace") String namespace,
+    public Response deleteQuery(@PathParam("namespace") String namespace,
                                    @PathParam("queryName") String queryName,
                                    @Context HttpServletRequest request) throws IOException {
-        final Namespace ns = Namespace.get(namespace);
-        return RestHelper.deleteAny(getClass(), ns, queryName, request);
+        return RestHelper.deleteAny(getClass(), scope(namespace), queryName, request);
     }
 
 }

@@ -20,23 +20,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mozilla.grouperfish.base.StreamTool;
-import com.mozilla.grouperfish.json.JsonConverter;
-import com.mozilla.grouperfish.model.Entity;
+import com.mozilla.grouperfish.model.NamedSource;
 
 
 /** Helps loading a remote bagheera installation with documents. */
-public class Loader<T extends Entity> {
+public class Loader<T extends NamedSource> {
 
     private final String baseUrl_;
-    private final JsonConverter<T> converter_;
     private static Logger log = LoggerFactory.getLogger(Loader.class);
 
     /**
      * @param baseUrl The url to a grouperfish resource to use as destination.
      *                Example: http://localhost:61732/documents/mynamespace
      */
-    public Loader(final String baseUrl, final JsonConverter<T> converter) {
-        converter_ = converter;
+    public Loader(final String baseUrl) {
         baseUrl_ = baseUrl;
     }
 
@@ -47,7 +44,7 @@ public class Loader<T extends Entity> {
     public void load(T item) {
         final List<T> wrapper = new ArrayList<T>();
         wrapper.add(item);
-        new InsertTask<T>(baseUrl_, converter_, wrapper).run();
+        new InsertTask<T>(baseUrl_, wrapper).run();
     }
 
     /**
@@ -65,7 +62,7 @@ public class Loader<T extends Entity> {
         for (T item : stream) {
             batch.add(item);
             if (i % BATCH_SIZE == 0) {
-                workers.submit(new InsertTask<T>(baseUrl_, converter_, batch));
+                workers.submit(new InsertTask<T>(baseUrl_, batch));
                 batch = new ArrayList<T>(BATCH_SIZE);
             }
             if (i % 5000 == 0) {
@@ -74,7 +71,7 @@ public class Loader<T extends Entity> {
             ++i;
         }
         if (!batch.isEmpty()) {
-            workers.submit(new InsertTask<T>(baseUrl_, converter_, batch));
+            workers.submit(new InsertTask<T>(baseUrl_, batch));
         }
 
         // Submit will block until it is safe to shut down:
@@ -145,18 +142,16 @@ public class Loader<T extends Entity> {
     }
 
     /** Each insert task submits a batch of items */
-    static class InsertTask<T extends Entity> implements Runnable {
+    static class InsertTask<T extends NamedSource> implements Runnable {
 
         private static final Charset UTF8 = Charset.forName("UTF8");
 
         private final String baseUrl_;
         private final List<T> items_;
-        private final JsonConverter<T> converter_;
 
-        InsertTask(final String baseUrl, final JsonConverter<T> converter, final List<T> items) {
+        InsertTask(final String baseUrl, final List<T> items) {
             baseUrl_ = baseUrl;
             items_ = items;
-            converter_ = converter;
         }
 
         @Override
@@ -165,11 +160,11 @@ public class Loader<T extends Entity> {
             if (items_.size() == 0)
                 return;
             for (T item : items_) {
-                log.trace("Writing '{}' to '{}'", converter_.encode(item), baseUrl_ + "/" + item.id());
+                log.trace("Writing '{}' to '{}'", item.name(), baseUrl_ + "/" + item.name());
                 int retriesLeft = 5;
                 boolean done = false;
                 while (!done && retriesLeft > 0) {
-                    final String resource = baseUrl_ + "/" + item.id();
+                    final String resource = baseUrl_ + "/" + item.name();
                     try {
                         final HttpURLConnection conn =
                             (HttpURLConnection) new URL(resource).openConnection();
@@ -179,7 +174,7 @@ public class Loader<T extends Entity> {
                         conn.setUseCaches(false);
                         conn.setRequestProperty("Content-Type", "application/json");
                         Writer wr = new OutputStreamWriter(conn.getOutputStream(), UTF8);
-                        wr.write(converter_.encode(item));
+                        wr.write(item.source());
                         wr.flush();
                         wr.close();
 
@@ -194,9 +189,9 @@ public class Loader<T extends Entity> {
                         done = true;
                     }
                     catch (IOException e) {
-                        final Entity from = items_.get(0);
-                        final Entity to = items_.get(items_.size() - 1);
-                        log.error(String.format("While inserting batch %s,%s", from.id(), to.id()));
+                        final T from = items_.get(0);
+                        final T to = items_.get(items_.size() - 1);
+                        log.error(String.format("While inserting batch %s,%s", from.name(), to.name()));
                         log.error("IO Error in importer", e);
                         --retriesLeft;
                         if (retriesLeft == 0) {

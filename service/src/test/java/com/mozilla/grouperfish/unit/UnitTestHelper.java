@@ -3,7 +3,8 @@ package com.mozilla.grouperfish.unit;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
 
-import com.mozilla.grouperfish.service.Grouperfish;
+import com.mozilla.grouperfish.bootstrap.Grouperfish;
+
 
 @Test(groups="unit")
 public class UnitTestHelper {

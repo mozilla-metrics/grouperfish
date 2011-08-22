@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.service;
+package com.mozilla.grouperfish.rest;
 
 import java.io.IOException;
 
@@ -14,12 +14,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.mozilla.grouperfish.model.Namespace;
+import com.google.inject.Inject;
+import com.mozilla.grouperfish.services.Grid;
 
 
 @Path("/configurations/{namespace}")
 public class ConfigurationsResource {
-
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -41,7 +41,10 @@ public class ConfigurationsResource {
 
 
     @Path("/configurations/{namespace}/transforms/{name}")
-    public static class TransformConfigsResource {
+    public static class TransformConfigsResource extends ResourceBase {
+
+        @Inject
+        public TransformConfigsResource(final Grid grid) { super(grid); }
 
         @PUT
         @Consumes(MediaType.APPLICATION_JSON)
@@ -50,7 +53,7 @@ public class ConfigurationsResource {
                             @Context HttpServletRequest request) throws IOException {
             // :TODO: Next:
             // Validate parameters to match transform-specific schema.
-            return RestHelper.putAny(getClass(), Namespace.get(namespace), name, request);
+            return RestHelper.putAny(getClass(), scope(namespace), name, request);
         }
 
         @GET
@@ -58,7 +61,7 @@ public class ConfigurationsResource {
         public Response get(@PathParam("namespace") String namespace,
                             @PathParam("name") String name,
                             @Context HttpServletRequest request) {
-            return RestHelper.getAny(getClass(), Namespace.get(namespace), name, request);
+            return RestHelper.getAny(getClass(), scope(namespace), name, request);
         }
 
         @DELETE
@@ -66,13 +69,16 @@ public class ConfigurationsResource {
         public Response delete(@PathParam("namespace") String namespace,
                                @PathParam("name") String name,
                                @Context HttpServletRequest request) throws IOException {
-            return RestHelper.deleteAny(getClass(), Namespace.get(namespace), name, request);
+            return RestHelper.deleteAny(getClass(), scope(namespace), name, request);
         }
     }
 
 
     @Path("/configurations/{namespace}/filters/{name}")
-    public static class FilterConfigsResource {
+    public static class FilterConfigsResource extends ResourceBase {
+
+        @Inject
+        public FilterConfigsResource(final Grid grid) { super(grid); }
 
         @PUT
         @Consumes(MediaType.APPLICATION_JSON)
@@ -82,7 +88,7 @@ public class ConfigurationsResource {
             // :TODO: Next:
             // 1. Validate parameters to match filter-specific schema.
             // 2. Implement some smart filter instantiation/registration so this has some effect.
-            return RestHelper.putAny(getClass(), Namespace.get(namespace), name, request);
+            return RestHelper.putAny(getClass(), scope(namespace), name, request);
         }
 
         @GET
@@ -90,7 +96,7 @@ public class ConfigurationsResource {
         public Response get(@PathParam("namespace") String namespace,
                             @PathParam("name") String name,
                             @Context HttpServletRequest request) {
-            return RestHelper.getAny(getClass(), Namespace.get(namespace), name, request);
+            return RestHelper.getAny(getClass(), scope(namespace), name, request);
         }
 
         @DELETE
@@ -98,7 +104,7 @@ public class ConfigurationsResource {
         public Response delete(@PathParam("namespace") String namespace,
                                @PathParam("name") String name,
                                @Context HttpServletRequest request) throws IOException {
-            return RestHelper.deleteAny(getClass(), Namespace.get(namespace), name, request);
+            return RestHelper.deleteAny(getClass(), scope(namespace), name, request);
         }
     }
 
