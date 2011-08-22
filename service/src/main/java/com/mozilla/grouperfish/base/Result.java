@@ -5,6 +5,13 @@ public class Result<T> extends Box<T> {
 
     private final Box<Exception> error = new Box<Exception>();
 
+    public Result(T content) {
+        put(content);
+    }
+
+    public Result() {
+    }
+
     public Result<T> error(final String message) {
         error.put(new Exception(message));
         return this;
