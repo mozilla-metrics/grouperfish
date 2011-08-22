@@ -1,0 +1,47 @@
+a:link, a, a.visited { text-decoration:none; }
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form, fieldset,input,textarea,blockquote,th,td,p { margin:0; padding:0; }
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a, h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover, h6 a:hover { text-decoration:none; }
+table { border-collapse:collapse; border-spacing:0; }
+fieldset,img { border:0; }
+address,caption,cite,code,dfn,em,strong,th,var { font-style:normal; font-weight:normal; }
+ul { list-style:none; }
+caption,th { text-align:left; }
+q:before,q:after { content:''; }
+abbr,acronym { border:0; }
+
+body {
+    font-family: Gill Sans, sans-serif;
+    margin-left:2em;
+    margin-top:2em;
+}
+
+td {
+    padding-right:.5em;
+    padding-left:.5em;
+    padding-bottom:.25em;
+    padding-top:.25em;
+}
+
+#words {
+    margin-bottom:.25em;
+    border-bottom:1px solid gray;
+}
+
+.clicked {
+    background-color:black;
+    color:white;
+}
+
+.hovered {
+    background-color:gray;
+    color:white;
+}
+
+#docs {
+    margin-top:1em;
+    width:800px;
+}
+
+#docs p {
+    margin-top:.5em;
+}

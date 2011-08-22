@@ -1,0 +1,80 @@
+<html>
+<head>
+    <link href="public/css/topics.css" rel="stylesheet" type="text/css" />
+    <title>Topic Prototype</title>
+    <script src="public/js/jquery.js"></script>
+    <script src="public/js/jquery.isotope.min.js"></script>
+    <script src="public/js/d3.js"></script>
+    <script src="public/js/toy_topics.js"></script>
+</head>
+<body>
+
+<h1>Topics</h1>
+<br>
+<table id='words'></table>
+<div id='docs'></div>
+<script>
+    
+    var k;
+    var data = [];
+    var current_row = [];
+    
+    for (var key in results) {
+        k = results[key]['TOP_FEATURES'].length;
+        data.push(results[key])
+    }
+    
+    var ks = d3.range(0, k);
+    
+    for (var i = 0; i < k; i += 1){
+        for (var j = 0; j < data.length; j += 1) {
+            current_row.push(data[j]['TOP_FEATURES'][i])
+        }
+        current_row = d3.zip(current_row, ks).map(function(x){
+            return '<td class="word" data-col=' + x[1] + '>' + x[0] + '</td>'
+        }).reduce(function(p, n, ind, arr) {
+            return p + n;
+        });
+        
+        $("#words").append('<tr>' + current_row + '</tr>');
+        current_row = [];
+        
+    }
+    var clicked_col;
+    // reveal documents.
+    var these_docs;
+    $('.word').click(function(){
+        // add a class.
+        
+        
+        $('.clicked').removeClass('clicked');
+        $('td[data-col=' + hi_col + ']').addClass('clicked');
+        
+        // surface documents.
+        $('#docs').html('')
+        clicked_col = parseInt($(this).data('col'));
+        console.log(data[clicked_col]['TOP_DOCS'])
+        these_docs = data[clicked_col]['TOP_DOCS'].map(function(x){
+            return '<p>' + x.split('\t')[1] + '</p>'
+        }).reduce(function(p,n){
+            return p + n
+        })
+        $('#docs').html(these_docs);
+        
+    })
+    
+    var hi_col;
+    
+    $('.word').hover(
+        function(){
+            hi_col = $(this).data('col');
+            $('td[data-col=' + hi_col + ']').addClass('hovered');
+        },
+        function(){
+            
+            $('td[data-col=' + hi_col + ']').removeClass('hovered');
+        })
+    
+</script>
+</body>
+</html>
