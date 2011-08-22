@@ -3,6 +3,8 @@ package com.mozilla.grouperfish.naming;
 import java.util.Map;
 
 import com.mozilla.grouperfish.base.Assert;
+import com.mozilla.grouperfish.json.JsonValidator;
+import com.mozilla.grouperfish.model.Access;
 import com.mozilla.grouperfish.model.ConfigurationType;
 import com.mozilla.grouperfish.rest.DocumentsResource;
 import com.mozilla.grouperfish.rest.QueriesResource;
@@ -16,6 +18,7 @@ import com.mozilla.grouperfish.services.Grid;
 public class Scope extends Namespace {
 
     private final Grid grid;
+    private final int maxDocumentLength = 512 * 1024;
 
     public Scope(final String namespace, final Grid grid) {
         super(namespace);
@@ -48,5 +51,17 @@ public class Scope extends Namespace {
         if (resourceType == FilterConfigsResource.class) return configurations(ConfigurationType.FILTERS);
         Assert.unreachable("Unhandled resource type: %s", resourceType.getName());
         return null;
+    }
+
+    public int maxLength(final Class<?> resourceType, final Access access) {
+        return maxDocumentLength;
+    }
+
+    public boolean allows(final Class<?> resourceType, final Access access) {
+        return true;
+    }
+
+    public JsonValidator validator(final Class<?> resourceType) {
+        return new JsonValidator();
     }
 }

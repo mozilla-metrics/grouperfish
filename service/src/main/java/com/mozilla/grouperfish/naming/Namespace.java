@@ -1,7 +1,5 @@
 package com.mozilla.grouperfish.naming;
 
-import com.mozilla.grouperfish.json.JsonValidator;
-import com.mozilla.grouperfish.model.Access;
 
 
 /**
@@ -9,7 +7,6 @@ import com.mozilla.grouperfish.model.Access;
  */
 public class Namespace {
 
-    private final int MAX_LENGTH = 512 * 1024;
     private final String namespace;
 
     public Namespace(final String namespace) {
@@ -20,15 +17,7 @@ public class Namespace {
         return namespace;
     }
 
-    public int maxLength(Class<?> resourceType, Access access) {
-        return MAX_LENGTH;
-    }
-
-    public boolean allows(Class<?> resourceType, Access access) {
-        return true;
-    }
-
-    public JsonValidator validator(final Class<?> resourceType) {
-        return new JsonValidator();
+    public String String() {
+        return raw();
     }
 }

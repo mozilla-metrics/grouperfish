@@ -29,7 +29,7 @@ fi
 
 
 
-SERVER_CLASS_NAME="com.mozilla.grouperfish.service.Grouperfish"
+SERVER_CLASS_NAME="com.mozilla.grouperfish.bootstrap.Grouperfish"
 JAVA_OPTS="-Xmx1000m -XX:+UseParNewGC -XX:+UseConcMarkSweepGC"
 
 if [ "$GROUPERFISH_USER" = "" ]; then
@@ -75,7 +75,7 @@ if [ ! -d $bin/../logs ]; then
     mkdir -p $bin/../logs
 fi
 
-BAGHEERA_OPTS="-Dhazelcast.config=${HAZELCAST_CONF} -Dserver.port=${SERVER_PORT} -Dbagheera.log.dir=${bin}/../logs"
+BAGHEERA_OPTS="-Dhazelcast.config=${HAZELCAST_CONF} -Dgrouperfish.rest.port=${SERVER_PORT} -Dbagheera.log.dir=${bin}/../logs"
 
 echo "Using classpath: " $CLASSPATH
 

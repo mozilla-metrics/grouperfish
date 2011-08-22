@@ -33,7 +33,7 @@ public class ScopeTest {
         }
     }
 
-    @Test(expectedExceptions=IllegalStateException.class)
+    @Test(expectedExceptions=IllegalArgumentException.class)
     public void testInvalidConfigurations() {
         scope(NS).configurations(null);
     }
@@ -78,7 +78,7 @@ public class ScopeTest {
     }
 
     public void testToString() {
-        assertEquals(NS, scope(NS).toString());
+        assertEquals(NS, scope(NS).raw());
     }
 
     public void testValidator() {

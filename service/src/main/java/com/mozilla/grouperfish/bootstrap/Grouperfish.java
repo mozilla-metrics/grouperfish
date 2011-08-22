@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.mozilla.grouperfish.services.StorageAndRetrieval;
 import com.mozilla.grouperfish.services.jersey.JerseyStorageAndRetrieval;
 import com.mozilla.grouperfish.services.jersey.ResourceConfig;
 
@@ -29,6 +30,7 @@ public class Grouperfish {
 
 	public Grouperfish(final AbstractModule bindings) {
 	    final Injector injector = Guice.createInjector(bindings);
-	    new JerseyStorageAndRetrieval(injector, ResourceConfig.class);
+	    StorageAndRetrieval rest = new JerseyStorageAndRetrieval(injector, ResourceConfig.class);
+	    rest.start();
 	}
 }
