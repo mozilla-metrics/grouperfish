@@ -43,29 +43,32 @@ Co-Clustering
 ^^^^^^^^^^^^^
 
 * ``parameters.json``
-  ::
+
+::
+
     {
-     "text" : {
-                "STOPWORDS" : [ "the", "cat" ]
-                "STEM": "false",
-        	"MIN_WORD_LEN": "2",
-        	"MIN_DF": "1",
-        	"MAX_DF_PERCENT": "0.99",
-        	"DOC_COL_ID" : "id",
-        	"TEXT_COL_ID" : "text"
-              },
-    "mapreduce":{
-        	"NUM_REDUCERS": "7"
-             },
-    "transform":{
-                "KMEANS_NUM_CLUSTERS": "10",
-                "KMEANS_NUM_ITERATIONS": "20",
-                "SSVD_MULTIPLIER": "5",
-                "SSVD_BLOCK_HEIGHT": "30000",
-                "KMEANS_DELTA": "0.1",
-                "KMEANS_DISTANCE" : "CosineDistanceMeasure"
-               }
+      "text" : {
+        "STOPWORDS" : [ "the", "cat" ]
+        "STEM": "false",
+        "MIN_WORD_LEN": "2",
+        "MIN_DF": "1",
+        "MAX_DF_PERCENT": "0.99",
+        "DOC_COL_ID": "id",
+        "TEXT_COL_ID": "text"
+      },
+      "mapreduce":{
+        "NUM_REDUCERS": "7"
+      },
+      "transform":{
+        "KMEANS_NUM_CLUSTERS": "10",
+        "KMEANS_NUM_ITERATIONS": "20",
+        "SSVD_MULTIPLIER": "5",
+        "SSVD_BLOCK_HEIGHT": "30000",
+        "KMEANS_DELTA": "0.1",
+        "KMEANS_DISTANCE": "CosineDistanceMeasure"
+      }
     }
+
 
     * "text"
 
@@ -102,28 +105,29 @@ Co-Clustering
 
   Example:
 
-  ::
+::
 
-      {
-        "1" : { "TOP_DOCS" : ["48\t no flash", "32\t I love firefox"]
-                "TOP_FEATURES" : ["flash", "firefox" ]
-                }
-        }
+    {
+      "1": { "TOP_DOCS": ["48\t no flash", "32\t I love firefox"],
+             "TOP_FEATURES": ["flash", "firefox" ] },
       ...
+    }
+    ...
 
 * ``tags.json``
 
     Example:
 
-    ::
-        {
-            "232" : [ 13 ]
-            "43" : [ 32 ]
-        }
+::
+
+    {
+        "232": [ "13" ],
+        "43": [ "32" ]
+    }
 
 
-REFERENCES:
-~~~~~~~~~~
+References:
+~~~~~~~~~~~
     1. Dhillon, I. (2001). Co-clustering documents and words using bipartite
        spectral graph partitioning. In Proceedings of the seventh ACM SIGKDD
        international conference on Knowledge discover aand data mining (KDD)
