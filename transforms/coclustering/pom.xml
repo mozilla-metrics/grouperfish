@@ -26,11 +26,6 @@
         </repository>
 
         <repository>
-            <id>mozilla-metrics-snapshots</id>
-            <url>http://mozilla-metrics.github.com/maven2/snapshots</url>
-        </repository>
-
-        <repository>
             <id>sonatype-nexus-public</id>
             <name>SonaType public snapshots and releases repository</name>
             <url>https://oss.sonatype.org/content/groups/public</url>
@@ -42,6 +37,19 @@
             <name>Cloudera Releases Repository</name>
             <snapshots><enabled>true</enabled></snapshots>
         </repository>
+
+        <!-- for akela -->
+        <repository>
+            <id>mozilla-metrics-snapshots</id>
+            <url>http://mozilla-metrics.github.com/maven2/snapshots</url>
+        </repository>
+
+        <!-- for mahout/0.5-cdh3u0 -->
+        <repository>
+            <id>mozilla-metrics-releases</id>
+            <url>http://mozilla-metrics.github.com/maven2/releases</url>
+        </repository>
+
     </repositories>
 
 
@@ -61,13 +69,6 @@
             <groupId>com.mozilla</groupId>
             <artifactId>akela</artifactId>
             <version>0.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>5.6</version>
-            <classifier>jdk15</classifier>
-            <scope>test</scope>
         </dependency>
 
         <!-- Logging:
@@ -197,36 +198,30 @@
             </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.2</version>
-            <scope>test</scope>
-        </dependency>
-
 
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>2.3</version>
         </dependency>
+
         <!-- Lucene -->
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
-            <version>3.3.0</version>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-analyzers</artifactId>
-            <version>3.3.0</version>
+            <version>3.1.0</version>
         </dependency>
 
         <!-- Mahout -->
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-core</artifactId>
-            <version>0.5</version>
+            <version>0.5-cdh3u0</version>
             <exclusions>
             <exclusion>
                 <artifactId>commons-cli</artifactId>
@@ -269,7 +264,7 @@
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-math</artifactId>
-            <version>0.5</version>
+            <version>0.5-cdh3u0</version>
             <exclusions>
             <exclusion>
                 <artifactId>uncommons-maths</artifactId>
@@ -287,8 +282,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-examples</artifactId>
+            <version>0.5-cdh3u0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-utils</artifactId>
-            <version>0.5</version>
+            <version>0.5-cdh3u0</version>
             <exclusions>
             <exclusion>
                 <artifactId>slf4j-jcl</artifactId>
