@@ -1,0 +1,96 @@
+#! /bin/bash
+
+usage() {
+    echo "Usage: ${self} [--build | --help | --package | --clean] [PATH]"
+    echo "    --help      Show this message."
+    echo "    --clean     Discard all build results and intermediate files."
+    echo "    --build     Install components to ./build (default)"
+    echo "    --package   Create a complete grouperfish tarball."
+    echo "                Cleans and rebuilds every component first."
+    echo
+    echo "    PATH        The component to build."
+    echo "                Examples: 'service', 'transforms/coclustering'"
+    echo "                If omitted, everything is built."
+    echo
+    echo "This script must be called from the root directory of the project."
+    echo
+}
+
+self="${0}"
+cmd="--build"
+what="docs service transforms/* tools/* filters/*"
+
+if [[ "${#}" -gt "2" ]]; then
+    usage
+    exit 1
+fi
+
+if [[ "${#}" -eq "2" ]]; then
+    cmd=$1
+    what=$2
+fi
+
+if [[ "${#}" -eq "1" ]]; then
+    if [[ "${1}" == --* ]]; then
+        cmd=$1
+    else
+        what=$1
+    fi
+fi
+
+
+fail() {
+    echo "Build aborted: ${1}"
+    exit 1
+}
+
+clean() {
+    what=$1
+    for component in $what; do
+        if [[ -x "$component/install" ]]; then
+            echo "Cleaning $component ..."
+            ( cd "${component}"
+              ./install --clean || fail "Clean of '${component}' failed." )
+        fi
+        rm -rf "./build/${component}"
+    done
+}
+
+build() {
+    what=$1
+    for component in $what; do
+        if [[ -x "$component/install" ]]; then
+            echo "Installing $component ..."
+            ( cd "${component}"
+              ./install || fail "Installation of '${component}' failed." )
+        else
+            echo "Copying $component ..."
+            mkdir -p "build/${component}/"
+            cp -r "${component}"/* "build/${component}/"
+        fi
+    done
+}
+
+package() {
+    version="$(cat ./VERSION)"
+    clean && build && tar xzf "grouperfish-$version.tar.gz" build
+}
+
+case "${cmd}" in
+    --help)
+        usage
+        ;;
+    --build)
+        build "${what}"
+        ;;
+    --clean)
+        clean "${what}"
+        ;;
+    --package)
+        package
+        ;;
+    *)
+        usage
+        exit 1
+        ;;
+esac

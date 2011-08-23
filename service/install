@@ -1,0 +1,26 @@
+#! /bin/bash
+
+cmd="--build"
+if [[ "${#}" -eq "1" ]]; then
+    if [[ "${1}" == --* ]]; then
+        cmd=$1
+    fi
+fi
+
+case "${cmd}" in
+    --build)
+        mvn install
+        mkdir -p ../build/service/
+        cp target/grouperfish-service-*.jar ../build/service/
+        mkdir -p ../build/bin/
+        cp bin/grouperfish ../build/bin/
+        ;;
+    --clean)
+        mvn clean
+        rm -rf ../build/service
+        rm -rf ../build/bin/grouperfish
+        ;;
+    --help)
+        "Usage: ${0} [--build|--clean]"
+        ;;
+esac

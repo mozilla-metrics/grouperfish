@@ -1,326 +1,324 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.mozilla</groupId>
-  <artifactId>grouperfish-service</artifactId>
-  <version>0.1-SNAPSHOT</version>
+    <groupId>com.mozilla</groupId>
+    <artifactId>grouperfish-service</artifactId>
+    <version>0.1-SNAPSHOT</version>
 
-  <name>grouperfish-service</name>
-  <description>Clustering engine for the web</description>
-  <url>https://github.com/mozilla-metrics/grouperfish</url>
+    <name>grouperfish-service</name>
+    <description>Clustering engine for the web</description>
+    <url>https://github.com/mozilla-metrics/grouperfish</url>
 
-  <packaging>jar</packaging>
+    <packaging>jar</packaging>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <skip.tests.unit>false</skip.tests.unit>
-  </properties>
-
-
-  <repositories>
-    <repository>
-      <id>java.net</id>
-      <url>http://download.java.net/maven/2</url>
-      <name>java.net Maven Repository</name>
-    </repository>
-
-    <repository>
-      <id>mozilla-metrics-snapshots</id>
-      <url>http://mozilla-metrics.github.com/maven2/snapshots</url>
-    </repository>
-
-    <repository>
-      <id>sonatype-nexus-public</id>
-      <name>SonaType public snapshots and releases repository</name>
-      <url>https://oss.sonatype.org/content/groups/public</url>
-    </repository>
-
-    <repository>
-      <id>cdh.release.repo</id>
-      <url>https://repository.cloudera.com/content/repositories/releases</url>
-      <name>Cloudera Releases Repository</name>
-      <snapshots><enabled>true</enabled></snapshots>
-    </repository>
-  </repositories>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skip.tests.unit>false</skip.tests.unit>
+    </properties>
 
 
-  <dependencies>
+    <repositories>
+        <repository>
+            <id>java.net</id>
+            <url>http://download.java.net/maven/2</url>
+            <name>java.net Maven Repository</name>
+        </repository>
 
-    <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-      <version>3.0</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-guice</artifactId>
-      <version>1.8</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.mozilla</groupId>
-      <artifactId>bagheera</artifactId>
-      <version>0.3-SNAPSHOT</version>
-      <scope>runtime</scope>
+        <repository>
+            <id>mozilla-metrics-snapshots</id>
+            <url>http://mozilla-metrics.github.com/maven2/snapshots</url>
+        </repository>
 
-      <exclusions>
-        <exclusion>
-          <artifactId>log4j</artifactId>
-          <groupId>log4j</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+        <repository>
+            <id>sonatype-nexus-public</id>
+            <name>SonaType public snapshots and releases repository</name>
+            <url>https://oss.sonatype.org/content/groups/public</url>
+        </repository>
 
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-      <version>2.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>5.6</version>
-      <classifier>jdk15</classifier>
-      <scope>test</scope>
-    </dependency>
+        <repository>
+            <id>cdh.release.repo</id>
+            <url>https://repository.cloudera.com/content/repositories/releases</url>
+            <name>Cloudera Releases Repository</name>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
 
 
-    <!-- Jersey JAX-RS build time dependencies -->
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
-      <version>1.8</version>
-    </dependency>
+    <dependencies>
 
-    <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-multipart</artifactId>
-      <version>1.8</version>
-    </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>3.0</version>
+        </dependency>
 
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- End of JAX-RS configuration -->
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-guice</artifactId>
+            <version>1.8</version>
+        </dependency>
 
+        <dependency>
+            <groupId>com.mozilla</groupId>
+            <artifactId>bagheera</artifactId>
+            <version>0.3-SNAPSHOT</version>
 
-    <!-- Logging:
-         - slf4j is used by all loging inside of the project
-         - for all other common logging APIs, we put redirection in place
-         - the actual logging implementation is logback (posing as slf4j) -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <version>1.5.11</version>
-    </dependency>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>log4j-over-slf4j</artifactId>
-      <version>1.5.11</version>
-    </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1</version>
+        </dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.5.11</version>
-    </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.0</version>
+        </dependency>
 
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>0.9.20</version>
-    </dependency>
-
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-core</artifactId>
-      <version>0.9.20</version>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- End of logging configuration. -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>5.6</version>
+            <classifier>jdk15</classifier>
+            <scope>test</scope>
+        </dependency>
 
 
+        <!-- Jersey JAX-RS build time dependencies -->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>1.8</version>
+        </dependency>
 
-    <!-- Cloudera Hadoop -->
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-core</artifactId>
-      <version>0.20.2-cdh3u0</version>
-      <exclusions>
-        <exclusion>
-            <artifactId>jasper-runtime</artifactId>
-            <groupId>tomcat</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>commons-httpclient</artifactId>
-            <groupId>commons-httpclient</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>hsqldb</artifactId>
-            <groupId>hsqldb</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>commons-cli</artifactId>
-            <groupId>commons-cli</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>commons-logging</artifactId>
-            <groupId>commons-logging</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>jsp-api</artifactId>
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-multipart</artifactId>
+            <version>1.8</version>
+        </dependency>
+
+        <dependency>
             <groupId>javax.servlet</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>hadoop-ant</artifactId>
-            <groupId>com.cloudera.cdh</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>commons-net</artifactId>
-            <groupId>commons-net</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>jasper-compiler</artifactId>
-            <groupId>tomcat</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>commons-el</artifactId>
-            <groupId>commons-el</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>ant</artifactId>
-            <groupId>ant</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>jets3t</artifactId>
-            <groupId>net.java.dev.jets3t</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>xmlenc</artifactId>
-            <groupId>xmlenc</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>core</artifactId>
-            <groupId>org.eclipse.jdt</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>commons-codec</artifactId>
-            <groupId>commons-codec</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>oro</artifactId>
-            <groupId>oro</groupId>
-        </exclusion>
-        <exclusion>
-            <artifactId>jsp-api</artifactId>
-            <groupId>javax.servlet.jsp</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <!-- ElasticSearch -->
-    <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
-      <version>0.16.2</version>
-    </dependency>
-
-    <!-- Immutable Collections -->
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>r08</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>  
-      <version>1.8.5</version> 
-      <scope>test</scope>
-    </dependency>
-
-  </dependencies>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- End of JAX-RS configuration -->
 
 
-  <build>
-    <finalName>grouperfish-service</finalName>
-    <plugins>
+        <!-- Logging:
+        - slf4j is used by all loging inside of the project
+        - for all other common logging APIs, we put redirection in place
+        - the actual logging implementation is logback (posing as slf4j) -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.5.11</version>
+        </dependency>
 
-      <!--  Set compiler level to Java 6 -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>1.5.11</version>
+        </dependency>
 
-      <!-- Test-NG based unit tests -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-          <skip>${skip.tests.unit}</skip>
-          <argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
-          <parallel>methods</parallel>
-          <threadCount>1</threadCount>
-          <workingDirectory>${project.build.directory}/test-classes</workingDirectory>
-          <suiteXmlFiles>
-            <suiteXmlFile>src/test/resources/ng_unit.xml</suiteXmlFile>
-          </suiteXmlFiles>
-        </configuration>
-      </plugin>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.5.11</version>
+        </dependency>
 
-      <!-- Standard jar packaging -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.3.1</version>
-        <configuration>
-          <finalName>${project.name}-${project.version}</finalName>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <classpathPrefix>${settings.localRepository}</classpathPrefix>
-              <classpathLayoutType>repository</classpathLayoutType>
-              <mainClass>com.mozilla.grouperfish.bootstrap.Grouperfish</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>0.9.20</version>
+        </dependency>
 
-    </plugins>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>0.9.20</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- End of logging configuration. -->
 
 
-  </build>
+
+        <!-- Cloudera Hadoop -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-core</artifactId>
+            <version>0.20.2-cdh3u0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jasper-runtime</artifactId>
+                    <groupId>tomcat</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-httpclient</artifactId>
+                    <groupId>commons-httpclient</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hsqldb</artifactId>
+                    <groupId>hsqldb</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-cli</artifactId>
+                    <groupId>commons-cli</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jsp-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-ant</artifactId>
+                    <groupId>com.cloudera.cdh</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-net</artifactId>
+                    <groupId>commons-net</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jasper-compiler</artifactId>
+                    <groupId>tomcat</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-el</artifactId>
+                    <groupId>commons-el</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>ant</artifactId>
+                    <groupId>ant</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jets3t</artifactId>
+                    <groupId>net.java.dev.jets3t</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>xmlenc</artifactId>
+                    <groupId>xmlenc</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>core</artifactId>
+                    <groupId>org.eclipse.jdt</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-codec</artifactId>
+                    <groupId>commons-codec</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>oro</artifactId>
+                    <groupId>oro</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jsp-api</artifactId>
+                    <groupId>javax.servlet.jsp</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- ElasticSearch -->
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>0.16.2</version>
+        </dependency>
+
+        <!-- Immutable Collections -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>r08</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.8.5</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+
+    <build>
+        <finalName>grouperfish-service</finalName>
+        <plugins>
+
+            <!--  Set compiler level to Java 6 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+
+            <!-- Test-NG based unit tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <skip>${skip.tests.unit}</skip>
+                    <argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
+                    <parallel>methods</parallel>
+                    <threadCount>1</threadCount>
+                    <workingDirectory>${project.build.directory}/test-classes</workingDirectory>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/ng_unit.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
+            </plugin>
+
+            <!-- Standard jar packaging -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <finalName>${project.name}-${project.version}</finalName>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>${settings.localRepository}</classpathPrefix>
+                            <classpathLayoutType>repository</classpathLayoutType>
+                            <mainClass>com.mozilla.grouperfish.bootstrap.Grouperfish</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+    </build>
 
 </project>

@@ -1,0 +1,28 @@
+#! /bin/bash
+
+# A minimal transform that performs a line-count on the input and
+# generates a result like this
+#
+# {"count": 12345}
+
+work=${1}
+
+fs_mkdir() {
+   hadoop fs -mkdir $1
+}
+
+fs_rmr() {
+   hadoop fs -rmr $1
+}
+
+fs_cat() {
+  hadoop fs -cat $1
+}
+
+fs_put() {
+  hadoop fs -put - $1
+}
+
+fs_rmr "${work}/output"
+fs_mkdir "${work}/output"
+echo '{"count": '"$(fs_cat ${work}/input.json.tsv | wc -l | awk '{print $1}')"'}' | fs_put "${work}/output/results.json"

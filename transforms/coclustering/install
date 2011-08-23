@@ -1,0 +1,28 @@
+#! /bin/bash
+
+cmd="--build"
+if [[ "${#}" -eq "1" ]]; then
+    if [[ "${1}" == --* ]]; then
+        cmd=$1
+    fi
+fi
+
+dest=../../build/transforms/coclustering
+case "${cmd}" in
+    --build)
+        mvn package
+        mvn assembly:assembly
+        mkdir -p $dest
+        cp target/grouperfish-*.jar $dest/
+        cp ./coclustering $dest/
+        cp ./src/main/python/cocluster.py $dest/
+        # :TODO: get all dependencies via maven
+        ;;
+    --clean)
+        mvn clean
+        rm -rf $dest
+        ;;
+    --help)
+        "Usage: ${0} [--build|--clean]"
+        ;;
+esac
