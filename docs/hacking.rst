@@ -4,8 +4,44 @@
 Hacking
 ========
 
-Code Style
-----------
+
+Prerequisites
+-------------
+
+First, make sure that you satisfy the requirements for running grouperfish
+(:ref:`installation`).
+
+Maven
+    We are using Maven 3 for build and dependency management of several
+    Grouperfish components.
+
+JDK 6
+    Java 6 Standard Edition should work fine.
+
+The Source
+    To obtain the (latest) source using **git**:
+
+::
+
+        > git clone git://github.com/mozilla-metrics/grouperfish.git
+        > cd grouperfish
+        > git checkout development
+
+
+Building it:
+------------
+
+::
+
+    > ./install             # Creates a build under ./build
+    > ./install --package   # Creates grouperfish-$VERSION.tar.gz
+
+
+Coding Style
+------------
+
+In general, consistency with existing surrounding code / module is more
+important for a patch than adherence to these rules (local consistency over global consistency).
 
 Java
     This project follows the default eclipse code style, except that 4 spaces
