@@ -52,7 +52,7 @@ public class ResultsResource extends ResourceBase {
         return RestHelper.deleteAny(getClass(), scope(namespace), key(transformName, queryName), request);
     }
 
-    private String key(String transformName, String queryName) {
+    public static String key(final String transformName, final String queryName) {
         return String.format("%s/%s", transformName, queryName);
     }
 

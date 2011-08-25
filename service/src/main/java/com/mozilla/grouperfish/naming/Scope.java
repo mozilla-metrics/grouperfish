@@ -25,6 +25,11 @@ public class Scope extends Namespace {
         this.grid = grid;
     }
 
+    public Scope(final Namespace ns, final Grid grid) {
+        super(ns.raw());
+        this.grid = grid;
+    }
+
     public Map<String, String> documents() {
         return grid.map("documents_" + raw());
     }

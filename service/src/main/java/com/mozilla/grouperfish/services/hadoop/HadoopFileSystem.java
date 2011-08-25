@@ -12,7 +12,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.mozilla.grouperfish.base.Assert;
-import com.mozilla.grouperfish.base.Result;
 
 
 public class HadoopFileSystem implements com.mozilla.grouperfish.services.FileSystem {
@@ -32,80 +31,90 @@ public class HadoopFileSystem implements com.mozilla.grouperfish.services.FileSy
     }
 
     @Override
-    public String uri(final String relativePath) {
-        return abs(relativePath).toUri().toString();
-    }
-
-    @Override
-    public Result<String> removeRecursively(final String relativePath) {
-        Assert.nonNull(relativePath);
-        Assert.check(!relativePath.isEmpty());
-        final Result<String> result = new Result<String>();
+    public String uri(final String relativePath) throws NotFound {
+        final Path abs = abs(relativePath);
         try {
-            final Path absolutePath = abs(relativePath);
-            hdfs.delete(absolutePath, true);
-            result.put(absolutePath.toString());
-        } catch (IOException e) {
-            result.error(e);
+            if (!hdfs.exists(abs)) throw new NotFound(uncheckedUri(abs));
         }
-        return result;
+        catch (IOException e) {
+            throw new NotFound("IOException trying to check for existence of " + relativePath, e);
+        }
+        return abs.toUri().toString();
     }
 
     @Override
-    public Result<String> makeDirectory(final String relativePath) {
+    public String removeRecursively(final String relativePath) throws Denied {
         Assert.nonNull(relativePath);
         Assert.check(!relativePath.isEmpty());
-        final Result<String> result = new Result<String>();
         try {
             final Path absolutePath = abs(relativePath);
+            if (!hdfs.exists(absolutePath)) return uncheckedUri(absolutePath);
+            hdfs.delete(absolutePath, true);
+            return uncheckedUri(absolutePath);
+        } catch (final IOException e) {
+            throw new Denied("Error removing ", e);
+        }
+    }
+
+    @Override
+    public String makeDirectory(final String relativePath) throws Denied {
+        Assert.nonNull(relativePath);
+        Assert.check(!relativePath.isEmpty());
+        final Path absolutePath = abs(relativePath);
+        try {
             if (!hdfs.getFileStatus(absolutePath).isDir()) {
-                return result.error("makeDirectory: Path exists but is not a directory!");
+                final String message = String.format(
+                        "Path %s exists but is not a directory!",
+                        uncheckedUri(absolutePath));
+                throw new Denied(message);
             }
             hdfs.mkdirs(absolutePath);
-            result.put(absolutePath.toString());
+            return uncheckedUri(absolutePath);
         } catch (IOException e) {
-            result.error(e);
+            throw new Denied("Failed to create " + uncheckedUri(absolutePath), e);
         }
-        return result;
     }
 
     @Override
-    public Result<Writer> writer(final String path) {
+    public Writer writer(final String path) throws Denied {
         Assert.nonNull(path);
         Assert.check(!path.isEmpty());
-        final Result<Writer> result = new Result<Writer>();
         final Path filePath = abs(path);
         final FSDataOutputStream out;
         try {
             out = (hdfs.exists(filePath)) ? hdfs.append(filePath) : hdfs.create(filePath);
-            result.put(new OutputStreamWriter(out));
+            return new OutputStreamWriter(out);
         }
-        catch (IOException e) {
-            result.error(e);
+        catch (final IOException e) {
+            throw new Denied("Cannot write to " + uncheckedUri(filePath), e);
         }
-        return result;
     }
 
     @Override
-    public Result<Reader> reader(String path) {
-        final Result<Reader> result = new Result<Reader>();
+    public Reader reader(String path) throws NotFound, Denied {
         Assert.nonNull(path);
         Assert.check(!path.isEmpty());
         final Path filePath = abs(path);
         try {
             if (!hdfs.exists(filePath)) {
-                return result.error("Path to read does not exist: '" + filePath + "'");
+                final String message = String.format(
+                        "Path to read does not exist: '%s'",
+                        uncheckedUri(filePath));
+                throw new NotFound(message);
             }
-            result.put(new InputStreamReader(hdfs.open(filePath)));
+            return new InputStreamReader(hdfs.open(filePath));
         }
-        catch (IOException e) {
-            result.error(e);
+        catch (final IOException e) {
+            throw new Denied("Cannot read from " + uncheckedUri(filePath), e);
         }
-        return result;
     }
 
     private Path abs(final String relativePath) {
         return new Path(basePath, relativePath);
+    }
+
+    private String uncheckedUri(final Path absolutePath) {
+        return absolutePath.toUri().toString();
     }
 
 }

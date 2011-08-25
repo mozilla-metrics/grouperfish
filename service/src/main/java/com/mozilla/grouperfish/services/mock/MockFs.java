@@ -14,44 +14,47 @@ import java.util.Map;
 
 import com.mozilla.grouperfish.base.ArrayTool;
 import com.mozilla.grouperfish.base.Assert;
-import com.mozilla.grouperfish.base.Result;
 import com.mozilla.grouperfish.services.FileSystem;
 
 
 public class MockFs implements FileSystem {
 
-    private final String root = "/mockfs";
+    private final String root;
 
     private final Map<String, byte[]> files = new Hashtable<String, byte[]>();
 
+    public MockFs(final String root) {
+        this.root = root;
+    }
+
     @Override
-    public Result<String> removeRecursively(final String relativePath) {
+    public synchronized String removeRecursively(final String relativePath) throws Denied, NotFound {
         Assert.nonNull(relativePath);
         Assert.check(!relativePath.isEmpty());
-        final String path = abs(relativePath);
 
         final List<String> toRemove = new ArrayList<String>();
         for (final String key : files.keySet()) {
-            if (!key.startsWith(path)) continue;
+            if (!key.startsWith(relativePath)) continue;
             final String rest = key.substring(key.length());
-            if (rest.startsWith("/") || path.endsWith("/") || rest.isEmpty()) {
+            if (rest.startsWith("/") || relativePath.endsWith("/") || rest.isEmpty()) {
                 toRemove.add(key);
             }
         }
         for (final String key : toRemove) files.remove(key);
-        return new Result<String>(path);
+        return uncheckedUri(relativePath);
     }
 
     @Override
-    public Result<String> makeDirectory(final String relativePath) {
+    public synchronized String makeDirectory(final String relativePath) throws Denied {
         Assert.nonNull(relativePath);
         Assert.check(!relativePath.isEmpty());
-        return new Result<String>(abs(relativePath));
+        if (files.containsKey(relativePath)) throw new Denied("used as file: " + uncheckedUri(relativePath));
+        return uncheckedUri(relativePath);
     }
 
     @Override
-    public Result<Writer> writer(final String path) {
-        return new Result<Writer>(new OutputStreamWriter(new ByteArrayOutputStream() {
+    public synchronized Writer writer(final String path) throws Denied {
+        return new OutputStreamWriter(new ByteArrayOutputStream() {
             @Override
             public void close() throws IOException {
                 if (files.containsKey(path)) {
@@ -61,26 +64,22 @@ public class MockFs implements FileSystem {
                     files.put(path, toByteArray());
                 }
             }
-        }));
+        });
     }
 
     @Override
-    public Result<Reader> reader(final String path) {
-        final Result<Reader> result = new Result<Reader>();
-        if (!files.containsKey(path)) {
-            result.error(String.format("Not found in mock fs: '%s'", path));
-            return result;
-        }
-        result.put(new InputStreamReader(new ByteArrayInputStream(files.get(path))));
-        return result;
+    public synchronized Reader reader(final String path) throws Denied, NotFound {
+        if (!files.containsKey(path)) throw new NotFound(uri(path));
+        return new InputStreamReader(new ByteArrayInputStream(files.get(path)));
     }
 
     @Override
-    public String uri(final String relativePath) {
-        return "mockfs://" + abs(relativePath);
+    public String uri(final String relativePath) throws NotFound {
+        if (!files.containsKey(relativePath)) throw new NotFound(relativePath);
+        return uncheckedUri(relativePath);
     }
 
-    private String abs(final String relativePath) {
-        return root + (relativePath.startsWith("/") ? ""  : "/" ) + relativePath;
+    private String uncheckedUri(final String relativePath) {
+        return "mockfs://" + root + (relativePath.startsWith("/") ? ""  : "/" ) + relativePath;
     }
 }

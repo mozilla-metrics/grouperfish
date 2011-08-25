@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.mozilla.grouperfish.base.Box;
-import com.mozilla.grouperfish.batch.BatchSystem;
+import com.mozilla.grouperfish.batch.BatchService;
 import com.mozilla.grouperfish.model.ConfigurationType;
 import com.mozilla.grouperfish.model.Access.Type;
 import com.mozilla.grouperfish.model.Query;
@@ -36,7 +36,9 @@ public class RunResource {
     public static class ForAll extends RunResourceBase {
 
         @Inject
-        public ForAll(final Grid grid, final BatchSystem system) { super(grid, system); }
+        public ForAll(final Grid grid, final BatchService batchService) {
+            super(grid, batchService);
+        }
 
         @POST
         public Response runTransformsForQuery(@PathParam("namespace") final String namespace,
@@ -48,7 +50,7 @@ public class RunResource {
             }
 
             try {
-                batchSystem().schedule(ns);
+                batchService().schedule(ns);
             }
             catch (final Exception e) {
                 log.error("Error initiating run request '{}': {}", request.getPathInfo(), e);
@@ -64,7 +66,9 @@ public class RunResource {
     public static class ForQuery extends RunResourceBase {
 
         @Inject
-        public ForQuery(final Grid grid, final BatchSystem system) { super(grid, system); }
+        public ForQuery(final Grid grid, final BatchService batchService) {
+            super(grid, batchService);
+        }
 
         @POST
         public Response runTransformsForQuery(@PathParam("namespace") final String namespace,
@@ -82,7 +86,7 @@ public class RunResource {
             for (final Response some404 : any404) return some404;
 
             try {
-                batchSystem().schedule(ns, q);
+                batchService().schedule(ns, q);
             }
             catch (final Exception e) {
                 log.error("Error initiating run request '{}': {}", request.getPathInfo(), e);
@@ -98,7 +102,7 @@ public class RunResource {
     public static class ForQueryWithTransform extends RunResourceBase {
 
         @Inject
-        public ForQueryWithTransform(final Grid grid, final BatchSystem system) { super(grid, system); }
+        public ForQueryWithTransform(final Grid grid, final BatchService system) { super(grid, system); }
 
         public Response runOneTransformForQuery(@PathParam("namespace") final String namespace,
                                                 @PathParam("transformName") final String transformName,
@@ -119,7 +123,7 @@ public class RunResource {
             for (final Response some404 : any404) return some404;
 
             try {
-                batchSystem().schedule(ns, q, config);
+                batchService().schedule(ns, q, config);
             }
             catch (final Exception e) {
                 log.error("Error initiating run request '{}': {}", request.getPathInfo(), e);
@@ -167,15 +171,15 @@ public class RunResource {
 
     private static abstract class RunResourceBase extends ResourceBase {
 
-        private final BatchSystem batchSystem;
+        private final BatchService batchService;
 
-        RunResourceBase(final Grid grid, final BatchSystem batchSystem) {
+        RunResourceBase(final Grid grid, final BatchService batchService) {
             super(grid);
-            this.batchSystem = batchSystem;
+            this.batchService = batchService;
         }
 
-        protected BatchSystem batchSystem() {
-            return batchSystem;
+        protected BatchService batchService() {
+            return batchService;
         }
     }
 

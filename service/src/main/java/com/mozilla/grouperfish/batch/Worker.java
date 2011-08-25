@@ -15,7 +15,7 @@ class Worker extends Thread {
     private final BlockingQueue<Task> inQueue;
     private final BlockingQueue<Task> outQueue;
     private final BlockingQueue<Task> failQueue;
-    private final TaskHandler actor;
+    private final TaskHandler handler;
     private final String name;
 
     public Worker(final BlockingQueue<Task> failQueue,
@@ -25,7 +25,7 @@ class Worker extends Thread {
         this.inQueue = inQueue;
         this.outQueue = outQueue;
         this.failQueue = failQueue;
-        this.actor = actor;
+        this.handler = actor;
         this.name = String.format("[Worker for %s]", actor.getClass().getSimpleName());
     }
 
@@ -43,9 +43,9 @@ class Worker extends Thread {
                     // If power fails, tasks can go MIA here.
                     // We should maintain a global map of tasks, check it periodically, and restart tasks that went MIA.
                     // Task update their status there, and clients could check the status using a GET /run/... call.
-                    task = actor.handle(task);
+                    task = handler.handle(task);
                 }
-                catch (final RetryException e) {
+                catch (final Fail e) {
                     log.warn(String.format("%s %s: failed with message '%s'", name, task, e.getMessage()));
                     if (task.failures().size() >= NUM_TRIES) {
                         log.error(String.format("%s %s: Error details:", name, task), e);
