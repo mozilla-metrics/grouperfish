@@ -40,7 +40,6 @@
             <id>cdh.release.repo</id>
             <url>https://repository.cloudera.com/content/repositories/releases</url>
             <name>Cloudera Releases Repository</name>
-            <snapshots><enabled>true</enabled></snapshots>
         </repository>
     </repositories>
 

@@ -18,6 +18,7 @@ usage() {
 
 self="${0}"
 cmd="--build"
+all="YES"
 what="docs service transforms/* tools/* filters/*"
 
 if [[ "${#}" -gt "2" ]]; then
@@ -27,17 +28,18 @@ fi
 
 if [[ "${#}" -eq "2" ]]; then
     cmd=$1
+    all="NO"
     what=$2
 fi
 
 if [[ "${#}" -eq "1" ]]; then
-    if [[ "${1}" == --* ]]; then
+    if [[ "${1}" == -* ]]; then
         cmd=$1
     else
+        all="NO"
         what=$1
     fi
 fi
-
 
 fail() {
     echo "Build aborted: ${1}"
@@ -54,6 +56,11 @@ clean() {
         fi
         rm -rf "./build/${component}"
     done
+    if [[ "YES" = "${all}" ]]; then
+        rm -rf ./build
+        version="$(cat ./VERSION)"
+        rm "./grouperfish-${version}.tar.gz"
+    fi
 }
 
 build() {
@@ -72,8 +79,11 @@ build() {
 }
 
 package() {
+    what=$1
     version="$(cat ./VERSION)"
-    clean && build && tar xzf "grouperfish-$version.tar.gz" build
+    clean "${what}"
+    build "${what}"
+    tar czf "grouperfish-${version}.tar.gz" build
 }
 
 case "${cmd}" in
@@ -87,7 +97,7 @@ case "${cmd}" in
         clean "${what}"
         ;;
     --package)
-        package
+        package "${what}"
         ;;
     *)
         usage
