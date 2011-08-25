@@ -15,10 +15,10 @@ case "${cmd}" in
         mvn assembly:assembly
         mkdir -p $dest
         cp target/grouperfish-*.jar $dest/
-        cp ./src/main/pig $dest/
+        cp ./src/main/pig/* $dest/
         cp ./coclustering $dest/
         cp ./src/main/python/cocluster.py $dest/
-        # TODO: move the jars into the right place
+        # TODO: move the (job) jars into the right place
         ;;
     --clean)
         mvn clean
