@@ -32,10 +32,10 @@ the configuration is on your classpath (easiest with a local installation).
 Prepare your installation
 -------------------------
 
-* Obtain a grouperfish tarball[*] and unpack it into a directory of your choice.
+* Obtain a grouperfish tarball [#]_ and unpack it into a directory of your choice.
 
-   tar xzf grouperfish-0.1.tar
-   cd grouperfish-0.1
+    tar xzf grouperfish-0.1.tar
+    cd grouperfish-0.1
 
 * Under ``config``, modify the ``elasticsearch.yml`` so that Grouperfish will
   be able to discover your cluster.
@@ -47,8 +47,7 @@ Prepare your installation
 .. _`Hazelcast documentation`:
    http://www.hazelcast.com/docs/1.9.4/manual/multi_html/ch09.html
 
-[*] right now, the only way to do so is to build it from source.
-    See :ref:`hacking`.
+.. [#] right now, the only way is to build it from source. See :ref:`hacking`.
 
 
 Launch the daemon

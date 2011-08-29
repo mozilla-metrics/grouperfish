@@ -12,6 +12,8 @@ case "${cmd}" in
         mvn install
         mkdir -p ../build/service/
         cp target/grouperfish-service-*.jar ../build/service/
+        mkdir -p ../build/conf
+        cp conf/* ../build/conf/
         mkdir -p ../build/bin/
         cp bin/grouperfish ../build/bin/
         ;;

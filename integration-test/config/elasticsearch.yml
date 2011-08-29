@@ -3,4 +3,4 @@ cluster:
   name: grouperfish-integration
 
 path:
-  data: data/elaticsearch
+  data: data/elasticsearch
