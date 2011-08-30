@@ -48,9 +48,22 @@ else (especially Java) at 120.
 
 Java
     This project follows the default Eclipse code format, except that 4 spaces
-    are used for indention rather than ``TAB``.
-    For Java projects (transforms, filters), Maven is encouraged as the
-    build-tool (but not required).
+    are used for indention rather than ``TAB``. Also, put
+    ``else``/``catch``/``finally`` on a new line (much nicer diffs). Crank
+    up the warnings for unused identifiers and dead code, they often point to
+    real bugs.
+    Help *readers* to reason about scope and side-effects:
+
+    * Keep declarations and initializations together
+
+    * Keep all declarations as local as possible.
+
+    * Use ``final`` generously, especially for fields.
+
+    * No ``static`` fields without ``final``.
+
+    For Java projects (service, transforms, filters), *Maven* is encouraged as
+    the build-tool (but not required).
 
 Python
     Follow `PEP 8`_

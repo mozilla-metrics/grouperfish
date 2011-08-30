@@ -31,15 +31,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.Tuple;
-import org.apache.pig.data.TupleFactory;
 
 public class ConvertDocumentIDToID extends EvalFunc<Integer> {
 
-    private static TupleFactory tupleFactory = TupleFactory.getInstance();
     private Map<String, Integer> documentIndex;
 
-    private void loadDocumentIndex(String documentIndexPath)
-					throws IOException {
+    private void loadDocumentIndex(String documentIndexPath) throws IOException {
         if (documentIndex == null) {
             documentIndex = new HashMap<String, Integer>();
 
@@ -47,12 +44,11 @@ public class ConvertDocumentIDToID extends EvalFunc<Integer> {
             FileSystem fs = FileSystem.get(p.toUri(), new Configuration());
             int index = 0;
             for (FileStatus status : fs.listStatus(p)) {
-		Path currPath = status.getPath();
+                Path currPath = status.getPath();
                 if (!status.isDir() && !currPath.getName().startsWith("_")) {
                     BufferedReader reader = null;
                     try {
-                        reader = new BufferedReader(
-			    new InputStreamReader(fs.open(currPath)));
+                        reader = new BufferedReader(new InputStreamReader(fs.open(currPath)));
                         String line = null;
                         while ((line = reader.readLine()) != null) {
                             documentIndex.put(line.trim(), index++);
@@ -82,7 +78,7 @@ public class ConvertDocumentIDToID extends EvalFunc<Integer> {
         if (documentIndex == null) {
             loadDocumentIndex(documentIndexPath);
         }
-	String docID = (String) input.get(1);
-	return documentIndex.get(docID);
+        String docID = (String) input.get(1);
+        return documentIndex.get(docID);
     }
 }

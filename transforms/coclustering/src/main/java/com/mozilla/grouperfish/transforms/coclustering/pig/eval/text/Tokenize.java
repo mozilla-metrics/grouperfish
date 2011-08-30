@@ -62,14 +62,14 @@ public class Tokenize extends EvalFunc<DataBag> {
         if (analyzer == null) {
             String langCode = "en";
             if (input.size() > 1) {
-                loadDictionary((String)input.get(1));
+                loadDictionary((String) input.get(1));
             }
             boolean stem = false;
             if (input.size() > 2) {
-                stem = Boolean.parseBoolean((String)input.get(2));
+                stem = Boolean.parseBoolean((String) input.get(2));
             }
             if (input.size() > 3) {
-                langCode = (String)input.get(3);
+                langCode = (String) input.get(3);
             }
 
             if (langCode.startsWith("zh") || langCode.startsWith("ja")) {
@@ -88,7 +88,7 @@ public class Tokenize extends EvalFunc<DataBag> {
         }
 
         DataBag output = bagFactory.newDefaultBag();
-        TokenStream stream = analyzer.tokenStream(NOFIELD, new StringReader((String)input.get(0)));
+        TokenStream stream = analyzer.tokenStream(NOFIELD, new StringReader((String) input.get(0)));
         CharTermAttribute termAttr = stream.addAttribute(CharTermAttribute.class);
         while (stream.incrementToken()) {
             if (termAttr.length() > 0) {

@@ -10,8 +10,6 @@ fi
 dest=../../build/transforms/coclustering
 case "${cmd}" in
     --build)
-        mvn compile
-        mvn package
         mvn assembly:assembly
         mkdir -p $dest
         cp target/grouperfish-*.jar $dest/

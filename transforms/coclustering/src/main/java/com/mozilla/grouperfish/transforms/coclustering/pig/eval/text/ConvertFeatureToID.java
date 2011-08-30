@@ -31,11 +31,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.data.Tuple;
-import org.apache.pig.data.TupleFactory;
 
 public class ConvertFeatureToID extends EvalFunc<Integer> {
 
-    private static TupleFactory tupleFactory = TupleFactory.getInstance();
     private Map<String, Integer> featureIndex;
 
     private void loadFeatureIndex(String featureIndexPath) throws IOException {
@@ -46,12 +44,11 @@ public class ConvertFeatureToID extends EvalFunc<Integer> {
             FileSystem fs = FileSystem.get(p.toUri(), new Configuration());
             int index = 0;
             for (FileStatus status : fs.listStatus(p)) {
-		Path currPath = status.getPath();
-                if (!status.isDir() && !currPath.getName().startsWith("_")){
+                Path currPath = status.getPath();
+                if (!status.isDir() && !currPath.getName().startsWith("_")) {
                     BufferedReader reader = null;
                     try {
-                        reader = new BufferedReader(
-			    new InputStreamReader(fs.open(currPath)));
+                        reader = new BufferedReader(new InputStreamReader(fs.open(currPath)));
                         String line = null;
                         while ((line = reader.readLine()) != null) {
                             featureIndex.put(line.trim(), index++);
@@ -81,8 +78,8 @@ public class ConvertFeatureToID extends EvalFunc<Integer> {
         if (featureIndex == null) {
             loadFeatureIndex(featureIndexPath);
         }
-	String feature = (String) input.get(1);
-	return featureIndex.get(feature);
+        String feature = (String) input.get(1);
+        return featureIndex.get(feature);
 
     }
 }

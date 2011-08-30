@@ -38,7 +38,6 @@ import org.apache.pig.data.TupleFactory;
 import com.mozilla.grouperfish.transforms.coclustering.lucene.analysis.en.NGramEnglishAnalyzer;
 import com.mozilla.grouperfish.transforms.coclustering.text.Dictionary;
 
-
 public class NGramTokenize extends EvalFunc<DataBag> {
 
     private static final BagFactory bagFactory = BagFactory.getInstance();
@@ -62,34 +61,32 @@ public class NGramTokenize extends EvalFunc<DataBag> {
         }
 
         if (analyzer == null) {
-            String langCode = "en";
             if (input.size() > 1) {
-                loadDictionary((String)input.get(1));
+                loadDictionary((String) input.get(1));
             }
             boolean stem = false;
             if (input.size() > 2) {
-                stem = Boolean.parseBoolean((String)input.get(2));
+                stem = Boolean.parseBoolean((String) input.get(2));
             }
             boolean outputUnigrams = false;
             if (input.size() > 3) {
-                outputUnigrams = Boolean.parseBoolean((String)input.get(3));
+                outputUnigrams = Boolean.parseBoolean((String) input.get(3));
             }
             int minNGram = 2;
             if (input.size() > 4) {
-                minNGram = Integer.parseInt((String)input.get(4));
+                minNGram = Integer.parseInt((String) input.get(4));
             }
             int maxNGram = 3;
             if (input.size() > 5) {
-                maxNGram = Integer.parseInt((String)input.get(5));
-            }
-            if (input.size() > 6) {
-                langCode = (String)input.get(6);
+                maxNGram = Integer.parseInt((String) input.get(5));
             }
 
             if (stopwords != null && stopwords.size() != 0) {
-                analyzer = new NGramEnglishAnalyzer(Version.LUCENE_31, stopwords, stem, outputUnigrams, minNGram, maxNGram);
+                analyzer = new NGramEnglishAnalyzer(Version.LUCENE_31, stopwords, stem, outputUnigrams, minNGram,
+                        maxNGram);
             } else {
-                analyzer = new NGramEnglishAnalyzer(Version.LUCENE_31, StandardAnalyzer.STOP_WORDS_SET, stem, outputUnigrams, minNGram, maxNGram);
+                analyzer = new NGramEnglishAnalyzer(Version.LUCENE_31, StandardAnalyzer.STOP_WORDS_SET, stem,
+                        outputUnigrams, minNGram, maxNGram);
             }
         }
 

@@ -32,11 +32,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Dictionary {
 
-    private static final Logger LOG = Logger.getLogger(Dictionary.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Dictionary.class);
 
     public static Set<String> loadDictionary(Path dictionaryPath) throws IOException {
         Set<String> dictionary = null;
@@ -80,8 +81,8 @@ public class Dictionary {
         return dictionary;
     }
 
-    public static Map<String,Integer> loadFeatureIndex(Path dictionaryPath) throws IOException {
-        Map<String,Integer> featureIndex = null;
+    public static Map<String, Integer> loadFeatureIndex(Path dictionaryPath) throws IOException {
+        Map<String, Integer> featureIndex = null;
         FileSystem fs = null;
         try {
             fs = FileSystem.get(dictionaryPath.toUri(), new Configuration());
@@ -95,10 +96,10 @@ public class Dictionary {
         return featureIndex;
     }
 
-    public static Map<String,Integer> loadFeatureIndex(FileSystem fs, Path dictionaryPath) throws IOException {
-        Map<String,Integer> featureIndex = null;
+    public static Map<String, Integer> loadFeatureIndex(FileSystem fs, Path dictionaryPath) throws IOException {
+        Map<String, Integer> featureIndex = null;
         if (dictionaryPath != null) {
-            featureIndex = new HashMap<String,Integer>();
+            featureIndex = new HashMap<String, Integer>();
             int idx = 0;
             for (FileStatus status : fs.listStatus(dictionaryPath)) {
                 if (!status.isDir()) {
@@ -123,8 +124,8 @@ public class Dictionary {
         return featureIndex;
     }
 
-    public static Map<Integer,String> loadInvertedFeatureIndex(Path dictionaryPath) throws IOException {
-        Map<Integer,String> featureIndex = null;
+    public static Map<Integer, String> loadInvertedFeatureIndex(Path dictionaryPath) throws IOException {
+        Map<Integer, String> featureIndex = null;
         FileSystem fs = null;
         try {
             fs = FileSystem.get(dictionaryPath.toUri(), new Configuration());
@@ -138,9 +139,8 @@ public class Dictionary {
         return featureIndex;
     }
 
-    public static Map<Integer,String>
-	loadInvertedIndexWithKeys(Path dictionaryPath) throws IOException {
-        Map<Integer,String> index = null;
+    public static Map<Integer, String> loadInvertedIndexWithKeys(Path dictionaryPath) throws IOException {
+        Map<Integer, String> index = null;
         FileSystem fs = null;
         try {
             fs = FileSystem.get(dictionaryPath.toUri(), new Configuration());
@@ -153,11 +153,10 @@ public class Dictionary {
         return index;
     }
 
-    public static Map<Integer,String> loadInvertedIndexWithKeys(FileSystem fs,
-	    Path dictionaryPath) throws IOException {
-        Map<Integer,String> index = null;
+    public static Map<Integer, String> loadInvertedIndexWithKeys(FileSystem fs, Path dictionaryPath) throws IOException {
+        Map<Integer, String> index = null;
         if (dictionaryPath != null) {
-            index = new HashMap<Integer,String>();
+            index = new HashMap<Integer, String>();
             for (FileStatus status : fs.listStatus(dictionaryPath)) {
                 if (!status.isDir()) {
                     BufferedReader reader = null;
@@ -165,7 +164,7 @@ public class Dictionary {
                         reader = new BufferedReader(new InputStreamReader(fs.open(status.getPath())));
                         String line = null;
                         while ((line = reader.readLine()) != null) {
-			    String [] pair = line.split("\t");
+                            String[] pair = line.split("\t");
                             index.put(Integer.parseInt(pair[0]), pair[1].trim());
                         }
                     } finally {
@@ -182,10 +181,10 @@ public class Dictionary {
         return index;
     }
 
-    public static Map<Integer,String> loadInvertedFeatureIndex(FileSystem fs, Path dictionaryPath) throws IOException {
-        Map<Integer,String> featureIndex = null;
+    public static Map<Integer, String> loadInvertedFeatureIndex(FileSystem fs, Path dictionaryPath) throws IOException {
+        Map<Integer, String> featureIndex = null;
         if (dictionaryPath != null) {
-            featureIndex = new HashMap<Integer,String>();
+            featureIndex = new HashMap<Integer, String>();
             int idx = 0;
             for (FileStatus status : fs.listStatus(dictionaryPath)) {
                 if (!status.isDir()) {

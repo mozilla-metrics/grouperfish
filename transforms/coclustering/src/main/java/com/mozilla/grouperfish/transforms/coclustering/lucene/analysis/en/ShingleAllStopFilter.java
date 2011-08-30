@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -33,13 +32,11 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeSource;
 
 /**
- * ShingleAllStopFilter is similar to the ShingleFilter that ships with Lucene except
- * it will detect if all unigrams in a token n-gram are stop words. If that is the case
- * the token will not be output.
+ * ShingleAllStopFilter is similar to the ShingleFilter that ships with Lucene
+ * except it will detect if all unigrams in a token n-gram are stop words. If
+ * that is the case the token will not be output.
  */
 public final class ShingleAllStopFilter extends TokenFilter {
-
-    private static final Logger LOG = Logger.getLogger(ShingleAllStopFilter.class);
 
     /**
      * filler token for when positionIncrement is more than 1
@@ -575,6 +572,8 @@ public final class ShingleAllStopFilter extends TokenFilter {
         /**
          * @return the value this instance had before the last advance() call
          */
+        // TODO: SMELLY: Why is this (no longer) used?
+        @SuppressWarnings("unused")
         public int getPreviousValue() {
             return previousValue;
         }
