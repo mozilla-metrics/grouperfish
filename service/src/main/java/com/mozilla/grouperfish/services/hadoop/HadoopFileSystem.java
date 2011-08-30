@@ -14,13 +14,15 @@ import org.apache.hadoop.fs.Path;
 import com.mozilla.grouperfish.base.Assert;
 
 
-public class HadoopFileSystem implements com.mozilla.grouperfish.services.FileSystem {
+public class HadoopFileSystem implements com.mozilla.grouperfish.services.api.FileSystem {
+
+    private static final String PROPERTY_DFS_ROOT = "grouperfish.services.hadoop.dfs.root";
 
     private final FileSystem hdfs;
     private final Path basePath;
 
     public HadoopFileSystem() {
-        final String hdfsRoot = System.getProperty("grouperfish.hdfs.root", "grouperfish");
+        final String hdfsRoot = System.getProperty(PROPERTY_DFS_ROOT, "grouperfish");
         try {
             hdfs = FileSystem.get(new Configuration());
             this.basePath = new Path(hdfsRoot);

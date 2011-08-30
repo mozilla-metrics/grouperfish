@@ -16,7 +16,7 @@ import java.io.Writer;
 
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.base.StreamTool;
-import com.mozilla.grouperfish.services.FileSystem;
+import com.mozilla.grouperfish.services.api.FileSystem;
 
 import static java.lang.String.format;
 
@@ -29,8 +29,10 @@ public class LocalFileSystem implements FileSystem {
         Assert.nonNull(root);
         Assert.check(!root.isEmpty());
         rootDir = new File(root);
-        Assert.check(rootDir.isDirectory());
+        Assert.check(!rootDir.exists() || rootDir.isDirectory());
+
         try {
+            if (!rootDir.exists()) rootDir.mkdirs();
             rootPath = rootDir.getCanonicalPath();
         }
         catch (final IOException e) {
@@ -47,8 +49,14 @@ public class LocalFileSystem implements FileSystem {
 
     @Override
     public String makeDirectory(final String relativePath) throws Denied {
-        // TODO Auto-generated method stub
-        return null;
+        final File toCreate = resolve(relativePath);
+        try {
+            toCreate.mkdirs();
+            return "file://" + toCreate.getCanonicalPath();
+        }
+        catch (final Exception e) {
+            throw new Denied(format("Error while creating '%s'", relativePath), e);
+        }
     }
 
     @Override
@@ -68,8 +76,7 @@ public class LocalFileSystem implements FileSystem {
             return "file://" + resolve(relativePath).getCanonicalPath();
         }
         catch (final Exception e) {
-            throw new NotFound(
-                    format("Error while lookig up '%s'", relativePath), e);
+            throw new NotFound(format("Error while lookig up '%s'", relativePath), e);
         }
     }
 
@@ -78,8 +85,7 @@ public class LocalFileSystem implements FileSystem {
         if (file.isDirectory()) {
             for (final File child : file.listFiles()) removeRecursively(child);
         }
-        if (file.delete()) throw new Denied(
-                format("Failed to delete file '%s'", file.getAbsolutePath()));
+        if (file.delete()) throw new Denied(format("Failed to delete file '%s'", file.getAbsolutePath()));
     }
 
     private File resolve(final String relativePath) throws Denied {
@@ -93,8 +99,7 @@ public class LocalFileSystem implements FileSystem {
             return f;
         }
         catch (final IOException e) {
-            throw new Denied(format(
-                    "Could not resolve '%s' due to IO error.", relativePath), e);
+            throw new Denied(format("Could not resolve '%s' due to IO error.", relativePath), e);
         }
     }
 

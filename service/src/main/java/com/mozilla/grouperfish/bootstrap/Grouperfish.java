@@ -3,12 +3,14 @@ package com.mozilla.grouperfish.bootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.mozilla.grouperfish.services.StorageAndRetrieval;
-import com.mozilla.grouperfish.services.jersey.JerseyStorageAndRetrieval;
-import com.mozilla.grouperfish.services.jersey.ResourceConfig;
+import com.google.inject.Module;
+import com.mozilla.grouperfish.batch.api.guice.BatchSystem;
+import com.mozilla.grouperfish.rest.api.RestService;
+import com.mozilla.grouperfish.rest.jersey.JerseyGuiceRestService;
+import com.mozilla.grouperfish.rest.jersey.ResourceConfig;
+import com.mozilla.grouperfish.services.api.guice.Services;
 
 /** Entry class to  set up the Grouperfish service. */
 public class Grouperfish {
@@ -25,12 +27,12 @@ public class Grouperfish {
      * @throws Exception
      */
 	public static void main(final String[] arguments) throws Exception {
-	    new Grouperfish(new GrouperfishBindings());
+	    new Grouperfish(new Services(), new BatchSystem());
 	}
 
-	public Grouperfish(final AbstractModule bindings) {
-	    final Injector injector = Guice.createInjector(bindings);
-	    StorageAndRetrieval rest = new JerseyStorageAndRetrieval(injector, ResourceConfig.class);
+	public Grouperfish(final Module... modules) {
+	    final Injector injector = Guice.createInjector(modules);
+	    final RestService rest = new JerseyGuiceRestService(injector, ResourceConfig.class);
 	    rest.start();
 	}
 }

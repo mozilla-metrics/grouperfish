@@ -1,11 +1,11 @@
 package com.mozilla.grouperfish.batch.handlers;
 
-import com.mozilla.grouperfish.batch.Helpers;
-import com.mozilla.grouperfish.batch.Fail;
-import com.mozilla.grouperfish.batch.Task;
-import com.mozilla.grouperfish.services.FileSystem;
-import com.mozilla.grouperfish.services.FileSystem.Denied;
-import com.mozilla.grouperfish.services.FileSystem.NotFound;
+import com.mozilla.grouperfish.batch.scheduling.Helpers;
+import com.mozilla.grouperfish.model.Fail;
+import com.mozilla.grouperfish.model.Task;
+import com.mozilla.grouperfish.services.api.FileSystem;
+import com.mozilla.grouperfish.services.api.FileSystem.Denied;
+import com.mozilla.grouperfish.services.api.FileSystem.NotFound;
 
 
 public class CleanupHandler implements TaskHandler {

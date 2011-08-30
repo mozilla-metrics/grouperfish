@@ -1,7 +1,7 @@
 package com.mozilla.grouperfish.batch.handlers;
 
-import com.mozilla.grouperfish.batch.Fail;
-import com.mozilla.grouperfish.batch.Task;
+import com.mozilla.grouperfish.model.Fail;
+import com.mozilla.grouperfish.model.Task;
 
 public interface TaskHandler {
 

@@ -1,17 +1,17 @@
 package com.mozilla.grouperfish.batch.handlers;
 
-import static com.mozilla.grouperfish.batch.Helpers.resultsFilename;
+import static com.mozilla.grouperfish.batch.scheduling.Helpers.resultsFilename;
 
 import java.io.Reader;
 import java.util.Map;
 
 import com.mozilla.grouperfish.base.StreamTool;
-import com.mozilla.grouperfish.batch.Fail;
-import com.mozilla.grouperfish.batch.Task;
+import com.mozilla.grouperfish.model.Fail;
+import com.mozilla.grouperfish.model.Task;
 import com.mozilla.grouperfish.naming.Scope;
-import com.mozilla.grouperfish.rest.ResultsResource;
-import com.mozilla.grouperfish.services.FileSystem;
-import com.mozilla.grouperfish.services.Grid;
+import com.mozilla.grouperfish.rest.jaxrs.ResultsResource;
+import com.mozilla.grouperfish.services.api.FileSystem;
+import com.mozilla.grouperfish.services.api.Grid;
 
 
 /**

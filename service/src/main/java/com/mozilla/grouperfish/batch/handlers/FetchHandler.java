@@ -1,19 +1,19 @@
 package com.mozilla.grouperfish.batch.handlers;
 
-import static com.mozilla.grouperfish.batch.Helpers.inputFilename;
-import static com.mozilla.grouperfish.batch.Helpers.parametersFilename;
-import static com.mozilla.grouperfish.batch.Helpers.writer;
+import static com.mozilla.grouperfish.batch.scheduling.Helpers.inputFilename;
+import static com.mozilla.grouperfish.batch.scheduling.Helpers.parametersFilename;
+import static com.mozilla.grouperfish.batch.scheduling.Helpers.writer;
 
 import java.io.Writer;
 
 import com.mozilla.grouperfish.base.Assert;
-import com.mozilla.grouperfish.batch.Helpers;
-import com.mozilla.grouperfish.batch.Fail;
-import com.mozilla.grouperfish.batch.Task;
-import com.mozilla.grouperfish.json.TsvJsonWriter;
+import com.mozilla.grouperfish.base.json.TsvJsonWriter;
+import com.mozilla.grouperfish.batch.scheduling.Helpers;
 import com.mozilla.grouperfish.model.Document;
-import com.mozilla.grouperfish.services.FileSystem;
-import com.mozilla.grouperfish.services.Index;
+import com.mozilla.grouperfish.model.Fail;
+import com.mozilla.grouperfish.model.Task;
+import com.mozilla.grouperfish.services.api.FileSystem;
+import com.mozilla.grouperfish.services.api.Index;
 
 public class FetchHandler implements TaskHandler {
 

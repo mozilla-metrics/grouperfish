@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import com.mozilla.grouperfish.services.Grid;
+import com.mozilla.grouperfish.services.api.Grid;
 
 
 /**

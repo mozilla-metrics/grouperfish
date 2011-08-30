@@ -14,7 +14,7 @@ import java.util.Map;
 
 import com.mozilla.grouperfish.base.ArrayTool;
 import com.mozilla.grouperfish.base.Assert;
-import com.mozilla.grouperfish.services.FileSystem;
+import com.mozilla.grouperfish.services.api.FileSystem;
 
 
 public class MockFs implements FileSystem {

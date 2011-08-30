@@ -6,7 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.Hazelcast;
-import com.mozilla.grouperfish.services.Grid;
+import com.mozilla.grouperfish.services.api.Grid;
 
 
 public class HazelcastGrid implements Grid {

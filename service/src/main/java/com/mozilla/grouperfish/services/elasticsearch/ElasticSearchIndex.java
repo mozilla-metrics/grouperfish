@@ -18,14 +18,16 @@ import com.mozilla.grouperfish.model.Query;
 import com.mozilla.grouperfish.naming.Namespace;
 
 
-public class ElasticSearchIndex implements com.mozilla.grouperfish.services.Index {
+public class ElasticSearchIndex implements com.mozilla.grouperfish.services.api.Index {
+
+    private final String PROPERTY_CLUSTER = "grouperfish.services.elasticsearch.cluster";
 
     private final String DOCUMENT_TYPE_NAME = "data";
 
     private final Client client;
 
     public ElasticSearchIndex() {
-        final String clusterName = System.getProperty("grouperfish.elasticsearch.cluster", "grouperfish");
+        final String clusterName = System.getProperty(PROPERTY_CLUSTER, "grouperfish");
         Node node = NodeBuilder.nodeBuilder().client(true).clusterName(clusterName).build();
         client = node.client();
     }

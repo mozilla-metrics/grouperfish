@@ -74,20 +74,6 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Cloudera Hadoop, HBase -->
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-core</artifactId>
-      <version>0.20.2-cdh3u0</version>
-    </dependency>
-
-    <!-- ElasticSearch -->
-    <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
-      <version>0.16.2</version>
-    </dependency>
-
   </dependencies>
 
 
@@ -112,8 +98,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.5</version>
         <configuration>
+          <workingDirectory>../build/</workingDirectory>
           <skip>${skip.tests.unit}</skip>
-          <argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
+          <argLine>-Xms128m -Xmx1024m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
           <parallel>methods</parallel>
           <threadCount>1</threadCount>
           <suiteXmlFiles>

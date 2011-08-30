@@ -15,6 +15,7 @@ import com.mozilla.grouperfish.bootstrap.Grouperfish;
 import com.hazelcast.core.Hazelcast;
 import com.jayway.restassured.RestAssured;
 import com.mozilla.grouperfish.base.Assert;
+import com.mozilla.grouperfish.rest.jersey.JerseyGuiceRestService;
 
 
 @Test(groups="integration")
@@ -33,7 +34,7 @@ public class IntegrationTestHelper {
         @Override
         public void run() {
             System.setProperty("hazelcast.config", "config/hazelcast.xml");
-            System.setProperty("grouperfish.rest.port", String.valueOf(port));
+            System.setProperty(JerseyGuiceRestService.PROPERTY_PORT, String.valueOf(port));
             try {
                 Grouperfish.main(new String[]{});
             }
@@ -76,7 +77,7 @@ public class IntegrationTestHelper {
 
 
     @BeforeTest(groups="integration")
-    static void setUpRestAssured() {
+    public static void setUpRestAssured() {
         RestAssured.baseURI = "http://127.0.0.1";
         RestAssured.port = port;
         RestAssured.basePath = "";
