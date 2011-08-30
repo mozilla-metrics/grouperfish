@@ -41,12 +41,16 @@ Coding Style
 ------------
 
 In general, consistency with existing surrounding code / module is more
-important for a patch than adherence to these rules (local consistency over global consistency).
+important for a patch than adherence to these rules (local consistency over
+global consistency).
+Wrap text (documentation, doc comments) and Python at 80 columns, everything
+else (especially Java) at 120.
 
 Java
-    This project follows the default eclipse code style, except that 4 spaces
+    This project follows the default Eclipse code format, except that 4 spaces
     are used for indention rather than ``TAB``.
-    For java projects, maven is encouraged as the build-tool.
+    For Java projects (transforms, filters), Maven is encouraged as the
+    build-tool (but not required).
 
 Python
     Follow `PEP 8`_
@@ -55,8 +59,8 @@ Python
 
 Other
     Follow the default convention of the language you are using.
-    When in doubt, indent using 4 spaces, limit width depending on language
-    (preferably 80 columns).
+    When in doubt, indent using 4 spaces.
+
 
 
 Repository Layout
@@ -68,8 +72,8 @@ Repository Layout
 
 ``service``
     The REST service and the batch system.
-    This must not contain any code or dependencies that is related to specific
-    algorithms/transforms.
+    This must not contain any code or any dependencies that are related to
+    specific transforms.
 
 ``docs``
     Sphinx-style documentation.
@@ -128,11 +132,19 @@ Each ``install`` script will put its components into the ``build`` directory
 under the main project. When a user unpacks a grouperfish distribution, she
 will see the contents of this directory:
 
+Each component can have build results into ``data``, ``conf``, ``bin``. The
+folder ``lib`` should be used where a component makes parts available to other
+components (other binaries should go to the respective subfolder).
+
 ::
 
     build/
         bin/
             grouperfish*
+        data/
+            ...
+        conf/
+            ...
         lib/
             grouperfish-service.jar
         transforms/
@@ -146,3 +158,79 @@ will see the contents of this directory:
             ...
 
 
+The Service Sub-Project
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``service/`` folder in the source tree contains the REST and batch
+drivers. It is the code that is run when you "start" Grouperfish, and which
+launches filters and transforms as needed.
+
+It is organized into some basic shared packages, and three *modules* which
+expose interfaces and components to be configured and replaced independent of
+each other, for flexibility.
+
+The shared packages contain:
+
+``bootstrap``
+    the entry point(s) to launch grouperfish
+
+``base``
+    shared general purpose helper code, e.g. for streams, immutable
+    collections and JSON handling
+
+``model``
+    simple objects that represent data Grouperfish deals with
+
+``util``
+    special purpose utility classes, e.g. for import/export,
+    TODO: move these to ``tools``
+
+Components from the three modules are instantiated using `Google Guice`_.
+Each module has multiple packages ``….grouperfish.<module>.…``.
+The ``….<module>.api`` package contains all interfaces of components that the
+module offers. The ``….<module>.api.guice`` package has the Guice-specific
+bindings (by implementing the Guice ``Module`` interface).
+Launch Grouperfish with different bindings to customize or stub parts.
+
+.. _`Google Guice`: http://code.google.com/p/google-guice/
+
+
+``services``
+    Components that depend on the computing environment. By configuring these
+    differently, users can chose alternative file systems, indexing or grid
+    solutions can be integrated.
+    Right now this flexibility is mostly used for mocking (testing).
+
+``rest``
+    The REST service is implemented as a couple of JAX-RS resources, managed
+    by Jetty/Jersey. Other than the service itself (to be started/stopped),
+    there is no functionality exposed api-wise.
+    Most resources mainly encapsulate maps. The ``/run`` resource also
+    interacts with the batch system.
+
+``batch``
+    The batch system implements scheduling and execution of tasks, and the
+    preparation and cleanup for each task run.
+    There are *handlers* for each stage of a task (fetch data, execute the
+    transform, make results available). The *transform* objects implement the
+    run itself: they manage child processes, or implement java-based
+    algorithms directly.
+    The *scheduling* is performed by a component that implements the
+    ``BatchService`` interface. Usually one or more queues are used, but
+    synchronous operation is also possible (for example in a command line
+    version).
+
+
+On Guice Usage
+^^^^^^^^^^^^^^
+
+Grouperfish uses *explicit dependency injection*: every class that needs a
+service component simply takes a corresponding constructor argument, to be
+provisioned on construction, without any Guice annotation. This means that
+Guice imports are mostly used...
+
+* where the application is configured (the bindings)
+
+* where it is bootstrapped
+
+* and in REST resources that are instantiated by `jersey-guice`_

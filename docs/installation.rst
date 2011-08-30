@@ -20,9 +20,10 @@ For development, see :ref:`hacking`.
 
 * **NumPy 1.6** or higher
 
-* **ElasticSearch 0.17.6** or above
-
 * **Hadoop, HBase and Pig** from the Cloudera distribution (cdh3u0)
+
+* **ElasticSearch 0.17.6** or above (only needed if you want to use an
+  existing cluster)
 
 The daemons for ElasticSearch/Hadoop/HBase do not need to be running on the
 same machines as Grouperfish. For Hadoop/HBase you will need to make sure that
@@ -32,13 +33,15 @@ the configuration is on your classpath (easiest with a local installation).
 Prepare your installation
 -------------------------
 
-* Obtain a grouperfish tarball[*] and unpack it into a directory of your choice.
+* Obtain a grouperfish tarball [#]_ and unpack it into a directory of your choice.
 
-   tar xzf grouperfish-0.1.tar
-   cd grouperfish-0.1
+    tar xzf grouperfish-0.1.tar
+    cd grouperfish-0.1
 
 * Under ``config``, modify the ``elasticsearch.yml`` so that Grouperfish will
   be able to discover your cluster.
+  By default, the Grouperfish nodes will participate as full ElasticSearch
+  nodes, so you do not need to have an existing cluster running.
 
 * In the ``hazelcast.xml``, have a look at ``<network>`` section.
   If your network does not support multicast based discovery, make changes
@@ -47,8 +50,7 @@ Prepare your installation
 .. _`Hazelcast documentation`:
    http://www.hazelcast.com/docs/1.9.4/manual/multi_html/ch09.html
 
-[*] right now, the only way to do so is to build it from source.
-    See :ref:`hacking`.
+.. [#] right now, the only way is to build it from source. See :ref:`hacking`.
 
 
 Launch the daemon
