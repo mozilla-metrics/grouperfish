@@ -125,7 +125,7 @@ when creating a grouperfish tarball.
           ...
 
 
-The build tree
+The Build Tree
 ^^^^^^^^^^^^^^
 
 Each ``install`` script will put its components into the ``build`` directory
@@ -158,6 +158,9 @@ components (other binaries should go to the respective subfolder).
             ...
 
 
+Components
+----------
+
 The Service Sub-Project
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -185,15 +188,9 @@ The shared packages contain:
     special purpose utility classes, e.g. for import/export,
     TODO: move these to ``tools``
 
-Components from the three modules are instantiated using `Google Guice`_.
-Each module has multiple packages ``….grouperfish.<module>.…``.
-The ``….<module>.api`` package contains all interfaces of components that the
-module offers. The ``….<module>.api.guice`` package has the Guice-specific
-bindings (by implementing the Guice ``Module`` interface).
-Launch Grouperfish with different bindings to customize or stub parts.
 
-.. _`Google Guice`: http://code.google.com/p/google-guice/
-
+Service Modules
+^^^^^^^^^^^^^^^
 
 ``services``
     Components that depend on the computing environment. By configuring these
@@ -224,6 +221,16 @@ Launch Grouperfish with different bindings to customize or stub parts.
 On Guice Usage
 ^^^^^^^^^^^^^^
 
+Components from modules are instantiated using `Google Guice`_.
+Each module has multiple packages ``….grouperfish.<module>.…``.
+The ``….<module>.api`` package contains all interfaces of components that the
+module offers. The ``….<module>.api.guice`` package has the Guice-specific
+bindings (by implementing the Guice ``Module`` interface).
+Launch Grouperfish with different bindings to customize or stub parts.
+
+.. _`Google Guice`: http://code.google.com/p/google-guice/
+
+
 Grouperfish uses *explicit dependency injection*: every class that needs a
 service component simply takes a corresponding constructor argument, to be
 provisioned on construction, without any Guice annotation. This means that
@@ -234,3 +241,7 @@ Guice imports are mostly used...
 * where it is bootstrapped
 
 * and in REST resources that are instantiated by `jersey-guice`_
+
+.. _`jersey-guice`:
+   http://jersey.java.net/nonav/apidocs/1.1.0-ea/contribs/jersey-guice/
+
