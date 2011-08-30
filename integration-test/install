@@ -9,14 +9,11 @@ fi
 
 case "${cmd}" in
     --build)
-        make html || exit 1
-        mkdir -p ../build/docs
-        cp -r _build/html ../build/docs
+        mvn test || exit 1
         ;;
     --clean)
-        make clean
-        rm -r ../build/docs
-        rm -r _build
+        mvn clean
+        rm -r target
         ;;
     --help)
         "Usage: ${0} [--build|--clean]"

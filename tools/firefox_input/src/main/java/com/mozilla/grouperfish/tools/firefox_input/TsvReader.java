@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.util.input;
+package com.mozilla.grouperfish.tools.firefox_input;
 
 import java.io.BufferedReader;
 import java.io.IOException;

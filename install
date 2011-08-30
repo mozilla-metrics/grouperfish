@@ -1,5 +1,6 @@
 #! /bin/bash
 
+self="${0}"
 usage() {
     echo "Usage: ${self} [--build | --help | --package | --clean] [PATH]"
     echo "    --help      Show this message."
@@ -16,10 +17,9 @@ usage() {
     echo
 }
 
-self="${0}"
 cmd="--build"
 all="YES"
-what="docs service transforms/* tools/* filters/*"
+what="project docs service transforms/* tools/* filters/* integration-test"
 
 if [[ "${#}" -gt "2" ]]; then
     usage
@@ -54,12 +54,12 @@ clean() {
             ( cd "${component}"
               ./install --clean || fail "Clean of '${component}' failed." )
         fi
-        rm -rf "./build/${component}"
+        rm -r "./build/${component}"
     done
     if [[ "YES" = "${all}" ]]; then
-        rm -rf ./build
-        version="$(cat ./VERSION)"
-        rm "./grouperfish-${version}.tar.gz"
+        rm -r ./build
+        version="$(cat ./project/VERSION)"
+        rm -f "./grouperfish-${version}.tar.gz"
     fi
 }
 
@@ -80,7 +80,7 @@ build() {
 
 package() {
     what=$1
-    version="$(cat ./VERSION)"
+    version="$(cat ./project/VERSION)"
     clean "${what}"
     build "${what}"
     tar czf "grouperfish-${version}.tar.gz" build

@@ -9,9 +9,9 @@ fi
 
 case "${cmd}" in
     --build)
-        mvn install
-        mkdir -p ../build/service/
-        cp target/grouperfish-service-*.jar ../build/service/
+        mvn install || exit 1
+        mkdir -p ../build/lib/
+        cp target/grouperfish-service-*.jar ../build/lib/
         mkdir -p ../build/conf
         cp conf/* ../build/conf/
         mkdir -p ../build/bin/
@@ -19,8 +19,8 @@ case "${cmd}" in
         ;;
     --clean)
         mvn clean
-        rm -rf ../build/service
-        rm -rf ../build/bin/grouperfish
+        rm -f ../build/lib/grouperfish-service-*
+        rm -f ../build/bin/grouperfish 
         ;;
     --help)
         "Usage: ${0} [--build|--clean]"

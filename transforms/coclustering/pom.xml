@@ -1,390 +1,310 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.mozilla</groupId>
+    <parent>
+        <groupId>com.mozilla</groupId>
+        <artifactId>grouperfish-parent</artifactId>
+        <relativePath>../../project</relativePath>
+        <version>FIXED</version>
+    </parent>
     <artifactId>grouperfish-transforms-coclustering</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>${grouperfishVersion}</version>
 
-    <name>grouperfish-transforms-coclustering</name>
+	<properties>
+		<mahoutVersion>0.5-cdh3u0</mahoutVersion>
+		<pigVersion>0.8.0-cdh3u0</pigVersion>
+		<luceneVersion>3.1.0</luceneVersion>
+	</properties>
+
     <description>Clustering engine for the web</description>
     <url>https://github.com/mozilla-metrics/grouperfish</url>
 
-    <packaging>jar</packaging>
+	<packaging>jar</packaging>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <skip.tests.unit>false</skip.tests.unit>
-    </properties>
+	<dependencies>
 
+		<dependency>
+			<groupId>com.mozilla</groupId>
+			<artifactId>akela</artifactId>
+			<version>0.2-SNAPSHOT</version>
+		</dependency>
 
-    <repositories>
-        <repository>
-            <id>java.net</id>
-            <url>http://download.java.net/maven/2</url>
-            <name>java.net Maven Repository</name>
-        </repository>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.6.0</version>
+		</dependency>
 
-        <repository>
-            <id>sonatype-nexus-public</id>
-            <name>SonaType public snapshots and releases repository</name>
-            <url>https://oss.sonatype.org/content/groups/public</url>
-        </repository>
-
-        <repository>
-            <id>cdh.release.repo</id>
-            <url>https://repository.cloudera.com/content/repositories/releases</url>
-            <name>Cloudera Releases Repository</name>
-            <snapshots><enabled>true</enabled></snapshots>
-        </repository>
-
-        <!-- for akela -->
-        <repository>
-            <id>mozilla-metrics-snapshots</id>
-            <url>http://mozilla-metrics.github.com/maven2/snapshots</url>
-        </repository>
-
-        <!-- for mahout/0.5-cdh3u0 -->
-        <repository>
-            <id>mozilla-metrics-releases</id>
-            <url>http://mozilla-metrics.github.com/maven2/releases</url>
-        </repository>
-
-    </repositories>
-
-
-    <dependencies>
-
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>1.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mozilla</groupId>
-            <artifactId>akela</artifactId>
-            <version>0.2-SNAPSHOT</version>
-        </dependency>
-
-        <!-- Logging:
-          - slf4j is used by all loging inside of the project
-          - for all other common logging APIs, we put redirection in place
-          - the actual logging implementation is logback (posing as slf4j) -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.5.11</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.5.11</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.5.11</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>0.9.20</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>0.9.20</version>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- End of logging configuration. -->
-
-
-
-        <!-- Cloudera Hadoop, HBase -->
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>0.20.2-cdh3u0</version>
-            <exclusions>
-            <exclusion>
-                <artifactId>jasper-runtime</artifactId>
-                <groupId>tomcat</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>commons-httpclient</artifactId>
-                <groupId>commons-httpclient</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>hsqldb</artifactId>
-                <groupId>hsqldb</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>commons-cli</artifactId>
-                <groupId>commons-cli</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>commons-logging</artifactId>
-                <groupId>commons-logging</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>jsp-api</artifactId>
-                <groupId>javax.servlet</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>hadoop-ant</artifactId>
-                <groupId>com.cloudera.cdh</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>commons-net</artifactId>
-                <groupId>commons-net</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>jasper-compiler</artifactId>
-                <groupId>tomcat</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>commons-el</artifactId>
-                <groupId>commons-el</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>ant</artifactId>
-                <groupId>ant</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>jets3t</artifactId>
-                <groupId>net.java.dev.jets3t</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>xmlenc</artifactId>
-                <groupId>xmlenc</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>core</artifactId>
-                <groupId>org.eclipse.jdt</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>commons-codec</artifactId>
-                <groupId>commons-codec</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>oro</artifactId>
-                <groupId>oro</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>jsp-api</artifactId>
-                <groupId>javax.servlet.jsp</groupId>
-            </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.3</version>
-        </dependency>
-
-        <!-- Lucene -->
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-analyzers</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-
-        <!-- Mahout -->
-        <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-core</artifactId>
-            <version>0.5-cdh3u0</version>
-            <exclusions>
-            <exclusion>
-                <artifactId>commons-cli</artifactId>
-                <groupId>org.apache.mahout.commons</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>uncommons-maths</artifactId>
-                <groupId>org.uncommons.maths</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>watchmaker-framework</artifactId>
-                <groupId>org.uncommons.watchmaker</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>commons-pool</artifactId>
-                <groupId>commons-pool</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>commons-dbcp</artifactId>
-                <groupId>commons-dbcp</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>commons-collections</artifactId>
-                <groupId>commons-collections</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>xpp3_min</artifactId>
-                <groupId>xpp3</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>slf4j-api</artifactId>
-                <groupId>org.slf4j</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>xstream</artifactId>
-                <groupId>com.thoughtworks.xstream</groupId>
-            </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-math</artifactId>
-            <version>0.5-cdh3u0</version>
-            <exclusions>
-            <exclusion>
-                <artifactId>uncommons-maths</artifactId>
-                <groupId>org.uncommons.maths</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>guava</artifactId>
-                <groupId>com.google.guava</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>slf4j-api</artifactId>
-                <groupId>org.slf4j</groupId>
-            </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-examples</artifactId>
-            <version>0.5-cdh3u0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-utils</artifactId>
-            <version>0.5-cdh3u0</version>
-            <exclusions>
-            <exclusion>
-                <artifactId>slf4j-jcl</artifactId>
-                <groupId>org.slf4j</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>slf4j-api</artifactId>
-                <groupId>org.slf4j</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>solr-commons-csv</artifactId>
-                <groupId>org.apache.solr</groupId>
-            </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-collections</artifactId>
-            <version>1.0</version>
-        </dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>1.6.0</version>
+		</dependency>
 
         <!-- Pig -->
         <dependency>
             <groupId>org.apache.pig</groupId>
             <artifactId>pig</artifactId>
-            <version>0.8.0-cdh3u0</version>
+            <version>${pigVersion}</version>
             <scope>provided</scope>
             <exclusions>
-            <exclusion>
-                <artifactId>jline</artifactId>
-                <groupId>jline</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>jsch</artifactId>
-                <groupId>com.jcraft</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>joda-time</artifactId>
-                <groupId>joda-time</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>jython</artifactId>
-                <groupId>org.python</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>guava</artifactId>
-                <groupId>com.google.guava</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>hadoop-root</artifactId>
-                <groupId>com.cloudera.cdh</groupId>
-            </exclusion>
-            <exclusion>
-                <artifactId>pig-ant</artifactId>
-                <groupId>com.cloudera.cdh</groupId>
-            </exclusion>
+                <exclusion>
+                    <artifactId>jline</artifactId>
+                    <groupId>jline</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jsch</artifactId>
+                    <groupId>com.jcraft</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>joda-time</artifactId>
+                    <groupId>joda-time</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jython</artifactId>
+                    <groupId>org.python</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-root</artifactId>
+                    <groupId>com.cloudera.cdh</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>pig-ant</artifactId>
+                    <groupId>com.cloudera.cdh</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
-    </dependencies>
+		<!-- Cloudera Hadoop, HBase -->
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
+			<version>${hadoopVersion}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>jasper-runtime</artifactId>
+					<groupId>tomcat</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-httpclient</artifactId>
+					<groupId>commons-httpclient</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>hsqldb</artifactId>
+					<groupId>hsqldb</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-cli</artifactId>
+					<groupId>commons-cli</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jsp-api</artifactId>
+					<groupId>javax.servlet</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>hadoop-ant</artifactId>
+					<groupId>com.cloudera.cdh</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-net</artifactId>
+					<groupId>commons-net</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jasper-compiler</artifactId>
+					<groupId>tomcat</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-el</artifactId>
+					<groupId>commons-el</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>ant</artifactId>
+					<groupId>ant</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jets3t</artifactId>
+					<groupId>net.java.dev.jets3t</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xmlenc</artifactId>
+					<groupId>xmlenc</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>core</artifactId>
+					<groupId>org.eclipse.jdt</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-codec</artifactId>
+					<groupId>commons-codec</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>oro</artifactId>
+					<groupId>oro</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jsp-api</artifactId>
+					<groupId>javax.servlet.jsp</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
-    <build>
-        <finalName>coclustering</finalName>
-        <plugins>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.3</version>
+		</dependency>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
+		<!-- Lucene -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>${luceneVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers</artifactId>
+			<version>${luceneVersion}</version>
+		</dependency>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <finalName>${project.name}-${project.version}</finalName>
-                </configuration>
-            </plugin>
+		<!-- Mahout -->
+		<dependency>
+			<groupId>org.apache.mahout</groupId>
+			<artifactId>mahout-core</artifactId>
+			<version>${mahoutVersion}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-cli</artifactId>
+					<groupId>org.apache.mahout.commons</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>uncommons-maths</artifactId>
+					<groupId>org.uncommons.maths</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>watchmaker-framework</artifactId>
+					<groupId>org.uncommons.watchmaker</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-pool</artifactId>
+					<groupId>commons-pool</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-dbcp</artifactId>
+					<groupId>commons-dbcp</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-collections</artifactId>
+					<groupId>commons-collections</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xpp3_min</artifactId>
+					<groupId>xpp3</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xstream</artifactId>
+					<groupId>com.thoughtworks.xstream</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.mahout</groupId>
+			<artifactId>mahout-math</artifactId>
+			<version>${mahoutVersion}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>uncommons-maths</artifactId>
+					<groupId>org.uncommons.maths</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>guava</artifactId>
+					<groupId>com.google.guava</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.mahout</groupId>
+			<artifactId>mahout-examples</artifactId>
+			<version>${mahoutVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.mahout</groupId>
+			<artifactId>mahout-utils</artifactId>
+			<version>${mahoutVersion}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-jcl</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>solr-commons-csv</artifactId>
+					<groupId>org.apache.solr</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.mahout</groupId>
+			<artifactId>mahout-collections</artifactId>
+			<version>1.0</version>
+		</dependency>
 
-            <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <configuration>
-                <finalName>${project.name}-${project.version}</finalName>
-                <appendAssemblyId>true</appendAssemblyId>
-                <descriptors>
-                    <descriptor>src/assembly/job.xml</descriptor>
-                </descriptors>
-            </configuration>
-            </plugin>
+	</dependencies>
 
-        </plugins>
-    </build>
+	<build>
+		<finalName>coclustering</finalName>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.1</version>
+				<configuration>
+					<finalName>${project.name}-${project.version}</finalName>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<finalName>${project.name}-${project.version}</finalName>
+					<appendAssemblyId>true</appendAssemblyId>
+					<descriptors>
+						<descriptor>src/assembly/job.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
 
 </project>

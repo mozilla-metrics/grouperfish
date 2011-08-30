@@ -1,0 +1,151 @@
+<!-- Parent pom used for shared properties -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mozilla</groupId>
+    <artifactId>grouperfish-parent</artifactId>
+    <version>FIXED</version>
+
+    <name>Grouperfish</name>
+    <description>Clustering engine for the web</description>
+    <packaging>pom</packaging>
+
+    <!-- These versions are likely to change more often. -->
+    <properties>
+        <grouperfishVersion>0.1-SNAPSHOT</grouperfishVersion>
+        <hadoopVersion>0.20.2-cdh3u0</hadoopVersion>
+        <mahoutVersion>0.5-cdh3u0</mahoutVersion>
+        <elasticsearchVersion>0.17.6</elasticsearchVersion>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<skip.tests.unit>false</skip.tests.unit>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>java.net</id>
+            <url>http://download.java.net/maven/2</url>
+            <name>java.net releases</name>
+        </repository>
+
+        <repository>
+            <id>sonatype-nexus-public</id>
+            <name>SonaType public snapshots and releases</name>
+            <url>https://oss.sonatype.org/content/groups/public</url>
+        </repository>
+
+        <repository>
+            <id>cdh.release.repo</id>
+            <name>Cloudera releases</name>
+            <url>
+                https://repository.cloudera.com/content/repositories/releases
+            </url>
+        </repository>
+
+        <repository>
+            <id>mozilla-metrics-snapshots</id>
+            <name>Mozilla Metrics snapshots</name>
+            <url>http://mozilla-metrics.github.com/maven2/snapshots</url>
+        </repository>
+
+        <!-- for mahout/0.5-cdh3u0 -->
+        <repository>
+            <id>mozilla-metrics-releases</id>
+            <url>http://mozilla-metrics.github.com/maven2/releases</url>
+        </repository>
+
+    </repositories>
+
+
+    <!-- Some dependencies can be assumed to be the same. -->
+    <dependencies>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>r09</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>5.6</version>
+            <classifier>jdk15</classifier>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Logging:
+        - slf4j is used by all loging inside of the project
+        - for all other common logging APIs, we put redirection in place
+        - the actual logging implementation is logback (posing as slf4j) -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.5.11</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>1.5.11</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.5.11</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>0.9.20</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>0.9.20</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- End of logging configuration. -->
+
+    </dependencies>
+
+
+
+    <build>
+        <plugins>
+            <!--  Set compiler level to Java 6 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

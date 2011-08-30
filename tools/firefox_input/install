@@ -7,16 +7,17 @@ if [[ "${#}" -eq "1" ]]; then
     fi
 fi
 
+dest=../../build/tools/firefox_input/
 case "${cmd}" in
     --build)
-        make html || exit 1
-        mkdir -p ../build/docs
-        cp -r _build/html ../build/docs
+        mvn install || exit 1
+        mkdir -p "${dest}/lib"
+        cp target/grouperfish-*.jar "${dest}/lib/"
+        cp bin/* "${dest}/"
         ;;
     --clean)
-        make clean
-        rm -r ../build/docs
-        rm -r _build
+        mvn clean
+        rm -r "${dest}"
         ;;
     --help)
         "Usage: ${0} [--build|--clean]"

@@ -58,7 +58,7 @@ if [ -d $bin/../target ]; then
     fi
 else
     # distribution: use dist jar, and go to background
-    MAIN_JAR_PATH="$bin/../grouperfish-*.jar"
+    MAIN_JAR_PATH="$bin/../lib/grouperfish-*.jar"
     if [ "$DAEMON_DETACHED" = "" ]; then
         DAEMON_DETACHED=true
     fi
@@ -75,18 +75,26 @@ if [ ! -d $bin/../logs ]; then
     mkdir -p $bin/../logs
 fi
 
-BAGHEERA_OPTS="-Dhazelcast.config=${HAZELCAST_CONF} -Dgrouperfish.rest.port=${SERVER_PORT} -Dbagheera.log.dir=${bin}/../logs"
+BAGHEERA_OPTS="-Dhazelcast.config=${HAZELCAST_CONF} -Dbagheera.log.dir=${bin}/../logs"
+GROUPERFISH_OPTS="-Dgrouperfish.services.rest.port=${SERVER_PORT}"
 
 echo "Using classpath: " $CLASSPATH
 
 if [ "$DAEMON_DETACHED" = false ]; then
-    java $BAGHEERA_OPTS $JAVA_OPTS -cp $CLASSPATH $SERVER_CLASS_NAME
+    java $BAGHEERA_OPTS $GROUPERFISH_OPTS $JAVA_OPTS \
+        -cp $CLASSPATH $SERVER_CLASS_NAME
     RETVAL=$?
 else
-    nohup java $BAGHEERA_OPTS $JAVA_OPTS -cp $CLASSPATH $SERVER_CLASS_NAME > $bin/../logs/grouperfish.out 2>&1 < /dev/null &
+    nohup java $BAGHEERA_OPTS $GROUPERFISH_OPTS $JAVA_OPTS \
+          -cp $CLASSPATH $SERVER_CLASS_NAME \
+          > $bin/../logs/grouperfish.out 2>&1 < /dev/null &
     PID=$!
     RETVAL=$?
-
+    if [[ $RETVAL == 0 ]]; then
+        echo "Started grouperfish (port=${SERVER_PORT}, PID=${PID})."
+    else
+        echo "Error starting grouperfish (port=${SERVER_PORT}, PID=${PID})!"
+    fi
     echo $PID > $PIDFILE
 fi
 

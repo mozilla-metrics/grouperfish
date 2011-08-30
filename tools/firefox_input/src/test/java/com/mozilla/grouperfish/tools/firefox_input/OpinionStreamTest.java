@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.util.input;
+package com.mozilla.grouperfish.tools.firefox_input;
 
 import java.io.ByteArrayInputStream;
 
@@ -9,7 +9,7 @@ import static org.testng.AssertJUnit.fail;
 
 import com.mozilla.grouperfish.base.StreamTool;
 import com.mozilla.grouperfish.model.Document;
-import com.mozilla.grouperfish.util.input.OpinionStream;
+import com.mozilla.grouperfish.tools.firefox_input.OpinionStream;
 
 
 @Test(groups="unit")

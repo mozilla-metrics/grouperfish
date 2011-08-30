@@ -1,0 +1,34 @@
+#! /bin/bash
+
+# Load Firefox Input opinions into Grouperfish.
+
+self="${0}"
+usage() {
+    echo "Usage: ${self} [http://grouperfish:port] namespace"
+    echo
+    echo "Reads opinion data from standard input and loads it into the"
+    echo "given namespace."
+    echo
+}
+
+tool_home=`dirname "$self"`
+grouperfish_home="${tool_home}/../.."
+
+load() {
+    for lib in `ls ${grouperfish_home}/lib`; do
+        CLASSPATH=${CLASSPATH}:$lib
+    done
+    for lib in `ls ${tool_home}/lib`; do
+        CLASSPATH=${CLASSPATH}:$lib
+    done
+    main=com.mozilla.grouperfish.tools.firefox_input.OpinionLoader
+    java -cp $CLASSPATH ${main}
+}
+
+case "${1}" in
+    --help)
+        usage
+        ;;
+    *)
+        load $@
+esac

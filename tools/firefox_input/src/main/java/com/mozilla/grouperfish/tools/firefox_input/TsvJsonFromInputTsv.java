@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.util.input;
+package com.mozilla.grouperfish.tools.firefox_input;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -8,6 +8,11 @@ import com.mozilla.grouperfish.base.StreamTool;
 import com.mozilla.grouperfish.base.json.TsvJsonWriter;
 import com.mozilla.grouperfish.model.Document;
 
+
+/**
+ * Produces a TSV/JSON (our algorithm format) directly from input data,
+ * without need for a running grouperfish instance.
+ */
 public class TsvJsonFromInputTsv {
 
     public static void main(String[] args) throws IOException {

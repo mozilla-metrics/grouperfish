@@ -12,7 +12,7 @@ First, make sure that you satisfy the requirements for running grouperfish
 (:ref:`installation`).
 
 Maven
-    We are using Maven 3 for build and dependency management of several
+    We are using Maven 3.0 for build and dependency management of several
     Grouperfish components.
 
 JDK 6
@@ -36,6 +36,8 @@ Building it:
     > ./install             # Creates a build under ./build
     > ./install --package   # Creates grouperfish-$VERSION.tar.gz
 
+When building, you might get Maven warnings due to expressions in the
+``'version'`` field, which can be ignored.
 
 Coding Style
 ------------

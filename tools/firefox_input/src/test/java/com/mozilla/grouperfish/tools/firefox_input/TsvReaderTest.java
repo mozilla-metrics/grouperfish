@@ -1,4 +1,4 @@
-package com.mozilla.grouperfish.util.input;
+package com.mozilla.grouperfish.tools.firefox_input;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.mozilla.grouperfish.util.input.TsvReader;
+import com.mozilla.grouperfish.tools.firefox_input.TsvReader;
 
 
 @Test(groups="unit")
