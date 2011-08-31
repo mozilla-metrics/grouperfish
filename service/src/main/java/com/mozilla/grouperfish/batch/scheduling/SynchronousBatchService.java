@@ -1,5 +1,8 @@
 package com.mozilla.grouperfish.batch.scheduling;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.mozilla.grouperfish.batch.handlers.TaskHandler;
 import com.mozilla.grouperfish.batch.transforms.TransformProvider;
@@ -20,6 +23,8 @@ import com.mozilla.grouperfish.services.api.Index;
  */
 public class SynchronousBatchService extends AbstractBatchService {
 
+    private static final Logger log = LoggerFactory.getLogger(SynchronousBatchService.class);
+
     private final TaskHandler handler;
 
     @Inject
@@ -30,6 +35,8 @@ public class SynchronousBatchService extends AbstractBatchService {
             final TransformProvider transforms) {
         super(index);
         handler = Helpers.sequentialHandler(grid, fs, index, transforms);
+
+        log.info("Instantiated service: {}", getClass().getSimpleName());
     }
 
     @Override

@@ -14,6 +14,9 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.base.StreamTool;
 import com.mozilla.grouperfish.services.api.FileSystem;
@@ -21,6 +24,8 @@ import com.mozilla.grouperfish.services.api.FileSystem;
 import static java.lang.String.format;
 
 public class LocalFileSystem implements FileSystem {
+
+    private static final Logger log = LoggerFactory.getLogger(LocalFileSystem.class);
 
     private final File rootDir;
     private final String rootPath;
@@ -38,6 +43,8 @@ public class LocalFileSystem implements FileSystem {
         catch (final IOException e) {
             throw new RuntimeException(root);
         }
+
+        log.info("Instantiated service: {} (rootPath={})", getClass().getSimpleName(), rootPath);
     }
 
     @Override

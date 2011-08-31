@@ -17,7 +17,7 @@ public class Grouperfish {
 
     public static final int DEFAULT_PORT = 0xF124;
 
-    static Logger log = LoggerFactory.getLogger(Grouperfish.class);
+    static final Logger log = LoggerFactory.getLogger(Grouperfish.class);
 
     /**
      * Starts the Grouperfish engine.
@@ -34,5 +34,9 @@ public class Grouperfish {
 	    final Injector injector = Guice.createInjector(modules);
 	    final RestService rest = new JerseyGuiceRestService(injector, ResourceConfig.class);
 	    rest.start();
+	    log.info("Grouperfish started.");
+        log.debug("Configured port: {}, default: {}",
+                  System.getProperty(JerseyGuiceRestService.PROPERTY_PORT), DEFAULT_PORT);
 	}
+
 }

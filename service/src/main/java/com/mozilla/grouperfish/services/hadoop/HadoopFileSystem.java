@@ -10,13 +10,17 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.mozilla.grouperfish.base.Assert;
 
 
 public class HadoopFileSystem implements com.mozilla.grouperfish.services.api.FileSystem {
 
-    private static final String PROPERTY_DFS_ROOT = "grouperfish.services.hadoop.dfs.root";
+    public static final String PROPERTY_DFS_ROOT = "grouperfish.services.hadoop.dfs.root";
+
+    private static final Logger log = LoggerFactory.getLogger(HadoopFileSystem.class);
 
     private final FileSystem hdfs;
     private final Path basePath;
@@ -30,6 +34,7 @@ public class HadoopFileSystem implements com.mozilla.grouperfish.services.api.Fi
         catch (IOException e) {
             throw new RuntimeException(e);
         }
+        log.info("Instantiated service: {} (hdfsRoot={})", getClass().getSimpleName(), hdfsRoot);
     }
 
     @Override

@@ -4,9 +4,31 @@
 # Internally, this starts a bagheera service, but uses custom JAX-RS resources.
 
 function usage() {
-  echo "Usage: $0 [server-port] [hazelcast-config-path]"
-  exit 1
+    echo "Usage: $0 [options] [server-port] [hazelcast-config-path]"
 }
+
+while getopts ":fh" optname ; do
+    case "$optname" in
+        "f")
+            DAEMON_DETACHED=false
+            ;;
+        "h")
+            usage
+            exit 0
+            ;;
+        "?")
+            echo "Unknown option ${OPTARG}"
+            usage
+            exit 1
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+done
+shift $(($OPTIND - 1))
+
 
 # Set defaults:
 #   port = FISH = 0xF124 = 61732
@@ -17,7 +39,10 @@ bin=`cd "$bin"; pwd`
 HAZELCAST_CONF=$bin/../conf/hazelcast.xml
 
 # Print usage if incorrect number of args
-[[ $# -gt 2 ]] && usage
+if [[ $# -gt 2 ]] ; then
+    usage
+    exit 1
+fi
 
 # User override:
 if [[ $# -gt 0 ]]; then
@@ -51,11 +76,15 @@ else
 fi
 
 if [ -d $bin/../target ]; then
-    # development: use the main jar in the build directory and run in foreground
+    # development:
+    # - use the main jar in the build directory
+    # - run in foreground
+    # - cd ../build to find transforms
     MAIN_JAR_PATH="$bin/../target/grouperfish-*.jar"
     if [ "$DAEMON_DETACHED" = "" ]; then
         DAEMON_DETACHED=false
     fi
+    cd ../build
 else
     # distribution: use dist jar, and go to background
     MAIN_JAR_PATH="$bin/../lib/grouperfish-*.jar"
@@ -76,12 +105,13 @@ if [ ! -d $bin/../logs ]; then
 fi
 
 BAGHEERA_OPTS="-Dhazelcast.config=${HAZELCAST_CONF} -Dbagheera.log.dir=${bin}/../logs"
-GROUPERFISH_OPTS="-Dgrouperfish.services.rest.port=${SERVER_PORT}"
+GROUPERFISH_OPTS="-Dgrouperfish.rest.port=${SERVER_PORT}"
 
 echo "Using classpath: " $CLASSPATH
 
 if [ "$DAEMON_DETACHED" = false ]; then
-    java $BAGHEERA_OPTS $GROUPERFISH_OPTS $JAVA_OPTS \
+    java -Dlogback.configurationFile=logback-stdout.xml \
+        $BAGHEERA_OPTS $GROUPERFISH_OPTS $JAVA_OPTS \
         -cp $CLASSPATH $SERVER_CLASS_NAME
     RETVAL=$?
 else
@@ -90,12 +120,14 @@ else
           > $bin/../logs/grouperfish.out 2>&1 < /dev/null &
     PID=$!
     RETVAL=$?
+    echo $PID > $PIDFILE
+
     if [[ $RETVAL == 0 ]]; then
         echo "Started grouperfish (port=${SERVER_PORT}, PID=${PID})."
     else
         echo "Error starting grouperfish (port=${SERVER_PORT}, PID=${PID})!"
     fi
-    echo $PID > $PIDFILE
 fi
 
 exit $RETVAL
+

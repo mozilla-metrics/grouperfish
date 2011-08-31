@@ -3,6 +3,9 @@ package com.mozilla.grouperfish.batch.scheduling;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.mozilla.grouperfish.batch.handlers.CleanupHandler;
@@ -39,6 +42,8 @@ import com.mozilla.grouperfish.services.api.Index;
  */
 public class PipeliningBatchService extends AbstractBatchService {
 
+    private static final Logger log = LoggerFactory.getLogger(PipeliningBatchService.class);
+
     private final List<Worker> workers;
     private final BlockingQueue<Task> prepareQueue;
 
@@ -66,6 +71,7 @@ public class PipeliningBatchService extends AbstractBatchService {
             .build();
 
         prepareQueue = prepQ;
+        log.info("Instantiated service: {}", getClass().getSimpleName());
     }
 
     public void start() {
