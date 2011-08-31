@@ -1,0 +1,5 @@
+#! /bin/bash
+
+export PYTHONPATH="lib/stemming:lib/textcluster:$PYTHONPATH"
+
+env python run.py $1 || exit 0

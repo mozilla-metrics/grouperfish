@@ -1,0 +1,52 @@
+#! /bin/bash
+
+# normalize work directory
+wd=`dirname "$0"`
+wd=`cd "$wd"; pwd`
+
+
+cmd="--build"
+if [[ "${#}" -eq "1" ]]; then
+    if [[ "${1}" == --* ]]; then
+        cmd=$1
+    fi
+fi
+
+
+dest=../../build/transforms/textcluster
+case "${cmd}" in
+    --build)
+        mkdir -p lib
+        cd lib
+        [[ -d stemming ]] ||
+            hg clone https://bitbucket.org/mchaput/stemming
+        [[ -d textcluster ]] ||
+            git clone https://github.com/davedash/textcluster.git
+        cd ..
+        [[ -d "${dest}/lib" ]] ||
+            cp -r lib "${dest}/"
+
+        mkdir -p "${dest}"
+        cp textcluster run.py "${dest}/"
+        ;;
+    --test)
+        for d in $( ls tests ); do
+            ./textcluster "tests/${d}" || exit 1
+            cd "tests/${d}"
+            diff results.expected.json results.json ||
+                ( echo "Test '${d}': Result seems to be wrong"; exit 1 )
+            cd ..
+        done
+        ;;
+    --clean)
+        rm -rf lib
+        find . -type f -name '*.pyc' | xargs rm
+        ;;
+    --help)
+        echo "Usage: ${0} [--build|--clean|--test]"
+        ;;
+    *)
+        echo "Usage: ${0} [--build|--clean|--test]"
+        exit 1
+        ;;
+esac
