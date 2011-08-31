@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# A minimal transform that performs a line-count on the input and
+# A minimal hadoop based transform that performs a line-count on the input and
 # generates a result like this
 #
 # {"count": 12345}

@@ -1,11 +1,17 @@
 #! /bin/bash
 
+# normalize work directory
+wd=`dirname "$0"`
+wd=`cd "$wd"; pwd`
+
+
 cmd="--build"
 if [[ "${#}" -eq "1" ]]; then
     if [[ "${1}" == --* ]]; then
         cmd=$1
     fi
 fi
+
 
 dest=../../build/transforms/coclustering
 case "${cmd}" in

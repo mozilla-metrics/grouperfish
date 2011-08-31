@@ -38,7 +38,7 @@ def main(args):
     work_dir = args[1]
     parameters = json.load(open("%s/parameters.json" % work_dir))
     with open("%s/input.json.tsv" % work_dir) as inFile:
-        with open("%s/results.json" % work_dir, "w+") as outFile:
+        with open("%s/output/results.json" % work_dir, "w+") as outFile:
             process(inFile, outFile, **parameters)
 
 if __name__ == "__main__":

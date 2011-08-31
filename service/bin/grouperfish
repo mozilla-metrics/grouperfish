@@ -1,11 +1,16 @@
 #!/bin/bash
 
-# Startup a grouperfish instance.
-# Internally, this starts a bagheera service, but uses custom JAX-RS resources.
+# Starts up a grouperfish instance.
+# Internally, this uses bagheera map stores, but uses custom JAX-RS resources.
 
 function usage() {
-    echo "Usage: $0 [options] [server-port] [hazelcast-config-path]"
+    echo "Usage: $0 [-fh] [server-port] [hazelcast-config-path]"
 }
+
+bin=`dirname "$0"`
+bin=`cd "$bin"; pwd`
+
+#### Process options
 
 while getopts ":fh" optname ; do
     case "$optname" in
@@ -30,12 +35,10 @@ done
 shift $(($OPTIND - 1))
 
 
-# Set defaults:
+#### Process arguments
+
 #   port = FISH = 0xF124 = 61732
 SERVER_PORT=61732
-#   config is fixed for grouperfish
-bin=`dirname "$0"`
-bin=`cd "$bin"; pwd`
 HAZELCAST_CONF=$bin/../conf/hazelcast.xml
 
 # Print usage if incorrect number of args
@@ -103,6 +106,7 @@ done
 if [ ! -d $bin/../logs ]; then
     mkdir -p $bin/../logs
 fi
+
 
 BAGHEERA_OPTS="-Dhazelcast.config=${HAZELCAST_CONF} -Dbagheera.log.dir=${bin}/../logs"
 GROUPERFISH_OPTS="-Dgrouperfish.rest.port=${SERVER_PORT}"

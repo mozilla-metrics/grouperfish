@@ -4,12 +4,9 @@
 wd=`dirname "$0"`
 wd=`cd "$wd"; pwd`
 
-
 cmd="--build"
 if [[ "${#}" -eq "1" ]]; then
-    if [[ "${1}" == --* ]]; then
-        cmd=$1
-    fi
+    if [[ "${1}" == --* ]]; then cmd=$1; fi
 fi
 
 
@@ -32,10 +29,10 @@ case "${cmd}" in
     --test)
         for d in $( ls tests ); do
             ./textcluster "tests/${d}" || exit 1
-            cd "tests/${d}"
-            diff results.expected.json results.json ||
+            pushd "tests/${d}" > /dev/null
+            diff results.expected.json output/results.json ||
                 ( echo "Test '${d}': Result seems to be wrong"; exit 1 )
-            cd ..
+            popd > /dev/null
         done
         ;;
     --clean)
