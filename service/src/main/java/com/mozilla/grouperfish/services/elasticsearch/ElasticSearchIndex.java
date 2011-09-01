@@ -10,6 +10,8 @@ import org.elasticsearch.client.action.search.SearchRequestBuilder;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.mozilla.grouperfish.base.Assert;
@@ -18,16 +20,21 @@ import com.mozilla.grouperfish.model.Query;
 import com.mozilla.grouperfish.naming.Namespace;
 
 
-public class ElasticSearchIndex implements com.mozilla.grouperfish.services.Index {
+public class ElasticSearchIndex implements com.mozilla.grouperfish.services.api.Index {
+
+    public static final String PROPERTY_CLUSTER = "grouperfish.services.elasticsearch.cluster";
+
+    private static final Logger log = LoggerFactory.getLogger(ElasticSearchIndex.class);
 
     private final String DOCUMENT_TYPE_NAME = "data";
 
     private final Client client;
 
     public ElasticSearchIndex() {
-        final String clusterName = System.getProperty("grouperfish.elasticsearch.cluster", "grouperfish");
+        final String clusterName = System.getProperty(PROPERTY_CLUSTER, "grouperfish");
         Node node = NodeBuilder.nodeBuilder().client(true).clusterName(clusterName).build();
         client = node.client();
+        log.info("Instantiated service: {} (clusterName={})", getClass().getSimpleName(), clusterName);
     }
 
     @Override

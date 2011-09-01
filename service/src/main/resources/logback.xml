@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
- 
-  <!-- 
+
+  <!--
   <appender name="REST" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <encoder><pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern></encoder>
     <file>logs/rest.log</file>
@@ -12,8 +12,8 @@
     </rollingPolicy>
 
   </appender>
-  
-  
+
+
   <appender name="BATCH" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <encoder><pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern></encoder>
     <file>logs/batch.log</file>
@@ -27,17 +27,20 @@
   -->
 
 
-  <appender name="GENERAL" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <encoder><pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern></encoder>
+  <appender name="GENERAL"
+            class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <encoder>
+        <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
     <file>logs/grouperfish.log</file>
-    
+
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>logs/archive/grouperfish.%d{yyyy/MM}.log.gz</fileNamePattern>
       <maxHistory>365</maxHistory>
     </rollingPolicy>
   </appender>
-  
-  
-  <root level="DEBUG"><appender-ref ref="GENERAL" /></root>
+
+
+  <root level="INFO"><appender-ref ref="GENERAL" /></root>
 
 </configuration>

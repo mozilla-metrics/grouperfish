@@ -1,0 +1,106 @@
+#! /bin/bash
+
+self="${0}"
+usage() {
+    echo "Usage: ${self} [--build | --help | --package | --clean] [PATH]"
+    echo "    --help      Show this message."
+    echo "    --clean     Discard all build results and intermediate files."
+    echo "    --build     Install components to ./build (default)"
+    echo "    --package   Create a complete grouperfish tarball."
+    echo "                Cleans and rebuilds every component first."
+    echo
+    echo "    PATH        The component to build."
+    echo "                Examples: 'service', 'transforms/coclustering'"
+    echo "                If omitted, everything is built."
+    echo
+    echo "This script must be called from the root directory of the project."
+    echo
+}
+
+cmd="--build"
+all="YES"
+what="project docs service transforms/* tools/* filters/* integration-test"
+
+if [[ "${#}" -gt "2" ]]; then
+    usage
+    exit 1
+fi
+
+if [[ "${#}" -eq "2" ]]; then
+    cmd=$1
+    all="NO"
+    what=$2
+fi
+
+if [[ "${#}" -eq "1" ]]; then
+    if [[ "${1}" == -* ]]; then
+        cmd=$1
+    else
+        all="NO"
+        what=$1
+    fi
+fi
+
+fail() {
+    echo "Build aborted: ${1}"
+    exit 1
+}
+
+clean() {
+    what=$1
+    for component in $what; do
+        if [[ -x "$component/install" ]]; then
+            echo "Cleaning $component ..."
+            ( cd "${component}"
+              ./install --clean || fail "Clean of '${component}' failed." )
+        fi
+        rm -r "./build/${component}"
+    done
+    if [[ "YES" = "${all}" ]]; then
+        rm -r ./build
+        version="$(cat ./project/VERSION)"
+        rm -f "./grouperfish-${version}.tar.gz"
+    fi
+}
+
+build() {
+    what=$1
+    for component in $what; do
+        if [[ -x "$component/install" ]]; then
+            echo "Installing $component ..."
+            ( cd "${component}"
+              ./install || fail "Installation of '${component}' failed." )
+        else
+            echo "Copying $component ..."
+            mkdir -p "build/${component}/"
+            cp -r "${component}"/* "build/${component}/"
+        fi
+    done
+}
+
+package() {
+    what=$1
+    version="$(cat ./project/VERSION)"
+    clean "${what}"
+    build "${what}"
+    tar czf "grouperfish-${version}.tar.gz" build
+}
+
+case "${cmd}" in
+    --help)
+        usage
+        ;;
+    --build)
+        build "${what}"
+        ;;
+    --clean)
+        clean "${what}"
+        ;;
+    --package)
+        package "${what}"
+        ;;
+    *)
+        usage
+        exit 1
+        ;;
+esac

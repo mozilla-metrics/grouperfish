@@ -123,7 +123,7 @@ Here are the contents of this working directory when the transform is started:
 
   Example:
 
-  ::
+::
 
       4815162342``  ``{"id":"4815162342", "text": "some\ntext"}
       4815162343``  ``{"id":"4815162343", "text": "moar text"}
@@ -137,28 +137,27 @@ Here are the contents of this working directory when the transform is started:
 
   Example:
 
-  ::
+::
+
     {
-     "text" : {
-                "STOPWORDS" : [ "the", "cat" ]
-                "STEM": "false",
-        	"MIN_WORD_LEN": "2",
-        	"MIN_DF": "1",
-        	"MAX_DF_PERCENT": "0.99",
-        	"DOC_COL_ID" : "id",
-        	"TEXT_COL_ID" : "text"
-              },
-    "mapreduce":{
-        	"NUM_REDUCERS": "7"
-             },
-    "transform":{
-                "KMEANS_NUM_CLUSTERS": "10",
-                "KMEANS_NUM_ITERATIONS": "20",
-                "SSVD_MULTIPLIER": "5",
-                "SSVD_BLOCK_HEIGHT": "30000",
-                "KMEANS_DELTA": "0.1",
-                "KMEANS_DISTANCE" : "CosineDistanceMeasure"
-               }
+      "text" : {
+        "STOPWORDS": [ "the", "cat" ]
+        "STEM": "false",
+        "MIN_WORD_LEN": "2",
+        "MIN_DF": "1",
+        "MAX_DF_PERCENT": "0.99",
+        "DOC_COL_ID": "id",
+        "TEXT_COL_ID": "text"
+      },
+      "mapreduce": {"NUM_REDUCERS": "7"},
+      "transform": {
+        "KMEANS_NUM_CLUSTERS": "10",
+        "KMEANS_NUM_ITERATIONS": "20",
+        "SSVD_MULTIPLIER": "5",
+        "SSVD_BLOCK_HEIGHT": "30000",
+        "KMEANS_DELTA": "0.1",
+        "KMEANS_DISTANCE": "CosineDistanceMeasure"
+      }
     }
 
 

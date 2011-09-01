@@ -1,36 +1,47 @@
 package com.mozilla.grouperfish.batch.handlers;
 
+import static com.mozilla.grouperfish.batch.scheduling.Helpers.resultsFilename;
+
 import java.io.Reader;
+import java.util.Map;
 
-import com.mozilla.grouperfish.base.Result;
-import com.mozilla.grouperfish.batch.RetryException;
-import com.mozilla.grouperfish.batch.Task;
-import com.mozilla.grouperfish.services.FileSystem;
-import com.mozilla.grouperfish.services.Grid;
-
-import static com.mozilla.grouperfish.batch.handlers.Helpers.resultsFilename;
+import com.mozilla.grouperfish.base.StreamTool;
+import com.mozilla.grouperfish.model.Fail;
+import com.mozilla.grouperfish.model.Task;
+import com.mozilla.grouperfish.naming.Scope;
+import com.mozilla.grouperfish.rest.jaxrs.ResultsResource;
+import com.mozilla.grouperfish.services.api.FileSystem;
+import com.mozilla.grouperfish.services.api.Grid;
 
 
 /**
- * Loads run results into storage.
+ * Put run results into results storage.
  */
 public class PutHandler implements TaskHandler {
 
 
     private final FileSystem fs;
+    private final Grid grid;
 
     public PutHandler(final Grid grid, final FileSystem fs) {
+        this.grid = grid;
         this.fs = fs;
     }
 
     @Override
-    public Task handle(final Task task) throws RetryException {
+    public Task handle(final Task task) throws Fail {
 
-        final Result<Reader> result = fs.reader(resultsFilename(task));
-        for (final Exception error : result.error())
-            throw new RetryException("Could not read results from filesystem:", error);
+        final String key = ResultsResource.key(task.transform().name(), task.query().name());
+        final Map<String, String> results = new Scope(task.namespace(), grid).results();
 
-        return null;
+        try {
+            final Reader reader = fs.reader(resultsFilename(task));
+            results.put(key, StreamTool.consume(reader));
+        }
+        catch (final Exception e) {
+            throw new Fail(task, "Could not read results from filesystem.", e);
+        }
+        return task;
     }
 
 }

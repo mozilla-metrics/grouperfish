@@ -3,18 +3,22 @@ package com.mozilla.grouperfish.naming;
 import java.util.Map;
 
 import com.mozilla.grouperfish.base.Assert;
-import com.mozilla.grouperfish.json.JsonValidator;
+import com.mozilla.grouperfish.base.json.JsonValidator;
 import com.mozilla.grouperfish.model.Access;
 import com.mozilla.grouperfish.model.ConfigurationType;
-import com.mozilla.grouperfish.rest.DocumentsResource;
-import com.mozilla.grouperfish.rest.QueriesResource;
-import com.mozilla.grouperfish.rest.ResultsResource;
-import com.mozilla.grouperfish.rest.ConfigurationsResource.FilterConfigsResource;
-import com.mozilla.grouperfish.rest.ConfigurationsResource.TransformConfigsResource;
-import com.mozilla.grouperfish.services.Grid;
+import com.mozilla.grouperfish.rest.jaxrs.DocumentsResource;
+import com.mozilla.grouperfish.rest.jaxrs.QueriesResource;
+import com.mozilla.grouperfish.rest.jaxrs.ResultsResource;
+import com.mozilla.grouperfish.rest.jaxrs.ConfigurationsResource.FilterConfigsResource;
+import com.mozilla.grouperfish.rest.jaxrs.ConfigurationsResource.TransformConfigsResource;
+import com.mozilla.grouperfish.services.api.Grid;
 
 
-/** Helps to consistently associate resource access to a namespace. */
+/**
+ * Helps to consistently associate resource access to a namespace.
+ * Gatekeeperfor each access, allows to implement permissions
+ * (in {@link #allows(Class, Access)}).
+ */
 public class Scope extends Namespace {
 
     private final Grid grid;
@@ -22,6 +26,11 @@ public class Scope extends Namespace {
 
     public Scope(final String namespace, final Grid grid) {
         super(namespace);
+        this.grid = grid;
+    }
+
+    public Scope(final Namespace ns, final Grid grid) {
+        super(ns.raw());
         this.grid = grid;
     }
 

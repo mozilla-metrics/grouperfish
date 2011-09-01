@@ -39,17 +39,17 @@ import com.mozilla.util.TextUtil;
 
 public class UnigramExtractor extends EvalFunc<DataBag> {
 
-	private static BagFactory bagFactory = BagFactory.getInstance();
-	private static TupleFactory tupleFactory = TupleFactory.getInstance();
+    private static BagFactory bagFactory = BagFactory.getInstance();
+    private static TupleFactory tupleFactory = TupleFactory.getInstance();
 
-	private String stopwordDictPath;
-	private Set<String> stopwords;
+    private String stopwordDictPath;
+    private Set<String> stopwords;
 
-	public UnigramExtractor() {
-	    stopwordDictPath = "stopwords.txt";
-	}
+    public UnigramExtractor() {
+        stopwordDictPath = "stopwords.txt";
+    }
 
-	private void loadStopwordDict() throws IOException {
+    private void loadStopwordDict() throws IOException {
         if (stopwordDictPath != null) {
             stopwords = new HashSet<String>();
 
@@ -77,36 +77,36 @@ public class UnigramExtractor extends EvalFunc<DataBag> {
         }
     }
 
-	public DataBag exec(Tuple input) throws IOException {
-		if (input == null || input.size() == 0) {
-			return null;
-		}
+    public DataBag exec(Tuple input) throws IOException {
+        if (input == null || input.size() == 0) {
+            return null;
+        }
 
-		if (input.size() > 1) {
-            stopwordDictPath = (String)input.get(1);
+        if (input.size() > 1) {
+            stopwordDictPath = (String) input.get(1);
         }
 
         if (stopwords == null) {
             loadStopwordDict();
         }
 
-		String normStr = ((String)input.get(0));
-		if (normStr == null) {
-			return null;
-		}
+        String normStr = ((String) input.get(0));
+        if (normStr == null) {
+            return null;
+        }
 
-		// Normalize the text
-		normStr = TextUtil.normalize(normStr, true);
+        // Normalize the text
+        normStr = TextUtil.normalize(normStr, true);
 
-		DataBag output = bagFactory.newDefaultBag();
-		for (String s : TextUtil.tokenize(normStr)) {
-			if (s.length() <= 30 && !stopwords.contains(s)) {
-				Tuple t = tupleFactory.newTuple(1);
-	            t.set(0, s);
-				output.add(t);
-			}
-		}
+        DataBag output = bagFactory.newDefaultBag();
+        for (String s : TextUtil.tokenize(normStr)) {
+            if (s.length() <= 30 && !stopwords.contains(s)) {
+                Tuple t = tupleFactory.newTuple(1);
+                t.set(0, s);
+                output.add(t);
+            }
+        }
 
-		return output;
-	}
+        return output;
+    }
 }

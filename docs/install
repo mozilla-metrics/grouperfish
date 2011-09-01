@@ -1,0 +1,24 @@
+#! /bin/bash
+
+cmd="--build"
+if [[ "${#}" -eq "1" ]]; then
+    if [[ "${1}" == --* ]]; then
+        cmd=$1
+    fi
+fi
+
+case "${cmd}" in
+    --build)
+        make html || exit 1
+        mkdir -p ../build/docs
+        cp -r _build/html ../build/docs
+        ;;
+    --clean)
+        make clean
+        rm -r ../build/docs
+        rm -r _build
+        ;;
+    --help)
+        "Usage: ${0} [--build|--clean]"
+        ;;
+esac

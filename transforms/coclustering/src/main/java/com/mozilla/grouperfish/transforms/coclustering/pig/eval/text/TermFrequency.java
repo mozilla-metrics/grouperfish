@@ -40,10 +40,10 @@ public class TermFrequency extends EvalFunc<DataBag> {
             return null;
         }
 
-        DataBag db = (DataBag)input.get(0);
-        Map<String,Integer> termFreq = new HashMap<String,Integer>();
+        DataBag db = (DataBag) input.get(0);
+        Map<String, Integer> termFreq = new HashMap<String, Integer>();
         for (Tuple t : db) {
-            String word = (String)t.get(0);
+            String word = (String) t.get(0);
             int curCount = 0;
             if (termFreq.containsKey(word)) {
                 curCount = termFreq.get(word);
@@ -52,10 +52,10 @@ public class TermFrequency extends EvalFunc<DataBag> {
         }
 
         DataBag output = bagFactory.newDefaultBag();
-        for (Map.Entry<String, Integer> entry: termFreq.entrySet()) {
+        for (Map.Entry<String, Integer> entry : termFreq.entrySet()) {
             Tuple t = tupleFactory.newTuple(2);
             t.set(0, entry.getKey());
-            t.set(1, (double)entry.getValue());
+            t.set(1, (double) entry.getValue());
             output.add(t);
         }
 

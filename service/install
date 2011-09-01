@@ -1,0 +1,34 @@
+#! /bin/bash
+
+# normalize work directory
+wd=`dirname "$0"`
+wd=`cd "$wd"; pwd`
+
+
+cmd="--build"
+if [[ "${#}" -eq "1" ]]; then
+    if [[ "${1}" == --* ]]; then
+        cmd=$1
+    fi
+fi
+
+
+case "${cmd}" in
+    --build)
+        mvn install || exit 1
+        mkdir -p ../build/lib/
+        cp target/grouperfish-service-*.jar ../build/lib/
+        mkdir -p ../build/conf
+        cp conf/* ../build/conf/
+        mkdir -p ../build/bin/
+        cp bin/grouperfish ../build/bin/
+        ;;
+    --clean)
+        mvn clean
+        rm -f ../build/lib/grouperfish-service-*
+        rm -f ../build/bin/grouperfish
+        ;;
+    --help)
+        "Usage: ${0} [--build|--clean]"
+        ;;
+esac

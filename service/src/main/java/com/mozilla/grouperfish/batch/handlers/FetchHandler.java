@@ -1,19 +1,19 @@
 package com.mozilla.grouperfish.batch.handlers;
 
-import static com.mozilla.grouperfish.batch.handlers.Helpers.inputFilename;
-import static com.mozilla.grouperfish.batch.handlers.Helpers.parametersFilename;
-import static com.mozilla.grouperfish.batch.handlers.Helpers.writer;
+import static com.mozilla.grouperfish.batch.scheduling.Helpers.inputFilename;
+import static com.mozilla.grouperfish.batch.scheduling.Helpers.parametersFilename;
+import static com.mozilla.grouperfish.batch.scheduling.Helpers.writer;
 
-import java.io.IOException;
 import java.io.Writer;
 
 import com.mozilla.grouperfish.base.Assert;
-import com.mozilla.grouperfish.batch.RetryException;
-import com.mozilla.grouperfish.batch.Task;
-import com.mozilla.grouperfish.json.TsvJsonWriter;
+import com.mozilla.grouperfish.base.json.TsvJsonWriter;
+import com.mozilla.grouperfish.batch.scheduling.Helpers;
 import com.mozilla.grouperfish.model.Document;
-import com.mozilla.grouperfish.services.FileSystem;
-import com.mozilla.grouperfish.services.Index;
+import com.mozilla.grouperfish.model.Fail;
+import com.mozilla.grouperfish.model.Task;
+import com.mozilla.grouperfish.services.api.FileSystem;
+import com.mozilla.grouperfish.services.api.Index;
 
 public class FetchHandler implements TaskHandler {
 
@@ -26,24 +26,26 @@ public class FetchHandler implements TaskHandler {
     }
 
     @Override
-    public Task handle(final Task task) throws RetryException {
+    public Task handle(final Task task) throws Fail {
         Assert.nonNull(task);
-        final TsvJsonWriter tsvWriter = new TsvJsonWriter(writer(fs, task, inputFilename(task)));
-        final Writer parametersWriter = writer(fs, task, parametersFilename(task));
         try {
+            final TsvJsonWriter tsvWriter = new TsvJsonWriter(writer(fs, task, inputFilename(task)));
             for (final Document doc : matches(task)) tsvWriter.write(doc);
+            tsvWriter.close();
+
+            final Writer parametersWriter = writer(fs, task, parametersFilename(task));
             parametersWriter.write(task.transform().parametersJson());
+            parametersWriter.close();
         }
-        catch (final IOException e) {
+        catch (final Exception e) {
             final String message = String.format(
                     "Failed writing doc to %s", Helpers.inputFilename(task));
-            throw new RetryException(message, e);
+            throw new Fail(task, message, e);
         }
         return task;
     }
 
-    private Iterable<Document> matches(final Task task) throws RetryException {
-        final Iterable<Document> matches = index.find(task.namespace(), task.query());
-        return matches;
+    private Iterable<Document> matches(final Task task) throws Fail {
+        return index.find(task.namespace(), task.query());
     }
 }

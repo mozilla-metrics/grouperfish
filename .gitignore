@@ -4,5 +4,6 @@ conf/grouperfish.json
 .settings/
 target/
 docs/_build
+build
 *.pyc
 .DS_Store

@@ -62,14 +62,17 @@ public class NGramEnglishAnalyzer extends StopwordAnalyzerBase {
     }
 
     public NGramEnglishAnalyzer(Version version, Set<?> stopwords, boolean stem, boolean outputUnigrams) {
-        this(version, stopwords, stem, outputUnigrams, ShingleAllStopFilter.DEFAULT_MIN_SHINGLE_SIZE, ShingleAllStopFilter.DEFAULT_MAX_SHINGLE_SIZE, CharArraySet.EMPTY_SET);
+        this(version, stopwords, stem, outputUnigrams, ShingleAllStopFilter.DEFAULT_MIN_SHINGLE_SIZE,
+                ShingleAllStopFilter.DEFAULT_MAX_SHINGLE_SIZE, CharArraySet.EMPTY_SET);
     }
 
-    public NGramEnglishAnalyzer(Version version, Set<?> stopwords, boolean stem, boolean outputUnigrams, int minNGram, int maxNGram) {
+    public NGramEnglishAnalyzer(Version version, Set<?> stopwords, boolean stem, boolean outputUnigrams, int minNGram,
+            int maxNGram) {
         this(version, stopwords, stem, outputUnigrams, minNGram, maxNGram, CharArraySet.EMPTY_SET);
     }
 
-    public NGramEnglishAnalyzer(Version matchVersion, Set<?> stopwords, boolean stem, boolean outputUnigrams, int minNGram, int maxNGram, Set<?> stemExclusionSet) {
+    public NGramEnglishAnalyzer(Version matchVersion, Set<?> stopwords, boolean stem, boolean outputUnigrams,
+            int minNGram, int maxNGram, Set<?> stemExclusionSet) {
         super(matchVersion, stopwords);
         this.stem = stem;
         this.outputUnigrams = outputUnigrams;
@@ -104,7 +107,9 @@ public class NGramEnglishAnalyzer extends StopwordAnalyzerBase {
     }
 
     public static void main(String[] args) throws IOException {
-        Set<String> stopwords = Dictionary.loadDictionary(new Path("file:///Users/xstevens/workspace/akela/stopwords-en.txt"));
+        // TODO: SMELLY: de-system-ify
+        Set<String> stopwords = Dictionary.loadDictionary(new Path(
+                "file:///Users/xstevens/workspace/akela/stopwords-en.txt"));
         NGramEnglishAnalyzer analyzer = new NGramEnglishAnalyzer(Version.LUCENE_31, stopwords, false, true);
         TokenStream stream = analyzer.tokenStream("", new StringReader("When I was growing up this was so much fun."));
         CharTermAttribute termAttr = stream.addAttribute(CharTermAttribute.class);

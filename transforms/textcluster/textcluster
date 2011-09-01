@@ -1,0 +1,13 @@
+#! /bin/bash
+
+export PYTHONPATH="lib/stemming:lib/textcluster:$PYTHONPATH"
+
+fail() {
+    echo $1
+    exit 1
+}
+
+[[ -d "${1}" ]] || fail "usage: ${0} WORKDIR"
+
+mkdir -p "${1}/output"
+env python run.py "${1}" || exit 0

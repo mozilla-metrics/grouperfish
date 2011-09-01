@@ -1,0 +1,10 @@
+{
+    "fields": {
+        "id": "id",
+        "text": "text"
+    },
+    "limits": {
+        "clusters": 10,
+        "top_documents": 10
+    }
+}

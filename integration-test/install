@@ -1,0 +1,21 @@
+#! /bin/bash
+
+cmd="--build"
+if [[ "${#}" -eq "1" ]]; then
+    if [[ "${1}" == --* ]]; then
+        cmd=$1
+    fi
+fi
+
+case "${cmd}" in
+    --build)
+        mvn test || exit 1
+        ;;
+    --clean)
+        mvn clean
+        rm -r target
+        ;;
+    --help)
+        "Usage: ${0} [--build|--clean]"
+        ;;
+esac
