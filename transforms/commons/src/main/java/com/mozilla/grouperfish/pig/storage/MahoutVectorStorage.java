@@ -37,9 +37,9 @@ import org.apache.pig.StoreFunc;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
 
-public class DocumentVectorStorage extends StoreFunc {
+public class MahoutVectorStorage extends StoreFunc {
 
-    private static final Logger LOG = Logger.getLogger(DocumentVectorStorage.class);
+    private static final Logger LOG = Logger.getLogger(MahoutVectorStorage.class);
     
 	@SuppressWarnings("rawtypes")
 	protected RecordWriter writer = null;
@@ -48,7 +48,7 @@ public class DocumentVectorStorage extends StoreFunc {
 	private VectorWritable outputValue = new VectorWritable();
 	private final int dimensions;
 	
-	public DocumentVectorStorage(String dimension) {
+	public MahoutVectorStorage(String dimension) {
 	    super();
 	    this.dimensions = Integer.parseInt(dimension);
 	}

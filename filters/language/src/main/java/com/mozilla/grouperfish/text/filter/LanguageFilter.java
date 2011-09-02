@@ -26,7 +26,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 import com.cybozu.labs.langdetect.Detector;
 import com.cybozu.labs.langdetect.DetectorFactory;
@@ -60,6 +64,7 @@ public class LanguageFilter {
         String desiredLang = args[2];
         String outputPath = args[3];
         
+        ObjectMapper jsonMapper = new ObjectMapper();
         BufferedReader reader = null;
         BufferedWriter writer = null;
         try {
@@ -75,11 +80,13 @@ public class LanguageFilter {
                 String[] fields = tabPattern.split(line);
                 
                 // Skip if we have more tabs (work around this later)
-                if (fields.length != 8) continue;
+                if (fields.length != 2) continue;
+                
+                Map<String,Object> jsonMap = jsonMapper.readValue(fields[1], new TypeReference<Map<String,Object>>() { });
                 
                 // Filter lang. detection
                 // !fields[6].toLowerCase().startsWith(desiredLang) && 
-                if (!langFilter.isLanguage(fields[7], desiredLang)) continue;
+                if (!langFilter.isLanguage((String)jsonMap.get("text"), desiredLang)) continue;
 
                 // Write original line back to output
                 writer.write(line);

@@ -7,10 +7,10 @@ SET default_parallel 7;
 
 %default INPUT 'input.json.tsv'
 %default STOPWORDS 'stopwords-en.txt'
-%default STEM 'true'
+%default STEM 'false'
 %default FREQ_OUTPUT 'feature-freq'
 %default OUTPUT 'feature-index'
-%default MIN_WORD_LENGTH 1
+%default MIN_WORD_LENGTH 3
 %default MIN_DF 2
 %default MAX_DF_PERCENTAGE 0.9
 

@@ -7,17 +7,19 @@ SET default_parallel 7;
 
 %default INPUT 'input.json.tsv'
 %default STOPWORDS 'stopwords-en.txt'
-%default STEM 'true'
+%default STEM 'FALSE'
+%default MIN_TOKENS 4
 %default FEATUREINDEX 'feature-index'
 %default OUTPUT 'document-vectors-tf'
 
 /*raw = LOAD 'hbase://grouperfish' USING org.apache.pig.backend.hadoop.hbase.HBaseStorage('data:json') AS json:chararray;*/
 raw = LOAD '$INPUT' USING PigStorage('\t') AS (doc_id:int,json:chararray);
 genmap = FOREACH raw GENERATE doc_id,com.mozilla.pig.eval.json.JsonMap(json) AS json_map:map[];
-tokenized = FOREACH genmap GENERATE doc_id,com.mozilla.grouperfish.pig.eval.text.Tokenize(json_map#'text','$STOPWORDS', '$STEM') AS token_bag;
+filtered_genmap = FILTER genmap BY json_map#'type' == 'issue' AND json_map#'product' == 'firefox' AND json_map#'version' == '5.0' AND json_map#'platform' == 'win7';
+tokenized = FOREACH filtered_genmap GENERATE doc_id,com.mozilla.grouperfish.pig.eval.text.Tokenize(json_map#'text','$STOPWORDS', '$STEM') AS token_bag;
 /* Comment out the line above and uncomment the line below if you are using an ngram feature-index */
 /*tokenized = FOREACH filtered_raw GENERATE doc_id,com.mozilla.pig.eval.text.NGramTokenize(text,'$STOPWORDS', '$STEM', 'true') AS token_bag;*/
-filtered_tokenized = FILTER tokenized BY SIZE(token_bag) > 1;
+filtered_tokenized = FILTER tokenized BY SIZE(token_bag) > $MIN_TOKENS;
 doc_vectors = FOREACH filtered_tokenized GENERATE doc_id,com.mozilla.grouperfish.pig.eval.text.TermFrequency(token_bag) AS tf_bag;
 
 /* Put things back into document vector form before storing in Mahout's vector format */
