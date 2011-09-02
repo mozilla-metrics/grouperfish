@@ -18,6 +18,13 @@ Maven
 JDK 6
     Java 6 Standard Edition should work fine.
 
+Sphinx
+    For documentation.  Best installed by running
+
+::
+
+        easy_install Sphinx
+
 The Source
     To obtain the (latest) source using **git**:
 
