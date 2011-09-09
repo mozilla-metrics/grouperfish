@@ -4,9 +4,9 @@ package com.mozilla.grouperfish.model;
 public class DummyAccess implements Access {
 
     private final String origin;
-    private final Type type;
+    private final Operation type;
 
-    public DummyAccess(Type type, String origin) {
+    public DummyAccess(Operation type, String origin) {
         this.origin = origin;
         this.type = type;
     }
@@ -17,7 +17,7 @@ public class DummyAccess implements Access {
     }
 
     @Override
-    public Type type() {
+    public Operation type() {
         return type;
     }
 

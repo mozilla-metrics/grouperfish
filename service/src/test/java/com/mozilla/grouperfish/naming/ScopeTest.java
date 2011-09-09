@@ -7,9 +7,9 @@ import static org.testng.AssertJUnit.assertTrue;
 import org.testng.annotations.Test;
 
 import com.mozilla.grouperfish.model.Access;
-import com.mozilla.grouperfish.model.ConfigurationType;
+import com.mozilla.grouperfish.model.Type;
 import com.mozilla.grouperfish.model.DummyAccess;
-import com.mozilla.grouperfish.model.Access.Type;
+import com.mozilla.grouperfish.model.Access.Operation;
 import com.mozilla.grouperfish.naming.Scope;
 import com.mozilla.grouperfish.rest.jaxrs.ConfigurationsResource;
 import com.mozilla.grouperfish.rest.jaxrs.DocumentsResource;
@@ -24,21 +24,21 @@ public class ScopeTest {
 
     private final String NS = "unit-test";
     private final Grid grid = new MockGrid();
-    private final Access DUMMY_ACCESS = new DummyAccess(Type.CREATE, "dummy.example.com");
+    private final Access DUMMY_ACCESS = new DummyAccess(Operation.CREATE, "dummy.example.com");
 
     public void testAllows() {
         assertTrue(scope(NS).allows(DocumentsResource.class, DUMMY_ACCESS));
     }
 
     public void testExistingConfigurations() {
-        for (final ConfigurationType type : ConfigurationType.values()) {
-            assertNotNull(scope(NS).configurations(type));
+        for (final Type type : Type.values()) {
+            assertNotNull(scope(NS).map(type));
         }
     }
 
     @Test(expectedExceptions=IllegalArgumentException.class)
     public void testInvalidConfigurations() {
-        scope(NS).configurations(null);
+        scope(NS).map(null);
     }
 
     public void testDocuments() {
@@ -46,7 +46,7 @@ public class ScopeTest {
     }
 
     public void testMaxLength() {
-        Access access = new DummyAccess(Type.CREATE, "dummy.example.com");
+        Access access = new DummyAccess(Operation.CREATE, "dummy.example.com");
         assertTrue(0 < scope(NS).maxLength(DocumentsResource.class, access));
     }
 
@@ -63,10 +63,10 @@ public class ScopeTest {
         assertEquals(
                 ns.results(), ns.resourceMap(ResultsResource.class));
         assertEquals(
-                ns.configurations(ConfigurationType.FILTERS),
+                ns.map(Type.CONFIGURATION_FILTER),
                 ns.resourceMap(ConfigurationsResource.FilterConfigsResource.class));
         assertEquals(
-                ns.configurations(ConfigurationType.TRANSFOMS),
+                ns.map(Type.CONFIGURATION_TRANSFORM),
                 ns.resourceMap(ConfigurationsResource.TransformConfigsResource.class));
     }
 

@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.mozilla.grouperfish.base.Box;
 import com.mozilla.grouperfish.batch.api.BatchService;
-import com.mozilla.grouperfish.model.ConfigurationType;
-import com.mozilla.grouperfish.model.Access.Type;
+import com.mozilla.grouperfish.model.Type;
+import com.mozilla.grouperfish.model.Access.Operation;
 import com.mozilla.grouperfish.model.Query;
 import com.mozilla.grouperfish.model.TransformConfig;
 import com.mozilla.grouperfish.naming.Scope;
@@ -29,7 +29,7 @@ import static com.mozilla.grouperfish.rest.jaxrs.RestHelper.FORBIDDEN;
 
 public class RunResource {
 
-    private static Logger log = LoggerFactory.getLogger(RunResource.class);
+    private static final Logger log = LoggerFactory.getLogger(RunResource.class);
 
 
     @Path("/run/{namespace}")
@@ -45,7 +45,7 @@ public class RunResource {
                                               @Context final HttpServletRequest request) {
             final Scope ns = scope(namespace);
 
-            if (!ns.allows(RunResource.class, new HttpAccess(Type.RUN, request))) {
+            if (!ns.allows(RunResource.class, new HttpAccess(Operation.RUN, request))) {
                 return FORBIDDEN;
             }
 
@@ -77,7 +77,7 @@ public class RunResource {
                                               @Context final HttpServletRequest request) {
             final Scope ns = scope(namespace);
 
-            if (!ns.allows(RunResource.class, new HttpAccess(Type.RUN, request))) {
+            if (!ns.allows(RunResource.class, new HttpAccess(Operation.RUN, request))) {
                 return FORBIDDEN;
             }
 
@@ -104,13 +104,14 @@ public class RunResource {
         @Inject
         public ForQueryWithTransform(final Grid grid, final BatchService system) { super(grid, system); }
 
+        @POST
         public Response runOneTransformForQuery(@PathParam("namespace") final String namespace,
                                                 @PathParam("transformName") final String transformName,
                                                 @PathParam("queryName") final String queryName,
                                                 @Context final HttpServletRequest request) {
             final Scope ns = scope(namespace);
 
-            if (!ns.allows(RunResource.class, new HttpAccess(Type.RUN, request))) {
+            if (!ns.allows(RunResource.class, new HttpAccess(Operation.RUN, request))) {
                 return FORBIDDEN;
             }
 
@@ -123,6 +124,7 @@ public class RunResource {
             for (final Response some404 : any404) return some404;
 
             try {
+                log.debug("Scheduling run: {} / {}", ns, q);
                 batchService().schedule(ns, q, config);
             }
             catch (final Exception e) {
@@ -147,6 +149,7 @@ public class RunResource {
             @Override public String getReasonPhrase() { return "Unknown query: " + name; }
             @Override public Family getFamily() { return Family.CLIENT_ERROR; }
         }).build());
+
         return null;
     }
 
@@ -154,7 +157,7 @@ public class RunResource {
     private static final TransformConfig fetchTransformConfig(final Scope ns,
                                                     final String name,
                                                     final Box<Response> failure) {
-        final String json = ns.configurations(ConfigurationType.TRANSFOMS).get(name);
+        final String json = ns.map(Type.CONFIGURATION_TRANSFORM).get(name);
         if (json != null) {
             return new TransformConfig(name, json);
         }

@@ -1,0 +1,8 @@
+# Cluster Settings
+cluster.name: grouperfish
+
+path.data: data/elasticsearch_hc
+
+gateway.recover_after_nodes: 1
+gateway.recover_after_time: 1s
+gateway.expected_nodes: 1

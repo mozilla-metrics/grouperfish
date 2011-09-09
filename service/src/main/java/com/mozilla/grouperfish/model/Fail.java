@@ -27,6 +27,13 @@ public class Fail extends Exception {
         return task;
     }
 
+    @Override
+    public String getMessage() {
+        // TODO: REMOVE ME
+        getCause().printStackTrace();
+        return super.getMessage();
+    }
+
     /**
      * Handlers can throw a hard failure if they are fairly certain that
      * retrying will not help.

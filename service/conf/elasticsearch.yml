@@ -1,6 +1,7 @@
 # Cluster Settings
-cluster:
-  name: grouperfish
+cluster.name: grouperfish
 
-path:
-  data: data/elasticsearch
+node.data: false
+node.client: true
+http.enabled: false
+transport.tcp.port: 9301

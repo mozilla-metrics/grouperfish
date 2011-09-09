@@ -68,7 +68,6 @@
 			<artifactId>jersey-server</artifactId>
 			<version>1.8</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
 			<artifactId>jersey-multipart</artifactId>
@@ -201,6 +200,16 @@
 					</archive>
 				</configuration>
 			</plugin>
+
+            <!-- Test faster without jar packaging. Used by bin/quickstart -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                   <outputFile>${project.build.directory}/classpath</outputFile>
+                </configuration>
+            </plugin>
+
 
 		</plugins>
 

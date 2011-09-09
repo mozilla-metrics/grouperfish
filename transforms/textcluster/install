@@ -16,14 +16,14 @@ case "${cmd}" in
         mkdir -p lib
         cd lib
         [[ -d stemming ]] ||
-            hg clone https://bitbucket.org/mchaput/stemming
+            hg clone https://www.bitbucket.org/mchaput/stemming
         [[ -d textcluster ]] ||
             git clone https://github.com/davedash/textcluster.git
         cd ..
-        [[ -d "${dest}/lib" ]] ||
-            cp -r lib "${dest}/"
 
         mkdir -p "${dest}"
+        [[ -d "${dest}/lib" ]] ||
+            cp -r lib "${dest}/lib"
         cp textcluster run.py "${dest}/"
         ;;
     --test)
@@ -36,7 +36,7 @@ case "${cmd}" in
         done
         ;;
     --clean)
-        rm -rf lib
+        rm -rf ./lib
         find . -type f -name '*.pyc' | xargs rm
         ;;
     --help)

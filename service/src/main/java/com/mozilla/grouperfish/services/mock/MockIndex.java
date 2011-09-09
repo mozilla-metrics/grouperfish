@@ -6,7 +6,6 @@ import org.elasticsearch.common.collect.ImmutableList;
 
 import com.mozilla.grouperfish.model.Document;
 import com.mozilla.grouperfish.model.Query;
-import com.mozilla.grouperfish.naming.Namespace;
 import com.mozilla.grouperfish.services.api.Index;
 
 public class MockIndex implements Index {
@@ -26,12 +25,12 @@ public class MockIndex implements Index {
             build();
 
     @Override
-    public Iterable<Document> find(final Namespace ns, final Query query) {
+    public Iterable<Document> find(final Query query) {
         return randomDocuments;
     }
 
     @Override
-    public Iterable<Query> resolve(Namespace ns, Query query) {
+    public Iterable<Query> resolve(Query query) {
         return randomQueries;
     }
 

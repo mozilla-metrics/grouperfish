@@ -53,7 +53,7 @@ public class ResultsResource extends ResourceBase {
     }
 
     public static String key(final String transformName, final String queryName) {
-        return String.format("%s/%s", transformName, queryName);
+        return String.format("%s_%s", transformName, queryName);
     }
 
 }

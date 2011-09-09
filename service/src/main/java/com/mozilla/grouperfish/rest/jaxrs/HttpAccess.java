@@ -11,22 +11,22 @@ import com.mozilla.grouperfish.model.Access;
 
 public class HttpAccess implements Access {
 
-    private final Access.Type type;
+    private final Access.Operation type;
     private final HttpServletRequest request;
 
     @SuppressWarnings("serial")
-    private static final Map<String, Access.Type> defaultType = new HashMap<String, Access.Type>() {{
-        put("PUT", Access.Type.CREATE);
-        put("GET", Access.Type.READ);
-        put("POST", Access.Type.RUN);
-        put("DELETE", Access.Type.DELETE);
+    private static final Map<String, Access.Operation> defaultType = new HashMap<String, Access.Operation>() {{
+        put("PUT", Access.Operation.CREATE);
+        put("GET", Access.Operation.READ);
+        put("POST", Access.Operation.RUN);
+        put("DELETE", Access.Operation.DELETE);
     }};
 
     public HttpAccess(final HttpServletRequest request) {
         this(defaultType.get(request.getMethod()), request);
     }
 
-    public HttpAccess(final Type type,
+    public HttpAccess(final Operation type,
                       final HttpServletRequest request) {
         Assert.nonNull(type);
         this.type = type;
@@ -39,7 +39,7 @@ public class HttpAccess implements Access {
     }
 
     @Override
-    public Type type() {
+    public Operation type() {
         return type;
     }
 

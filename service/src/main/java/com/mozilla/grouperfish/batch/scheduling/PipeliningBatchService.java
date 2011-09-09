@@ -16,7 +16,7 @@ import com.mozilla.grouperfish.batch.transforms.TransformProvider;
 import com.mozilla.grouperfish.model.Task;
 import com.mozilla.grouperfish.services.api.FileSystem;
 import com.mozilla.grouperfish.services.api.Grid;
-import com.mozilla.grouperfish.services.api.Index;
+import com.mozilla.grouperfish.services.api.IndexProvider;
 
 
 /**
@@ -50,10 +50,10 @@ public class PipeliningBatchService extends AbstractBatchService {
     @Inject
     public PipeliningBatchService(
             final Grid grid,
-            final Index index,
+            final IndexProvider indexes,
             final FileSystem fs,
             final TransformProvider transforms) {
-        super(index);
+        super(indexes);
 
         final BlockingQueue<Task> prepQ = grid.queue("grouperfish_prepare");
         final BlockingQueue<Task> runQ = grid.queue("grouperfish_run");
@@ -64,7 +64,7 @@ public class PipeliningBatchService extends AbstractBatchService {
 
         // Here we could in theory create e.g. several run workers instead of just one for this host...
         workers = new ImmutableList.Builder<Worker>()
-            .add(new Worker(failQ, prepQ, runQ, new FetchHandler(fs, index)))
+            .add(new Worker(failQ, prepQ, runQ, new FetchHandler(fs, indexes)))
             .add(new Worker(failQ,        runQ, putQ, new RunHandler(fs, transforms)))
             .add(new Worker(failQ,              putQ, cleanupQ, new PutHandler(grid, fs)))
             .add(new Worker(failQ,                    cleanupQ, null, new CleanupHandler(fs)))

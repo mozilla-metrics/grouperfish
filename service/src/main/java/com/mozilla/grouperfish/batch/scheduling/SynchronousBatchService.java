@@ -10,7 +10,7 @@ import com.mozilla.grouperfish.model.Fail;
 import com.mozilla.grouperfish.model.Task;
 import com.mozilla.grouperfish.services.api.FileSystem;
 import com.mozilla.grouperfish.services.api.Grid;
-import com.mozilla.grouperfish.services.api.Index;
+import com.mozilla.grouperfish.services.api.IndexProvider;
 
 
 /**
@@ -30,11 +30,11 @@ public class SynchronousBatchService extends AbstractBatchService {
     @Inject
     public SynchronousBatchService(
             final Grid grid,
-            final Index index,
+            final IndexProvider indexes,
             final FileSystem fs,
             final TransformProvider transforms) {
-        super(index);
-        handler = Helpers.sequentialHandler(grid, fs, index, transforms);
+        super(indexes);
+        handler = Helpers.sequentialHandler(grid, fs, indexes, transforms);
 
         log.info("Instantiated service: {}", getClass().getSimpleName());
     }

@@ -34,7 +34,8 @@
 
 
   <!-- Family of maps used for documents received through REST.
-       The wildcard stands for the namespace. -->
+       The wildcard stands for the namespace.
+       It is backed by HBase (primary store) as well as ElasticSearch. -->
   <map name="documents_*">
     <backup-count>0</backup-count>
     <eviction-policy>LRU</eviction-policy>
@@ -42,16 +43,20 @@
     <eviction-percentage>25</eviction-percentage>
 
     <map-store enabled="true">
-      <class-name>com.mozilla.bagheera.hazelcast.persistence.ElasticSearchMapStore</class-name>
-      <write-delay-seconds>1</write-delay-seconds>
-      <property name="hazelcast.elasticsearch.config.path">elasticsearch_hc.yml</property>
-      <property name="hazelcast.elasticsearch.type.name">documents</property>
-      <property name="hazelcast.elasticsearch.load_all">false</property>
+      <class-name>com.mozilla.bagheera.hazelcast.persistence.MultiMapStore</class-name>
+      <write-delay-seconds>2</write-delay-seconds>
+      <property name="hazelcast.multi.store.class.name.1">com.mozilla.bagheera.hazelcast.persistence.HBaseMapStore</property>
+      <property name="hazelcast.hbase.pool.size">10</property>
+      <property name="hazelcast.hbase.table">documents</property>
+      <property name="hazelcast.hbase.column.family">data</property>
+      <property name="hazelcast.multi.store.class.name.2">com.mozilla.bagheera.hazelcast.persistence.ElasticSearchMapStore</property>
+      <property name="hazelcast.elasticsearch.config.path">elasticsearch.yml</property>
+      <property name="hazelcast.elasticsearch.type.name">document</property>
     </map-store>
   </map>
 
 
-  <!-- For the results produced by the transforms. -->
+  <!-- For the results produced by the transforms. HBase only (key-only lookup). -->
   <map name="results_*">
     <backup-count>0</backup-count>
     <time-to-live-seconds>0</time-to-live-seconds>
@@ -60,15 +65,16 @@
     <eviction-percentage>25</eviction-percentage>
 
     <map-store enabled="true">
-      <class-name>com.mozilla.bagheera.hazelcast.persistence.ElasticSearchMapStore</class-name>
-      <write-delay-seconds>2</write-delay-seconds>
-      <property name="hazelcast.elasticsearch.config.path">elasticsearch_hc.yml</property>
-      <property name="hazelcast.elasticsearch.type.name">results</property>
+      <class-name>com.mozilla.bagheera.hazelcast.persistence.HBaseMapStore</class-name>
+      <write-delay-seconds>1</write-delay-seconds>
+      <property name="hazelcast.hbase.pool.size">5</property>
+      <property name="hazelcast.hbase.table">results</property>
+      <property name="hazelcast.hbase.column.family">data</property>
     </map-store>
   </map>
 
 
-  <!-- Used for the results produced by the transforms. -->
+  <!-- Used for the results produced by the transforms. HBase only (key-only lookup). -->
   <map name="queries_*">
     <backup-count>0</backup-count>
     <time-to-live-seconds>0</time-to-live-seconds>
@@ -77,16 +83,17 @@
     <eviction-percentage>25</eviction-percentage>
 
     <map-store enabled="true">
-      <class-name>com.mozilla.bagheera.hazelcast.persistence.ElasticSearchMapStore</class-name>
+      <class-name>com.mozilla.bagheera.hazelcast.persistence.HBaseMapStore</class-name>
       <write-delay-seconds>1</write-delay-seconds>
-      <property name="hazelcast.elasticsearch.config.path">elasticsearch_hc.yml</property>
-      <property name="hazelcast.elasticsearch.type.name">queries</property>
+      <property name="hazelcast.hbase.pool.size">3</property>
+      <property name="hazelcast.hbase.table">queries</property>
+      <property name="hazelcast.hbase.column.family">data</property>
     </map-store>
   </map>
 
 
-  <!-- Used for the results produced by the transforms. -->
-  <map name="configurations_*">
+  <!-- Used for the results produced by the transforms. HBase only (key-only lookup). -->
+  <map name="configuration_*">
     <backup-count>0</backup-count>
     <time-to-live-seconds>0</time-to-live-seconds>
     <eviction-policy>LRU</eviction-policy>
@@ -94,10 +101,11 @@
     <eviction-percentage>25</eviction-percentage>
 
     <map-store enabled="true">
-      <class-name>com.mozilla.bagheera.hazelcast.persistence.ElasticSearchMapStore</class-name>
+      <class-name>com.mozilla.bagheera.hazelcast.persistence.HBaseMapStore</class-name>
       <write-delay-seconds>1</write-delay-seconds>
-      <property name="hazelcast.elasticsearch.config.path">elasticsearch_hc.yml</property>
-      <property name="hazelcast.elasticsearch.type.name">configurations</property>
+      <property name="hazelcast.hbase.pool.size">3</property>
+      <property name="hazelcast.hbase.table">configurations</property>
+      <property name="hazelcast.hbase.column.family">data</property>
     </map-store>
   </map>
 

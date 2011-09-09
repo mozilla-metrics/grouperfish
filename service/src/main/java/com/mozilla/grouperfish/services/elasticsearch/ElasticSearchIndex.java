@@ -17,30 +17,35 @@ import com.google.common.collect.ImmutableList;
 import com.mozilla.grouperfish.base.Assert;
 import com.mozilla.grouperfish.model.Document;
 import com.mozilla.grouperfish.model.Query;
-import com.mozilla.grouperfish.naming.Namespace;
 
 
 public class ElasticSearchIndex implements com.mozilla.grouperfish.services.api.Index {
 
     public static final String PROPERTY_CLUSTER = "grouperfish.services.elasticsearch.cluster";
+    public static final String PROPERTY_CLUSTER_DEFAULT = "grouperfish";
+
+    public static final String PROPERTY_TYPE = "grouperfish.services.elasticsearch.type";
+    public static final String PROPERTY_TYPE_DEFAULT = "data";
 
     private static final Logger log = LoggerFactory.getLogger(ElasticSearchIndex.class);
 
-    private final String DOCUMENT_TYPE_NAME = "data";
-
     private final Client client;
+    private final String indexName;
+    private final String type;
 
-    public ElasticSearchIndex() {
-        final String clusterName = System.getProperty(PROPERTY_CLUSTER, "grouperfish");
+    public ElasticSearchIndex(final String name) {
+        this.indexName = name;
+        type = System.getProperty(PROPERTY_TYPE, PROPERTY_TYPE_DEFAULT);
+        final String clusterName = System.getProperty(PROPERTY_CLUSTER, PROPERTY_CLUSTER_DEFAULT);
         Node node = NodeBuilder.nodeBuilder().client(true).clusterName(clusterName).build();
         client = node.client();
         log.info("Instantiated service: {} (clusterName={})", getClass().getSimpleName(), clusterName);
     }
 
     @Override
-    public Iterable<Document> find(final Namespace ns, final Query query) {
+    public Iterable<Document> find(final Query query) {
         final SearchRequestBuilder requestBuilder =
-            client.prepareSearch(ns.raw()).setTypes(DOCUMENT_TYPE_NAME).setSource(query.source());
+            client.prepareSearch(indexName).setTypes(type).setSource(query.source());
         final SearchRequest request = requestBuilder.request();
         final SearchResponse response = client.search(request).actionGet();
 
@@ -54,7 +59,7 @@ public class ElasticSearchIndex implements com.mozilla.grouperfish.services.api.
     }
 
     @Override
-    public Iterable<Query> resolve(Namespace ns, Query query) {
+    public Iterable<Query> resolve(Query query) {
         if (!query.isTemplate()) return ImmutableList.of(query);
         // :TODO: Template queries
         Assert.unreachable("Not implemented.");

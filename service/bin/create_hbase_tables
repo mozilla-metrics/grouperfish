@@ -1,0 +1,9 @@
+#!hbase shell
+
+# Alternative Usage:
+# cat create_hbase_tables | hbase shell
+
+create 'documents', {NAME => 'data', VERSIONS => '1', BLOCKSIZE => '65536', IN_MEMORY => 'false', BLOCKCACHE => 'true'}
+create 'queries', {NAME => 'data', VERSIONS => '1', BLOCKSIZE => '65536', IN_MEMORY => 'false', BLOCKCACHE => 'true'}
+create 'results', {NAME => 'data', VERSIONS => '1', BLOCKSIZE => '65536', IN_MEMORY => 'false', BLOCKCACHE => 'true'}
+create 'configurations', {NAME => 'data', VERSIONS => '1', BLOCKSIZE => '65536', IN_MEMORY => 'false', BLOCKCACHE => 'true'}

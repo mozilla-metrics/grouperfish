@@ -22,6 +22,7 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 public class JerseyGuiceRestService implements RestService {
 
     public static final String PROPERTY_PORT = "grouperfish.rest.port";
+    public static final String PROPERTY_PORT_DEFAULT = String.valueOf(Grouperfish.DEFAULT_PORT);
 
     private final Server server;
 
@@ -36,13 +37,14 @@ public class JerseyGuiceRestService implements RestService {
         Assert.nonNull(resourceConfigClass, resourceConfigClass.getCanonicalName());
         Assert.check(!resourceConfigClass.getCanonicalName().isEmpty());
 
-        final int port = Integer.parseInt(System.getProperty(PROPERTY_PORT, String.valueOf(Grouperfish.DEFAULT_PORT)));
+        final int port = Integer.parseInt(System.getProperty(PROPERTY_PORT, PROPERTY_PORT_DEFAULT));
 
         server = new Server(port);
         final ServletContextHandler root =
             new ServletContextHandler(server, "/", ServletContextHandler.NO_SESSIONS);
 
         root.addEventListener(new GuiceServletContextListener() {
+
             @Override
             protected Injector getInjector() {
                 return parentInjector.createChildInjector(new JerseyServletModule() {
@@ -59,10 +61,6 @@ public class JerseyGuiceRestService implements RestService {
         });
 
         root.addFilter(GuiceFilter.class, "/*", null);
-
-        // Must add DefaultServlet for embedded Jetty.
-        // Failing to do this will cause 404 errors.
-        // This is not needed if web.xml is used instead.
         root.addServlet(DefaultServlet.class, "/");
 
         server.setSendServerVersion(false);

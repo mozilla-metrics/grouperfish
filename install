@@ -50,14 +50,14 @@ clean() {
     what=$1
     for component in $what; do
         if [[ -x "$component/install" ]]; then
-            echo "Cleaning $component ..."
+            echo $'\n\n'"Cleaning $component ..."
             ( cd "${component}"
               ./install --clean || fail "Clean of '${component}' failed." )
         fi
-        rm -r "./build/${component}"
+        rm -rf "./build/${component}"
     done
     if [[ "YES" = "${all}" ]]; then
-        rm -r ./build
+        rm -rf ./build
         version="$(cat ./project/VERSION)"
         rm -f "./grouperfish-${version}.tar.gz"
     fi
@@ -67,7 +67,7 @@ build() {
     what=$1
     for component in $what; do
         if [[ -x "$component/install" ]]; then
-            echo "Installing $component ..."
+            echo $'\n\n'"Installing $component ..."
             ( cd "${component}"
               ./install || fail "Installation of '${component}' failed." )
         else

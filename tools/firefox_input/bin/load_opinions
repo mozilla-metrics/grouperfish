@@ -1,5 +1,10 @@
 #! /bin/bash
 
+# normalize work directory
+wd=`dirname "$0"`
+wd=`cd -P "$wd"; pwd`
+
+
 # Load Firefox Input opinions into Grouperfish.
 
 self="${0}"
@@ -11,18 +16,35 @@ usage() {
     echo
 }
 
-tool_home=`dirname "$self"`
-grouperfish_home="${tool_home}/../.."
+cp_add_dir() {
+    d="${1}"
+    for lib in `find "${d}" -type f -name '*.jar'`; do
+        CLASSPATH=${CLASSPATH}:"${lib}"
+    done
+}
+
+
+bin=`dirname "$self"`
+tool="${bin}/.."
+
+LOGBACK_OPTS=-Dlogback.configurationFile=logback-stdout.xml
 
 load() {
-    for lib in `ls ${grouperfish_home}/lib`; do
-        CLASSPATH=${CLASSPATH}:$lib
-    done
-    for lib in `ls ${tool_home}/lib`; do
-        CLASSPATH=${CLASSPATH}:$lib
-    done
+    if [ -d $bin/../target ]; then
+        # source tree
+        grouperfish_home="${bin}/../../../build"
+        cp_add_dir "${tool}/target"
+    else
+        # build tree
+        grouperfish_home="${bin}/../.."
+        cp_add_dir "${tool}/lib"
+    fi
+
+    cp_add_dir "${grouperfish_home}/lib"
+    echo "CP $CLASSPATH"
+
     main=com.mozilla.grouperfish.tools.firefox_input.OpinionLoader
-    java -cp $CLASSPATH ${main}
+    java -cp $CLASSPATH $LOGBACK_OPTS ${main} $@
 }
 
 case "${1}" in

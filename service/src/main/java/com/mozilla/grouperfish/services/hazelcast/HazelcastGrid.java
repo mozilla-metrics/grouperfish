@@ -17,16 +17,15 @@ public class HazelcastGrid implements Grid {
     private static final Logger log = LoggerFactory.getLogger(HazelcastGrid.class);
 
     public HazelcastGrid() {
-        // Initialize Hazelcast now rather than waiting for the first request
+        // Initialize some of Hazelcast now rather than waiting for the first request
         Hazelcast.getDefaultInstance();
         final Config config = Hazelcast.getConfig();
         final StringBuilder sb = new StringBuilder();
         for (final Map.Entry<String, MapConfig> entry : config.getMapConfigs().entrySet()) {
-            Hazelcast.getMap(entry.getKey());
-            sb.append(entry.getKey());
+            sb.append(entry.getKey()).append(",");
         }
         final int numMembers = Hazelcast.getCluster().getMembers().size();
-        log.info(String.format("Instantiated service: %s (maps=%s, #members=%s)",
+        log.info(String.format("Instantiated service: %s (maps=%s #members=%s)",
             getClass().getSimpleName(), sb.toString(), numMembers));
     }
 

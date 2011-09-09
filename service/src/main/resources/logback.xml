@@ -30,7 +30,7 @@
   <appender name="GENERAL"
             class="ch.qos.logback.core.rolling.RollingFileAppender">
     <encoder>
-        <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
+        <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg %ex{full} %n</pattern>
     </encoder>
     <file>logs/grouperfish.log</file>
 

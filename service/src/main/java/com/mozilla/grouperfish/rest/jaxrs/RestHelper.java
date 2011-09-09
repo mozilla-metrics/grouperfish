@@ -14,15 +14,21 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.mozilla.grouperfish.base.StreamTool;
 import com.mozilla.grouperfish.base.json.MapStreamer;
 import com.mozilla.grouperfish.model.Access;
-import com.mozilla.grouperfish.model.Access.Type;
+import com.mozilla.grouperfish.model.Access.Operation;
 import com.mozilla.grouperfish.naming.Scope;
 
 
 /** Bunch of internal helpers to cut down on resource specific code. */
 class RestHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(RestHelper.class);
+
 
     /** Get any known resource. */
     static Response getAny(final Class<?> resourceType,
@@ -30,12 +36,16 @@ class RestHelper {
                            final String key,
                            final HttpServletRequest request) {
 
-        if (!ns.allows(resourceType, new HttpAccess(Type.READ, request))) return FORBIDDEN;
+        if (!ns.allows(resourceType, new HttpAccess(Operation.READ, request))) return FORBIDDEN;
 
         final Map<String, String> map = ns.resourceMap(resourceType);
-        if (!map.containsKey(key)) return NOT_FOUND;
+        final String source = map.get(key);
+        if (source == null) {
+            log.debug("404 Requested resource not found: {} {}", resourceType, ns.raw() + "::" + key);
+            return NOT_FOUND;
+        }
 
-        return Response.ok(map.get(key), MediaType.APPLICATION_JSON).build();
+        return Response.ok(source, MediaType.APPLICATION_JSON).build();
     }
 
 
@@ -45,7 +55,7 @@ class RestHelper {
                            final String key,
                            final HttpServletRequest request) throws IOException {
 
-        Access access = new HttpAccess(Type.CREATE, request);
+        Access access = new HttpAccess(Operation.CREATE, request);
         if (!ns.allows(resourceType, access)) return FORBIDDEN;
 
         final int maxLength = ns.maxLength(resourceType, access);
@@ -70,7 +80,7 @@ class RestHelper {
                             final Scope ns,
                             final HttpServletRequest request) {
 
-        if (!ns.allows(resourceType, new HttpAccess(Type.LIST, request))) return FORBIDDEN;
+        if (!ns.allows(resourceType, new HttpAccess(Operation.LIST, request))) return FORBIDDEN;
 
         final MapStreamer streamer = new MapStreamer(ns.resourceMap(resourceType));
 
@@ -91,7 +101,7 @@ class RestHelper {
                               final String key,
                               final HttpServletRequest request) throws IOException {
 
-        if (!ns.allows(resourceType, new HttpAccess(Type.DELETE, request))) return FORBIDDEN;
+        if (!ns.allows(resourceType, new HttpAccess(Operation.DELETE, request))) return FORBIDDEN;
 
         final Map<String, String> map = ns.resourceMap(resourceType);
         map.remove(key);

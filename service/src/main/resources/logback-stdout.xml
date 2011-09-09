@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration scan="true" scanPeriod="250 milliseconds">
 
   <conversionRule conversionWord="ansiLevel"
                   converterClass="com.mozilla.grouperfish.util.logback.AnsiColorConverter" />
@@ -7,7 +7,7 @@
   <appender name="STDOUT"
             class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-        <pattern>%d{HH:mm:ss.SSS} [%thread] %ansiLevel %logger{35} - %msg%n</pattern>
+        <pattern>%d{HH:mm:ss} [%thread] %ansiLevel %logger{35} - %msg %ex{full} %n</pattern>
     </encoder>
   </appender>
 

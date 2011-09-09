@@ -10,7 +10,7 @@ import com.mozilla.grouperfish.batch.transforms.TransformProvider;
 import com.mozilla.grouperfish.model.Task;
 import com.mozilla.grouperfish.services.api.FileSystem;
 import com.mozilla.grouperfish.services.api.Grid;
-import com.mozilla.grouperfish.services.api.Index;
+import com.mozilla.grouperfish.services.api.IndexProvider;
 
 /**
  * Run everything using one queue and a single worker.
@@ -32,15 +32,15 @@ public class SingleQueueBatchService extends AbstractBatchService {
     @Inject
     public SingleQueueBatchService(
             final Grid grid,
-            final Index index,
+            final IndexProvider indexes,
             final FileSystem fs,
             final TransformProvider transforms) {
 
-        super(index);
+        super(indexes);
         inQueue = grid.queue("grouperfish_in");
         failQueue = grid.queue("grouperfish_fail");
 
-        worker = new Worker(failQueue, inQueue, null, Helpers.sequentialHandler(grid, fs, index, transforms));
+        worker = new Worker(failQueue, inQueue, null, Helpers.sequentialHandler(grid, fs, indexes, transforms));
 
         log.info("Instantiated service: {}", getClass().getSimpleName());
     }

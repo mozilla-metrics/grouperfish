@@ -22,7 +22,7 @@ public class Task implements Serializable {
 
     public Task(final Namespace ns, final Query query, final TransformConfig transform) {
         Assert.nonNull(ns, query, transform);
-        this.namespace = ns.toString();
+        this.namespace = ns.raw();
         this.query = query;
         this.transform = transform;
         created = Instant.now();

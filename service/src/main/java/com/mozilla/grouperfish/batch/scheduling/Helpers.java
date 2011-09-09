@@ -19,9 +19,9 @@ import com.mozilla.grouperfish.batch.transforms.TransformProvider;
 import com.mozilla.grouperfish.model.Task;
 import com.mozilla.grouperfish.services.api.FileSystem;
 import com.mozilla.grouperfish.services.api.Grid;
-import com.mozilla.grouperfish.services.api.Index;
 import com.mozilla.grouperfish.services.api.FileSystem.Denied;
 import com.mozilla.grouperfish.services.api.FileSystem.NotFound;
+import com.mozilla.grouperfish.services.api.IndexProvider;
 
 public class Helpers {
 
@@ -30,7 +30,7 @@ public class Helpers {
         final String queryName = task.query().name();
         final String taskName = task.query().name();
         return String.format("tasks_%s/%s/%s-T%s-Q%s",
-                             task.namespace().toString(),
+                             task.namespace().raw(),
                              dateFormatter.print(task.created()),
                              timeFormatter.print(task.created()),
                              mangle(taskName),
@@ -66,7 +66,7 @@ public class Helpers {
     }
 
     public static String inputFilename(final Task task) {
-        return taskFilename(task, "input.json");
+        return taskFilename(task, "input.json.tsv");
     }
 
     public static String resultsFilename(final Task task) {
@@ -92,10 +92,10 @@ public class Helpers {
     static TaskHandler sequentialHandler(
             final Grid grid,
             final FileSystem fs,
-            final Index index,
+            final IndexProvider indexes,
             final TransformProvider transforms) {
         return new SequentialHandler(
-                new FetchHandler(fs, index),
+                new FetchHandler(fs, indexes),
                 new RunHandler(fs, transforms),
                 new PutHandler(grid, fs),
                 new CleanupHandler(fs));

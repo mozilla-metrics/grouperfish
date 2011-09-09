@@ -4,7 +4,7 @@
 # Internally, this uses bagheera map stores, but uses custom JAX-RS resources.
 
 function usage() {
-    echo "Usage: $0 [-fh] [server-port] [hazelcast-config-path]"
+    echo "Usage: $0 [-fh] [-p port] [hazelcast-config-path]"
 }
 
 bin=`dirname "$0"`
@@ -12,10 +12,16 @@ bin=`cd "$bin"; pwd`
 
 #### Process options
 
-while getopts ":fh" optname ; do
+# FISH = 0xF124 = 61732
+SERVER_PORT=61732
+
+while getopts ":fhp:" optname ; do
     case "$optname" in
         "f")
             DAEMON_DETACHED=false
+            ;;
+        "p")
+            SERVER_PORT="${OPTARG}"
             ;;
         "h")
             usage
@@ -37,24 +43,17 @@ shift $(($OPTIND - 1))
 
 #### Process arguments
 
-#   port = FISH = 0xF124 = 61732
-SERVER_PORT=61732
 HAZELCAST_CONF=$bin/../conf/hazelcast.xml
-
 # Print usage if incorrect number of args
-if [[ $# -gt 2 ]] ; then
+if [[ $# -gt 1 ]] ; then
     usage
     exit 1
 fi
 
 # User override:
 if [[ $# -gt 0 ]]; then
-    SERVER_PORT=$1
-    if [[ $# -gt 1 ]]; then
-        HAZELCAST_CONF=$bin/../conf/hazelcast.xml
-    fi
+    HAZELCAST_CONF=$1
 fi
-
 
 
 SERVER_CLASS_NAME="com.mozilla.grouperfish.bootstrap.Grouperfish"
