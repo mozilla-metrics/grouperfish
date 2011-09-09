@@ -106,8 +106,8 @@ if [ ! -d $bin/../logs ]; then
     mkdir -p $bin/../logs
 fi
 
-
-BAGHEERA_OPTS="-Dhazelcast.config=${HAZELCAST_CONF} -Dbagheera.log.dir=${bin}/../logs"
+HAZELCAST_OPTS="-Dhazelcast.config=${HAZELCAST_CONF}"
+BAGHEERA_OPTS="-Dbagheera.log.dir=${bin}/../logs"
 GROUPERFISH_OPTS="-Dgrouperfish.rest.port=${SERVER_PORT}"
 
 echo "Using classpath: " $CLASSPATH

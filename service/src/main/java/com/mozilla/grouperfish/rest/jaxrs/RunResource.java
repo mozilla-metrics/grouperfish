@@ -53,7 +53,7 @@ public class RunResource {
                 batchService().schedule(ns);
             }
             catch (final Exception e) {
-                log.error("Error initiating run request '{}': {}", request.getPathInfo(), e);
+                log.error(String.format("Error initiating run request '%s'", request.getPathInfo()), e);
                 return FAIL;
             }
 
@@ -89,7 +89,7 @@ public class RunResource {
                 batchService().schedule(ns, q);
             }
             catch (final Exception e) {
-                log.error("Error initiating run request '{}': {}", request.getPathInfo(), e);
+                log.error(String.format("Error initiating run request '%s'", request.getPathInfo()), e);
                 return FAIL;
             }
 
@@ -128,7 +128,7 @@ public class RunResource {
                 batchService().schedule(ns, q, config);
             }
             catch (final Exception e) {
-                log.error("Error initiating run request '{}': {}", request.getPathInfo(), e);
+                log.error(String.format("Error initiating run request '%s'", request.getPathInfo()), e);
                 return FAIL;
             }
 

@@ -42,7 +42,7 @@ public class Services extends AbstractModule {
         bind(FileSystem.class).annotatedWith(Local.class).toInstance(localFs);
         bind(FileSystem.class).toInstance(localFs);
         if (hasHadoop(properties)) {
-            log.error("Hadoop available. Using HDFS for shared file system.");
+            log.info("Hadoop available. Using HDFS for shared file system.");
             bind(FileSystem.class).annotatedWith(Shared.class).to(HadoopFileSystem.class).asEagerSingleton();
         }
         else {
@@ -53,12 +53,12 @@ public class Services extends AbstractModule {
                         PROPERTY_MODE,
                         PROPERTY_HADOOP_ENABLED));
             }
-            log.error("No hadoop. Using local FS for 'shared' file system (stand alone operation).");
+            log.info("No hadoop. Using local FS for 'shared' file system (stand alone operation).");
             bind(FileSystem.class).annotatedWith(Shared.class).toInstance(localFs);
         }
 
         bind(Grid.class).to(HazelcastGrid.class).asEagerSingleton();
-        bind(IndexProvider.class).to(ElasticSearchIndexProvider.class).asEagerSingleton();
+        bind(IndexProvider.class).toInstance(new ElasticSearchIndexProvider(properties));
     }
 
 

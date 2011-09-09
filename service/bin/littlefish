@@ -48,13 +48,15 @@ HAZELCAST_CONF=$bin/../conf/hazelcast.xml
 if [[ $# -gt 1 ]] ; then usage;  exit 1; fi
 if [[ $# -gt 0 ]]; then HAZELCAST_CONF=$1; fi
 
+CLASSPATH="$bin/../conf":"../service/target/classes":$(cat target/classpath)
+CLASSPATH="$CLASSPATH":"$HADOOP_CONF":"$HBASE_CONF"
 SERVER_CLASS_NAME="com.mozilla.grouperfish.bootstrap.Grouperfish"
 JAVA_OPTS="-Xmx1g -XX:+UseParNewGC -XX:+UseConcMarkSweepGC"
 
 if [ "$GROUPERFISH_USER" = "" ]; then GROUPERFISH_USER="$USER"; fi
 if [ "$HADOOP_CONF" = "" ]; then HADOOP_CONF="/etc/hadoop/conf"; fi
 if [ "$HBASE_CONF" = "" ]; then HBASE_CONF="/etc/hbase/conf"; fi
-HAZELCAST_OPTS="-Dhazelcast.config=${HAZELCAST_CONF} -Dhazelcast.logging.type=slf4j"
+HAZELCAST_OPTS="-Dhazelcast.logging.type=slf4j -Dhazelcast.config=${HAZELCAST_CONF}"
 BAGHEERA_OPTS="-Dbagheera.log.dir=${bin}/../logs"
 GROUPERFISH_OPTS="-Dgrouperfish.rest.port=${SERVER_PORT}"
 
@@ -67,9 +69,6 @@ fi
 
 mkdir -p "${build}/../logs"
 
-
-CLASSPATH="../service/target/classes":$(cat target/classpath)
-CLASSPATH="$CLASSPATH":"$HADOOP_CONF":"$HBASE_CONF"
 
 cd "${build}"
 echo "Work directory: $(pwd) / ${build}"

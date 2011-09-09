@@ -22,11 +22,17 @@ public class HazelcastGrid implements Grid {
         final Config config = Hazelcast.getConfig();
         final StringBuilder sb = new StringBuilder();
         for (final Map.Entry<String, MapConfig> entry : config.getMapConfigs().entrySet()) {
-            sb.append(entry.getKey()).append(",");
+            sb.append(entry.getKey()).append(", ");
         }
         final int numMembers = Hazelcast.getCluster().getMembers().size();
-        log.info(String.format("Instantiated service: %s (maps=%s #members=%s)",
-            getClass().getSimpleName(), sb.toString(), numMembers));
+
+        // Force initialization of index.
+        // :TODO: make less hacky...
+        log.info("Initializing HC ES node...");
+        Hazelcast.getMap("documents_grouperfish").get("unused");
+
+        log.info(String.format("Instantiated service: %s (maps=%smembers=%s)",
+                               getClass().getSimpleName(), sb.toString(), numMembers));
     }
 
     @Override

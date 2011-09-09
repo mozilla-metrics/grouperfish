@@ -1,6 +1,6 @@
 # Cluster Settings
 cluster:
-  name: grouperfish-integration
+  name: gfintegration
 
 path:
   data: data/elasticsearch

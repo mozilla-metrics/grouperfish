@@ -36,6 +36,10 @@ public abstract class NamedSource implements Serializable {
         this.source = JSONObject.toJSONString(fields);
     }
 
+    public String toString() {
+        return String.format("[%s %s, source.length=%s]", getClass().getSimpleName(), name(), source().length());
+    }
+
 
     public String name() {
         return name;
@@ -55,7 +59,7 @@ public abstract class NamedSource implements Serializable {
                                            getClass().getSimpleName(), name);
             Assert.unreachable(message, e);
         }
-        Assert.check(fields instanceof JSONObject);
+        Assert.check(fields instanceof Map);
         return fields;
     }
 

@@ -38,7 +38,7 @@ public class RunHandler implements TaskHandler {
         final TransformConfig config = task.transform();
         final Transform transform = transforms.get(config.transform());
         Assert.nonNull(transform);
-        log.info("Launching transform '%s' with input directory '%s'", transform, uri);
+        log.info(String.format("Launching transform '%s' with input directory '%s'", transform, uri));
         // new ProcessBuilder(transform, uri).directory(new File("the-local-working-directory-uri")).start();
         return task;
     }

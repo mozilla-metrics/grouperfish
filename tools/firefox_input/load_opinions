@@ -24,19 +24,18 @@ cp_add_dir() {
 }
 
 
-bin=`dirname "$self"`
-tool="${bin}/.."
+tool=`dirname "$self"`
 
 LOGBACK_OPTS=-Dlogback.configurationFile=logback-stdout.xml
 
 load() {
-    if [ -d $bin/../target ]; then
-        # source tree
-        grouperfish_home="${bin}/../../../build"
+    if [ -d $tool/target ]; then
+        # we are on source tree
+        grouperfish_home="${tool}/../../build"
         cp_add_dir "${tool}/target"
     else
-        # build tree
-        grouperfish_home="${bin}/../.."
+        # we are on build tree
+        grouperfish_home="${tool}/../.."
         cp_add_dir "${tool}/lib"
     fi
 

@@ -28,12 +28,12 @@ public class Helpers {
     /** Gives a working directory for the given task, relative to the grouperfish root directory. */
     public static String taskDirectory(final Task task) {
         final String queryName = task.query().name();
-        final String taskName = task.query().name();
+        final String transformName = task.transform().name();
         return String.format("tasks_%s/%s/%s-T%s-Q%s",
                              task.namespace().raw(),
                              dateFormatter.print(task.created()),
                              timeFormatter.print(task.created()),
-                             mangle(taskName),
+                             mangle(transformName),
                              mangle(queryName));
     }
 

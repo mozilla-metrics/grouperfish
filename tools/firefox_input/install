@@ -15,7 +15,7 @@ case "${cmd}" in
         mvn install || exit 1
         mkdir -p "${dest}/lib"
         cp target/grouperfish-*.jar "${dest}/lib/"
-        cp bin/* "${dest}/"
+        cp ./load_opinions "${dest}/"
         ;;
     --clean)
         mvn clean

@@ -73,4 +73,9 @@ public class Scope extends Namespace {
     public JsonValidator validator(final Class<?> resourceType) {
         return new JsonValidator();
     }
+
+    public String toString() {
+        return String.format("[Scope %s]", raw());
+    }
+
 }

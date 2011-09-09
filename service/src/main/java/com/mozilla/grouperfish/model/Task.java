@@ -49,7 +49,7 @@ public class Task implements Serializable {
 
     public String toString() {
         final String faildesc = (failures.size() == 0) ? "" : String.format(" (%s failed attempts)", failures.size());
-        return String.format("[Task %s::%s::%s%s]", created(), transform, created(), faildesc);
+        return String.format("[Task %s::%s::%s%s]", created(), transform, query, faildesc);
     }
 
     public TransformConfig transform() {
