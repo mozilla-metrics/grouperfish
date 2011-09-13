@@ -13,6 +13,7 @@ fi
 dest=../../build/transforms/textcluster
 case "${cmd}" in
     --build)
+
         mkdir -p lib
         cd lib
         [[ -d stemming ]] ||
@@ -22,9 +23,9 @@ case "${cmd}" in
         cd ..
 
         mkdir -p "${dest}"
-        [[ -d "${dest}/lib" ]] ||
-            cp -r lib "${dest}/lib"
         cp textcluster run.py "${dest}/"
+        rm -rf  "${dest}/lib"
+        cp -r lib "${dest}/lib"
         ;;
     --test)
         for d in $( ls tests ); do
@@ -38,6 +39,7 @@ case "${cmd}" in
     --clean)
         rm -rf ./lib
         find . -type f -name '*.pyc' | xargs rm
+        rm -rf "${dest}"
         ;;
     --help)
         echo "Usage: ${0} [--build|--clean|--test]"
