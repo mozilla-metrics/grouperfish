@@ -68,7 +68,7 @@ public class LocalFileSystem implements FileSystem {
 
     @Override
     public Writer writer(final String relativePath) throws Denied {
-        return new BufferedWriter(new OutputStreamWriter(outStream(relativePath)));
+        return new BufferedWriter(new OutputStreamWriter(outStream(relativePath), StreamTool.UTF8));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class LocalFileSystem implements FileSystem {
         if (file.isDirectory()) {
             for (final File child : file.listFiles()) removeRecursively(child);
         }
-        if (file.delete()) throw new Denied(format("Failed to delete file '%s'", file.getAbsolutePath()));
+        if (!file.delete()) throw new Denied(format("Failed to delete file '%s'", file.getAbsolutePath()));
     }
 
     private File resolve(final String relativePath) throws Denied {
