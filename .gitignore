@@ -1,3 +1,4 @@
+grouperfish-*.tar.gz
 conf/grouperfish.json
 .project
 .classpath
@@ -5,5 +6,6 @@ conf/grouperfish.json
 target/
 docs/_build
 build
+*.jar
 *.pyc
 .DS_Store

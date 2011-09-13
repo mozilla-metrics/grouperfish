@@ -2,15 +2,16 @@
 
 self="${0}"
 usage() {
-    echo "Usage: ${self} [--build | --help | --package | --clean] [PATH]"
+    echo "Usage: ${self} [--help | --package | (--build|--clean) [PATH]]"
     echo "    --help      Show this message."
     echo "    --clean     Discard all build results and intermediate files."
     echo "    --build     Install components to ./build (default)"
     echo "    --package   Create a complete grouperfish tarball."
     echo "                Cleans and rebuilds every component first."
     echo
-    echo "    PATH        The component to build."
-    echo "                Examples: 'service', 'transforms/coclustering'"
+    echo "    PATH        The component to build. Examples:"
+    echo "                  ./service"
+    echo "                  ./transforms/coclustering"
     echo "                If omitted, everything is built."
     echo
     echo "This script must be called from the root directory of the project."
@@ -60,11 +61,15 @@ clean() {
         rm -rf ./build
         version="$(cat ./project/VERSION)"
         rm -f "./grouperfish-${version}.tar.gz"
+        cd ./project && mvn clean ; cd ..
     fi
 }
 
 build() {
     what=$1
+    if [[ "YES" = "${all}" ]]; then
+        cd ./project && mvn install ; cd ..
+    fi
     for component in $what; do
         if [[ -x "$component/install" ]]; then
             echo $'\n\n'"Installing $component ..."
