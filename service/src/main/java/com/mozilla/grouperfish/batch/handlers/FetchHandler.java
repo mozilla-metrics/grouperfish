@@ -34,7 +34,7 @@ public class FetchHandler implements TaskHandler {
 
     @Override
     public Task handle(final Task task) throws Fail {
-        Index index = indexes.index(task.namespace().name(Type.DOCUMENT));
+        Index index = indexes.index(task.namespace().bucket(Type.DOCUMENT));
         Assert.nonNull(task);
         try {
             final TsvJsonWriter tsvWriter = new TsvJsonWriter(writer(fs, task, inputFilename(task)));
@@ -49,7 +49,7 @@ public class FetchHandler implements TaskHandler {
             final String message = String.format(
                     "Failed writing doc to %s", Helpers.inputFilename(task));
             log.error("Exception", e);
-            throw new Fail(task, message, e);
+            throw Fail.hard(task, message, e);
         }
         return task;
     }

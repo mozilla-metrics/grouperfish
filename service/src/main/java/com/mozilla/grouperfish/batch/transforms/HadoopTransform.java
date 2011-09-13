@@ -14,7 +14,7 @@ public class HadoopTransform extends ExecutableTransform {
     }
 
     @Override
-    protected String workDirectoryUri(final Task task) throws FsError {
+    protected String taskDirectoryUri(final Task task) throws FsError {
         return dataFs().uri(Helpers.taskDirectory(task));
     }
 

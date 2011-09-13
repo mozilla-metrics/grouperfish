@@ -3,7 +3,6 @@ package com.mozilla.grouperfish.services.elasticsearch;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.search.MatchAllDocsQuery;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -34,8 +33,9 @@ public class ElasticSearchIndex implements com.mozilla.grouperfish.services.api.
 
     @Override
     public Iterable<Document> find(final Query query) {
+
         final SearchRequestBuilder requestBuilder =
-            client.prepareSearch(indexName).setTypes(type).setQuery(new MatchAllDocsQuery().toString()).setExtraSource("{}");
+            client.prepareSearch(indexName).setTypes(type).setExtraSource(query.source());
         final SearchRequest request = requestBuilder.request();
         final SearchResponse response = client.search(request).actionGet();
 
@@ -46,7 +46,8 @@ public class ElasticSearchIndex implements com.mozilla.grouperfish.services.api.
             results.add(new Document(hit.getId(), hit.getSource()));
         }
 
-        log.debug(String.format("Returning %s/%s documents from find (index: %s, type: %s)...", indexName, type, results.size(), response.hits().totalHits()));
+        log.debug(String.format("Returning %s/%s documents from find (index: %s, type: %s, query: %s)...",
+                                results.size(), response.hits().totalHits(), indexName, type, query.source()));
         return results;
     }
 

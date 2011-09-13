@@ -23,7 +23,7 @@ abstract class AbstractBatchService implements BatchService {
     /** Run the configured transform over the query results. */
     public void schedule(final Scope ns, final Query query, final TransformConfig transform) {
         Assert.nonNull(query, transform);
-        final Index index = indexes.index(ns.name(Type.DOCUMENT));
+        final Index index = indexes.index(ns.bucket(Type.DOCUMENT));
         for (final Query concreteQuery : index.resolve(query)) {
             schedule(new Task(ns, concreteQuery, transform));
         }

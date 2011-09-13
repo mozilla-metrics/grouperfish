@@ -3,7 +3,6 @@ package com.mozilla.grouperfish.batch.scheduling;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.joda.time.format.DateTimeFormat;
@@ -29,7 +28,7 @@ public class Helpers {
     public static String taskDirectory(final Task task) {
         final String queryName = task.query().name();
         final String transformName = task.transform().name();
-        return String.format("tasks_%s/%s/%s-T%s-Q%s",
+        return String.format("tasks/%s/%s_utc/%s-T%s-Q%s",
                              task.namespace().raw(),
                              dateFormatter.print(task.created()),
                              timeFormatter.print(task.created()),
@@ -81,6 +80,10 @@ public class Helpers {
         return taskDirectory(task) + "/" + filename;
     }
 
+    public static String outputDirectory(final Task task) {
+        return taskDirectory(task) + "/output";
+    }
+
     public static String mangle(final String s) {
         return nonAlnum.matcher(s).replaceAll("_");
     }
@@ -101,13 +104,12 @@ public class Helpers {
                 new CleanupHandler(fs));
     }
 
-    /** Directory names use system locale for date formatting. */
+    /** Directory names use UTC for date formatting. */
     private static final DateTimeFormatter dateFormatter =
-        DateTimeFormat.forPattern("YYYY-MM-dd").withLocale(Locale.getDefault());
+        DateTimeFormat.forPattern("YYYY-MM-dd");
 
-    /** Directory names use system locale for date formatting. */
-    private static final DateTimeFormatter timeFormatter =
-        DateTimeFormat.forPattern("HH-mm-ss-SSS").withLocale(Locale.getDefault());
+    /** Directory names use UTC for date formatting. */
+    private static final DateTimeFormatter timeFormatter = DateTimeFormat.forPattern("HH-mm-ss-SSS");
 
     private static final Pattern nonAlnum = Pattern.compile("[^A-Za-z0-9-]");
 

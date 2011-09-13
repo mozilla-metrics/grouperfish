@@ -30,7 +30,8 @@ public class LocalTransform extends ExecutableTransform {
      * Task input data is copied from the dfs to the local fs before
      * running, and results are copied back afterwards.
      *
-     * @param name The transform executable.
+     * @param name The transform executable. It should take the location of the input data
+     *             as its single argument.
      * @param dfs The distributed filesystem used by grouperfish (e.g. HDFS).
      * @param localFs The local filesystem where working directories for local processes can be created.
      */
@@ -45,8 +46,8 @@ public class LocalTransform extends ExecutableTransform {
     }
 
     @Override
-    protected String workDirectoryUri(final Task task) throws FsError {
-        return localFs.uri(Helpers.taskDirectory(task));
+    protected String taskDirectoryUri(final Task task) throws FsError {
+        return localFs.uri(Helpers.taskDirectory(task)).substring("file://".length());
     }
 
     @Override
@@ -57,7 +58,7 @@ public class LocalTransform extends ExecutableTransform {
                 Helpers.copy(Helpers.parametersFilename(task), dataFs(), localFs);
             }
             catch (final Exception e) {
-                throw new Fail.SoftFail(task, "Could not copy data to local fs.", e);
+                throw Fail.hard(task, "Could not copy data to local fs.", e);
             }
         }
 
@@ -68,7 +69,7 @@ public class LocalTransform extends ExecutableTransform {
                 Helpers.copy(Helpers.resultsFilename(task), localFs, dataFs());
             }
             catch (final Exception e) {
-                throw new Fail.SoftFail(task, "Could not copy results back to distributed fs.", e);
+                throw Fail.hard(task, "Could not copy results back to distributed fs.", e);
             }
         }
 

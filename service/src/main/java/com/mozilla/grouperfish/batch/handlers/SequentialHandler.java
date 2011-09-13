@@ -27,7 +27,7 @@ public class SequentialHandler implements TaskHandler {
     @Override
     public Task handle(Task task) throws Fail {
         for (final TaskHandler handler : handlers) {
-            log.debug("Task {}: starting handler {}", task, handler.getClass().getSimpleName());
+            log.debug("Task {}: starting handler: {}", task, handler.getClass().getSimpleName());
             task = handler.handle(task);
         }
         return task;

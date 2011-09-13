@@ -11,7 +11,7 @@ public class SlugTool {
 	/**
 	 * http://stackoverflow.com/questions/1657193/
 	 * @param input
-	 * @return
+	 * @return A representation of the input string, containing only non-whitespace, latin characters.
 	 */
 	public static String toSlug(String input) {
 	    String nowhitespace = WHITESPACE.matcher(input).replaceAll("-");

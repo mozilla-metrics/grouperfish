@@ -35,20 +35,20 @@ public class Scope extends Namespace {
     }
 
     public Map<String, String> documents() {
-        return grid.map(name(Type.DOCUMENT));
+        return grid.map(bucket(Type.DOCUMENT));
     }
 
     public Map<String, String> queries() {
-        return grid.map(name(Type.QUERY));
+        return grid.map(bucket(Type.QUERY));
     }
 
     public Map<String, String> results() {
-        return grid.map(name(Type.RESULT));
+        return grid.map(bucket(Type.RESULT));
     }
 
     public Map<String, String> map(final Type type) {
         Assert.nonNull(type);
-        return grid.map(name(type));
+        return grid.map(bucket(type));
     }
 
     public Map<String, String> resourceMap(final Class<?> resourceType) {

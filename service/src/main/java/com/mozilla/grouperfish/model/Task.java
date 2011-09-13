@@ -39,6 +39,10 @@ public class Task implements Serializable {
         this.failures = new ImmutableList.Builder<String>().addAll(task.failures).add(failure).build();
     }
 
+    public boolean isOk() {
+        return failures.isEmpty();
+    }
+
     public Namespace namespace() {
         return new Namespace(namespace);
     }
@@ -49,7 +53,7 @@ public class Task implements Serializable {
 
     public String toString() {
         final String faildesc = (failures.size() == 0) ? "" : String.format(" (%s failed attempts)", failures.size());
-        return String.format("[Task %s::%s::%s%s]", created(), transform, query, faildesc);
+        return String.format("[Task @%s, T:%s, Q:%s%s]", created(), transform.name(), query.name(), faildesc);
     }
 
     public TransformConfig transform() {

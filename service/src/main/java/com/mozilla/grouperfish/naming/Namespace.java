@@ -36,7 +36,8 @@ public class Namespace {
         }
     }};
 
-    public final String name(final Type type) {
+    /** Buckets are used to name maps on the grid and indexes. */
+    public final String bucket(final Type type) {
         return prefixes.get(type) + namespace;
     }
 

@@ -19,7 +19,8 @@ public class ElasticSearchIndexProvider implements IndexProvider {
     public static final String PROPERTY_CLUSTER_DEFAULT = "grouperfish";
 
     public static final String PROPERTY_TYPE = "grouperfish.services.elasticsearch.type";
-    public static final String PROPERTY_TYPE_DEFAULT = "data";
+    // :TODO: Hack... to simplify, we should use 1 index for all HC maps, and differentiate solely using type.
+    public static final String PROPERTY_TYPE_DEFAULT = "documents";
 
     private final String type;
     private final Client client;
