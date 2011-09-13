@@ -14,6 +14,16 @@ function usage() {
 
 bin=`dirname "$0"`
 bin=`cd $bin; pwd`
+
+if [ ! -f "${bin}/../target/classpath" ]; then
+    if [ ! -d "${bin}/../target/" ]; then
+        mvn compile
+    fi
+    mvn dependency:build-classpath
+fi
+
+
+
 build=$bin/../../build
 build=`cd $build; pwd`
 
@@ -59,13 +69,6 @@ if [ "$HBASE_CONF" = "" ]; then HBASE_CONF="/etc/hbase/conf"; fi
 HAZELCAST_OPTS="-Dhazelcast.logging.type=slf4j -Dhazelcast.config=${HAZELCAST_CONF}"
 BAGHEERA_OPTS="-Dbagheera.log.dir=${bin}/../logs"
 GROUPERFISH_OPTS="-Dgrouperfish.rest.port=${SERVER_PORT}"
-
-if [ ! -f "${bin}/../target/classpath" ]; then
-    if [ ! -d "${bin}/../target/" ]; then
-        mvn compile
-    fi
-    mvn dependency:build-classpath
-fi
 
 mkdir -p "${build}/../logs"
 
