@@ -3,10 +3,8 @@ package com.mozilla.grouperfish.services.elasticsearch;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.action.search.SearchRequestBuilder;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
