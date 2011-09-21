@@ -11,7 +11,7 @@ fi
 
 dest=../../build/tools/firefox_input/
 case "${cmd}" in
-    --build)
+    --build|--package)
         mvn install || exit 1
         mkdir -p "${dest}/lib"
         cp target/grouperfish-*.jar "${dest}/lib/"
@@ -19,7 +19,7 @@ case "${cmd}" in
         ;;
     --clean)
         mvn clean
-        rm -r "${dest}"
+        rm -rf "${dest}"
         ;;
     --help)
         "Usage: ${0} [--build|--clean]"

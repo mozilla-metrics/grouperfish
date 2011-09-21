@@ -3,14 +3,14 @@
 
 <suite name="grouperfish-service-integration" verbose="4">
 
-  <test name="run-integration">
-    <groups>
-      <run>
-        <include name="integration" />
-      </run>
-    </groups>
-    <packages>
-      <package name="com.mozilla.grouperfish.integration.*" />
-    </packages>
-  </test>
+    <test name="run-integration">
+        <groups>
+            <run>
+                <include name="integration" />
+            </run>
+        </groups>
+        <packages>
+            <package name="com.mozilla.grouperfish.integration.*" />
+        </packages>
+    </test>
 </suite>

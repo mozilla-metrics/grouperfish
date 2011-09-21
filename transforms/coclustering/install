@@ -15,7 +15,7 @@ fi
 
 dest=../../build/transforms/coclustering
 case "${cmd}" in
-    --build)
+    --build|--package)
         mvn assembly:assembly || exit 1
         mkdir -p $dest
         cp target/grouperfish-*.jar $dest/
@@ -26,7 +26,7 @@ case "${cmd}" in
         ;;
     --clean)
         mvn clean
-        rm -r "${dest}"
+        rm -rf "${dest}"
         ;;
     --help)
         "Usage: ${0} [--build|--clean]"

@@ -2,14 +2,12 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
 <suite name="grouperfish-tools-fxinput" verbose="4">
-  <test name="run-unit">
-	<groups>
-      <run>
-        <include name="unit" />
-      </run>
-    </groups>
-	<packages>
-      <package name="com.mozilla.grouperfish.tools.firefox_input.*" />
-	</packages>
-  </test>
+    <test name="run-unit">
+        <groups>
+            <run><include name="unit" /></run>
+        </groups>
+        <packages>
+            <package name="com.mozilla.grouperfish.tools.firefox_input.*" />
+        </packages>
+    </test>
 </suite>

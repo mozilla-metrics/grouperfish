@@ -8,15 +8,15 @@ if [[ "${#}" -eq "1" ]]; then
 fi
 
 case "${cmd}" in
-    --build)
+    --build|--package)
         make html || exit 1
         mkdir -p ../build/docs
-        cp -r _build/html ../build/docs
+        cp -rf _build/html ../build/docs
         ;;
     --clean)
         make clean
-        rm -r ../build/docs
-        rm -r _build
+        rm -rf ../build/docs
+        rm -rf _build
         ;;
     --help)
         "Usage: ${0} [--build|--clean]"

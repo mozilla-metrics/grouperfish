@@ -66,7 +66,9 @@ clean() {
 }
 
 build() {
-    what=$1
+    # either --build or --release
+    mode=$1
+    what=$2
     if [[ "YES" = "${all}" ]]; then
         cd ./project && mvn install ; cd ..
     fi
@@ -74,7 +76,7 @@ build() {
         if [[ -x "$component/install" ]]; then
             echo $'\n\n'"Installing $component ..."
             ( cd "${component}"
-              ./install || fail "Installation of '${component}' failed." )
+              ./install $mode || fail "Installation of '${component}' failed." )
         else
             echo "Copying $component ..."
             mkdir -p "build/${component}/"
@@ -87,8 +89,8 @@ package() {
     what=$1
     version="$(cat ./project/VERSION)"
     clean "${what}"
-    build "${what}"
-    tar czf "grouperfish-${version}.tar.gz" build
+    build --package "${what}"
+    tar czf "grouperfish-${version}.tar.gz" ./build
 }
 
 case "${cmd}" in
@@ -96,7 +98,7 @@ case "${cmd}" in
         usage
         ;;
     --build)
-        build "${what}"
+        build --build "${what}"
         ;;
     --clean)
         clean "${what}"

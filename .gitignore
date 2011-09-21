@@ -4,6 +4,7 @@ conf/grouperfish.json
 .classpath
 .settings/
 target/
+data/
 docs/_build
 build
 *.jar

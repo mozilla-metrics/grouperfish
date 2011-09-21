@@ -1,76 +1,76 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>grouperfish-integration-test</artifactId>
     <version>${grouperfishVersion}</version>
-	<parent>
-		<groupId>com.mozilla</groupId>
-		<artifactId>grouperfish-parent</artifactId>
-		<relativePath>../project</relativePath>
-		<version>FIXED</version>
-	</parent>
-	
-	<url>https://github.com/mozilla-metrics/grouperfish</url>
-	
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<skip.tests.unit>false</skip.tests.unit>
-	</properties>
+    <parent>
+        <groupId>com.mozilla</groupId>
+        <artifactId>grouperfish-parent</artifactId>
+        <relativePath>../project</relativePath>
+        <version>FIXED</version>
+    </parent>
 
-	<dependencies>
+    <url>https://github.com/mozilla-metrics/grouperfish</url>
 
-		<dependency>
-			<groupId>com.mozilla</groupId>
-			<artifactId>grouperfish-service</artifactId>
-			<version>0.1-SNAPSHOT</version>
-		</dependency>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skip.tests.unit>false</skip.tests.unit>
+    </properties>
 
-		<dependency>
-			<groupId>com.jayway.restassured</groupId>
-			<artifactId>rest-assured</artifactId>
-			<version>1.2.2</version>
-			<scope>test</scope>
-		</dependency>
+    <dependencies>
 
-	</dependencies>
+        <dependency>
+            <groupId>com.mozilla</groupId>
+            <artifactId>grouperfish-service</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
 
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>1.2.2</version>
+            <scope>test</scope>
+        </dependency>
 
-	<build>
-		<finalName>grouperfish-service</finalName>
-		<plugins>
-
-			<!-- Set compiler level to Java 6 -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-
-			<!-- Test-NG based integration tests -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.5</version>
-				<configuration>
-					<workingDirectory>../build/</workingDirectory>
-					<skip>${skip.tests.unit}</skip>
-					<argLine>-Xms128m -Xmx1024m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
-					<parallel>methods</parallel>
-					<threadCount>1</threadCount>
-					<suiteXmlFiles>
-						<suiteXmlFile>src/test/resources/ng_integration.xml</suiteXmlFile>
-					</suiteXmlFiles>
-				</configuration>
-			</plugin>
-
-		</plugins>
+    </dependencies>
 
 
-	</build>
+    <build>
+        <finalName>grouperfish-service</finalName>
+        <plugins>
+
+            <!-- Set compiler level to Java 6 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+
+            <!-- Test-NG based integration tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <workingDirectory>../build/</workingDirectory>
+                    <skip>${skip.tests.unit}</skip>
+                    <argLine>-Xms128m -Xmx1024m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
+                    <parallel>methods</parallel>
+                    <threadCount>1</threadCount>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/ng_integration.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+
+    </build>
 
 </project>

@@ -12,8 +12,7 @@ fi
 
 dest=../../build/transforms/textcluster
 case "${cmd}" in
-    --build)
-
+    --build|--package)
         mkdir -p lib
         cd lib
         [[ -d stemming ]] ||

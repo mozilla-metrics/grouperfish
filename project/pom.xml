@@ -17,9 +17,10 @@
         <hadoopVersion>0.20.2-cdh3u0</hadoopVersion>
         <mahoutVersion>0.5-cdh3u0</mahoutVersion>
         <elasticsearchVersion>0.17.6</elasticsearchVersion>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<skip.tests.unit>false</skip.tests.unit>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skip.tests.unit>false</skip.tests.unit>
     </properties>
+
 
     <repositories>
         <repository>
@@ -119,26 +120,9 @@
             <artifactId>logback-core</artifactId>
             <version>0.9.20</version>
         </dependency>
-
-        <!--
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
-            <scope>provided</scope>
-        </dependency>
-        -->
         <!-- End of logging configuration. -->
 
     </dependencies>
-
 
 
     <build>

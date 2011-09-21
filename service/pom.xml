@@ -1,219 +1,234 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>grouperfish-service</artifactId>
+    <artifactId>grouperfish-service</artifactId>
     <version>${grouperfishVersion}</version>
-	<parent>
-		<groupId>com.mozilla</groupId>
-		<artifactId>grouperfish-parent</artifactId>
-		<relativePath>../project</relativePath>
-		<version>FIXED</version>
-	</parent>
+    <parent>
+        <groupId>com.mozilla</groupId>
+        <artifactId>grouperfish-parent</artifactId>
+        <relativePath>../project</relativePath>
+        <version>FIXED</version>
+    </parent>
 
-	<url>https://github.com/mozilla-metrics/grouperfish</url>
+    <url>https://github.com/mozilla-metrics/grouperfish</url>
 
-	<packaging>jar</packaging>
+    <packaging>jar</packaging>
 
-	<dependencies>
+    <dependencies>
 
-		<dependency>
-			<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
-			<version>3.0</version>
-		</dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>3.0</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.mozilla</groupId>
-			<artifactId>bagheera</artifactId>
-			<version>0.3-SNAPSHOT</version>
+        <dependency>
+            <groupId>com.mozilla</groupId>
+            <artifactId>bagheera</artifactId>
+            <version>0.3-SNAPSHOT</version>
 
-			<exclusions>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-		<dependency>
-			<groupId>org.elasticsearch</groupId>
-			<artifactId>elasticsearch</artifactId>
-			<version>${elasticsearchVersion}</version>
-		</dependency>
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>${elasticsearchVersion}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>2.0</version>
-		</dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.0</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.0-rc1</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.0-rc1</version>
+            <scope>test</scope>
+        </dependency>
 
-		<!-- Jersey / JAX-RS -->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
-		</dependency>
+        <!-- Jersey / JAX-RS -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-server</artifactId>
-			<version>1.8</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.sun.jersey.contribs</groupId>
-			<artifactId>jersey-multipart</artifactId>
-			<version>1.8</version>
-		</dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>1.8</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.sun.jersey.contribs</groupId>
-			<artifactId>jersey-guice</artifactId>
-			<version>1.8</version>
-		</dependency>
-		<!-- End of Jersey / JAX-RS -->
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-multipart</artifactId>
+            <version>1.8</version>
+        </dependency>
 
-		<!-- Hadoop -->
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-core</artifactId>
-			<version>${hadoopVersion}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>jasper-runtime</artifactId>
-					<groupId>tomcat</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-httpclient</artifactId>
-					<groupId>commons-httpclient</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>hsqldb</artifactId>
-					<groupId>hsqldb</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-cli</artifactId>
-					<groupId>commons-cli</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jsp-api</artifactId>
-					<groupId>javax.servlet</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>hadoop-ant</artifactId>
-					<groupId>com.cloudera.cdh</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-net</artifactId>
-					<groupId>commons-net</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jasper-compiler</artifactId>
-					<groupId>tomcat</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-el</artifactId>
-					<groupId>commons-el</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>ant</artifactId>
-					<groupId>ant</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jets3t</artifactId>
-					<groupId>net.java.dev.jets3t</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>xmlenc</artifactId>
-					<groupId>xmlenc</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>core</artifactId>
-					<groupId>org.eclipse.jdt</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-codec</artifactId>
-					<groupId>commons-codec</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>oro</artifactId>
-					<groupId>oro</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jsp-api</artifactId>
-					<groupId>javax.servlet.jsp</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<!-- End of Hadoop -->
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-guice</artifactId>
+            <version>1.8</version>
+        </dependency>
+        <!-- End of Jersey / JAX-RS -->
 
-	</dependencies>
+        <!-- Hadoop -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-core</artifactId>
+            <version>${hadoopVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jasper-runtime</artifactId>
+                    <groupId>tomcat</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-httpclient</artifactId>
+                    <groupId>commons-httpclient</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hsqldb</artifactId>
+                    <groupId>hsqldb</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-cli</artifactId>
+                    <groupId>commons-cli</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jsp-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-ant</artifactId>
+                    <groupId>com.cloudera.cdh</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-net</artifactId>
+                    <groupId>commons-net</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jasper-compiler</artifactId>
+                    <groupId>tomcat</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-el</artifactId>
+                    <groupId>commons-el</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>ant</artifactId>
+                    <groupId>ant</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jets3t</artifactId>
+                    <groupId>net.java.dev.jets3t</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>xmlenc</artifactId>
+                    <groupId>xmlenc</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>core</artifactId>
+                    <groupId>org.eclipse.jdt</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-codec</artifactId>
+                    <groupId>commons-codec</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>oro</artifactId>
+                    <groupId>oro</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jsp-api</artifactId>
+                    <groupId>javax.servlet.jsp</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- End of Hadoop -->
+
+    </dependencies>
 
 
-	<build>
-		<finalName>grouperfish-service</finalName>
-		<plugins>
+    <build>
+        <finalName>grouperfish-service</finalName>
+        <plugins>
 
-			<!-- Test-NG based unit tests -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.5</version>
-				<configuration>
-					<skip>${skip.tests.unit}</skip>
-					<argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
-					<parallel>methods</parallel>
-					<threadCount>1</threadCount>
-					<workingDirectory>${project.build.directory}/test-classes</workingDirectory>
-					<suiteXmlFiles>
-						<suiteXmlFile>src/test/resources/ng_unit.xml</suiteXmlFile>
-					</suiteXmlFiles>
-				</configuration>
-			</plugin>
+            <!-- Test-NG based unit tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <skip>${skip.tests.unit}</skip>
+                    <argLine>-Xms128m -Xmx768m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
+                    <parallel>methods</parallel>
+                    <threadCount>1</threadCount>
+                    <workingDirectory>${project.build.directory}/test-classes</workingDirectory>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/ng_unit.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
+            </plugin>
 
-			<!-- Standard jar packaging -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.1</version>
-				<configuration>
-					<finalName>${project.name}-${project.version}</finalName>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<classpathPrefix>${settings.localRepository}</classpathPrefix>
-							<classpathLayoutType>repository</classpathLayoutType>
-							<mainClass>com.mozilla.grouperfish.bootstrap.Grouperfish</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
+            <!-- mvn install
+                 - standard jar package with dependencies in local maven repo, for development/testing -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <finalName>${project.name}-${project.version}</finalName>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>${settings.localRepository}</classpathPrefix>
+                            <classpathLayoutType>repository</classpathLayoutType>
+                            <mainClass>com.mozilla.grouperfish.bootstrap.Grouperfish</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
 
-            <!-- Test faster without jar packaging. Used by bin/quickstart -->
+            <!-- mvn dependency:build-classpath
+                 - no packaging: just use class files for rapid development 
+                 - used by bin/quickstart -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <configuration>
-                   <outputFile>${project.build.directory}/classpath</outputFile>
+                    <outputFile>${project.build.directory}/classpath</outputFile>
                 </configuration>
             </plugin>
 
+            <!-- mvn dependency:copy-dependencies
+                 - Copy dependencies to create a distribution (used by ./install) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <goals>
+                    <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                </configuration>
+            </plugin>
 
-		</plugins>
+        </plugins>
 
-	</build>
+    </build>
 
 </project>

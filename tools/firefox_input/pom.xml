@@ -20,13 +20,13 @@
         <skip.tests.unit>false</skip.tests.unit>
     </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.mozilla</groupId>
-			<artifactId>grouperfish-service</artifactId>
-			<version>${grouperfishVersion}</version>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.mozilla</groupId>
+            <artifactId>grouperfish-service</artifactId>
+            <version>${grouperfishVersion}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <finalName>grouperfish-service</finalName>

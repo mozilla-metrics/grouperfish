@@ -12,16 +12,27 @@ if [[ "${#}" -eq "1" ]]; then
     fi
 fi
 
+build() {
+    mvn install || exit 1
+    mkdir -p ../build/lib ../build/conf ../build/bin
+    cp target/grouperfish-service-*.jar ../build/lib/
+    cp conf/* ../build/conf/
+    cp bin/grouperfish ../build/bin/
+}
+
+package() {
+    mvn dependency:copy-dependencies || exit 1
+    cp target/lib/* ../build/lib
+}
+
 
 case "${cmd}" in
     --build)
-        mvn install || exit 1
-        mkdir -p ../build/lib/
-        cp target/grouperfish-service-*.jar ../build/lib/
-        mkdir -p ../build/conf
-        cp conf/* ../build/conf/
-        mkdir -p ../build/bin/
-        cp bin/grouperfish ../build/bin/
+        build
+        ;;
+    --package)
+        build
+        package
         ;;
     --clean)
         mvn clean
