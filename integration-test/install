@@ -8,12 +8,12 @@ if [[ "${#}" -eq "1" ]]; then
 fi
 
 case "${cmd}" in
-    --build)
+    --build|--package)
         mvn test || exit 1
         ;;
     --clean)
         mvn clean
-        rm -r target
+        rm -rf target
         ;;
     --help)
         "Usage: ${0} [--build|--clean]"

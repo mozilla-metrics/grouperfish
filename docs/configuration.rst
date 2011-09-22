@@ -1,7 +1,0 @@
-.. _configuration:
-
-=============
-Configuration
-=============
-
-TBD

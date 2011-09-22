@@ -4,11 +4,14 @@
 Rest API
 ========
 
+This is a somewhat formal specification of the Grouperfish REST api. Look at
+the :ref:`usage` chapter for specific examples.
+
 
 Primer
 ------
 
-Rest talks about *resources*, *entities* and *methods*:
+The REST architecture talks about *resources*, *entities* and *methods*:
 
 * In grouperfish, each *entity* (*document*, *result*, *query*,
   *configuration*) is represented as a piece of JSON.
@@ -135,9 +138,8 @@ transform configuration named *themes*, you can get results like this:
 
     curl -XGET /results/mike/themes/myQ?facets=product%3AFirefox%20version%3A5
 
-**TBD:** The entity type *result* is currently not fully specified. There will be
-variations depending on the transform that is actually used.
-
+What exactly a result looks like is specific to the transform. See
+:ref:`transforms` for details.
 
 
 For Admins
@@ -163,7 +165,9 @@ Methods      ``PUT``, ``GET``, ``DELETE``
 
 Type is currently one of ``"transform"`` and ``"filter"``.
 
-.. seealso:: :ref:`configuration`, :ref:`transforms`, :ref:`filters`
+.. note:: Filters are not yet available as of Grouperfish 0.1
+
+.. seealso:: :ref:`transforms`, :ref:`filters`
 
 
 Batch Runs

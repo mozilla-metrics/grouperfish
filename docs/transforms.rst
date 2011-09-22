@@ -22,123 +22,87 @@ Primarily, a transform configuration parameterizes its transform (e.g. for
 clustering, it might specify the desired number of clusters). It can also be
 used to tell the  Grouperfish batch system how to interact with a transform.
 
-TBD: Exact contents of a transform configuration
+Currently, a transform configuration is a JSON document with two fields: The
+*transform* determines which piece of software to use, and *parameters* tells
+that software what to do.
+Example configuration for the *textcluster* transform:
+
+::
+
+    {
+        "transform": "textcluster",
+        "parameters": {
+            "fields": {"id": "id", "text": "text"},
+            "limits": {"clusters": 10,"top_documents": 10}
+        }
+    }
 
 
 Result Types
 ------------
 
-Clusters
-^^^^^^^^
+Topics (or Clusters)
+^^^^^^^^^^^^^^^^^^^^
 
-All unsupervised clustering results will guarantee the production of a
-results.JSON object that will contain keys as cluster IDs and values as an
-object that contains ``TOP_DOCS`` and ``TOP_FEATURES``.
+Clustering transforms try to extract the main topics from a set of documents.
+As of Grouperfish version 0.1, the only available transform is a clustering
+transform named textcluster. The results of clustering transform are topics,
+the structure of the result is as follows:
+
+::
+
+    {
+        "clusters": [
+            {
+                "top_documents": [{...}, {...}, ..., {...}],
+                "top_terms": ["Something", "Else", ..., "Another"]
+            },
+            ...
+        ]
+    }
+
+Depending on the actually configured transform, only top documents *or* top
+terms might be generated for a topic. Also, any given transform might add
+other top-level fields than just *clusters*.
 
 
 Available Transforms
 --------------------
 
-Co-Clustering
-^^^^^^^^^^^^^
+textcluster
+^^^^^^^^^^^
 
-* ``parameters.json``
+Textcluster is a relatively simple clustering algorithm written in Python by
+Dave Dash for Firefox Input. It is very fast for small input sets, but
+requires a lot of memory, especially when processing more than 10,000
+documents at a time. Textcluster is `available on github`__.
 
-::
+.. __: https://github.com/davedash/textcluster
 
-    {
-      "text" : {
-        "STOPWORDS" : [ "the", "cat" ]
-        "STEM": "false",
-        "MIN_WORD_LEN": "2",
-        "MIN_DF": "1",
-        "MAX_DF_PERCENT": "0.99",
-        "DOC_COL_ID": "id",
-        "TEXT_COL_ID": "text"
-      },
-      "mapreduce":{
-        "NUM_REDUCERS": "7"
-      },
-      "transform":{
-        "KMEANS_NUM_CLUSTERS": "10",
-        "KMEANS_NUM_ITERATIONS": "20",
-        "SSVD_MULTIPLIER": "5",
-        "SSVD_BLOCK_HEIGHT": "30000",
-        "KMEANS_DELTA": "0.1",
-        "KMEANS_DISTANCE": "CosineDistanceMeasure"
+In Grouperfish, you can select how many topics you want textcluster to
+extract, and how many documents to include in the results for each topic.
+
+* Parameters
+
+  ::
+
+      {
+          "fields": {
+              "id": "id",
+              "text": "text"
+          },
+          "limits": {
+              "clusters": 10,
+              "top_documents": 10
+          }
       }
-    }
+
+  These are the default parameters (top 10 topics/clusters,
+  with 10 documents each).
 
 
-    * "text"
+* Results
 
-        - STOPWORDS : A list of stopwords to use.
-        - STEM : "true" or "false" determines whether to use Porter Stemming or
-                not
-        - MIN_WORD_LEN : Any tokens of size less than this are discarded.
-        - MIN_DF : Minimum allowed occurrences of a token in corpus
-        - MAX_DF_PERCENT : Maximum number of occurrences of token in corpus.
-        - DOC_COL_ID : Key in input.tsv which serves as identifier.
-        - TEXT_COL_ID : Key in input.tsv that serves as text to be clustered.
-
-    * "mapreduce"
-
-        - NUM_REDUCERS : Number of reducers to be set in Pig/Hadoop/Mahout.
-
-    * "transform"
-
-        - KMEANS_NUM_CLUSTERS : Number of clusters to set. (Recommended < 30 )
-        - KMEANS_NUM_ITERATIONS : Number of iterations to run KMeans part of
-                    algorithms
-        - SSVD_MULTIPLIER : Mahout parameter. (Recommend : don't change)
-        - SSVD_BLOCK_HEIGHT : Mahout parameter. (Recommend : set at 30,000 )
-        - KMEANS_DELTA : Relax to 0.5  - 0.8 for larger datasets.
-        - KMEANS_DISTANCE : CosineDistanceMeasure OR EuclideanDistanceMeasure
-
-
-
-* ``results.json``
-
-  The results.json is an object that contains cluster ID as key and value as an
-  object that contains keys ``TOP_DOCS`` and ``TOP_FEATURES`` and values as an
-  array of top documents and top features respectively.
-
-  Example:
-
-::
-
-    {
-      "1": { "TOP_DOCS": ["48\t no flash", "32\t I love firefox"],
-             "TOP_FEATURES": ["flash", "firefox" ] },
-      ...
-    }
-    ...
-
-* ``tags.json``
-
-    Example:
-
-::
-
-    {
-        "232": [ "13" ],
-        "43": [ "32" ]
-    }
-
-
-References:
-~~~~~~~~~~~
-    1. Dhillon, I. (2001). Co-clustering documents and words using bipartite
-       spectral graph partitioning. In Proceedings of the seventh ACM SIGKDD
-       international conference on Knowledge discover aand data mining (KDD)
-       (pp.269 – 274). New York: ACM Press.
-
-
-LDA
-^^^
-
-Result Type
-    Clusters
-
-TBD: Describe how it works, link to papers, what parameters are available
+  Textcluster uses the standard clustering result format (see above), but does
+  not inclue top terms, only documents.
 

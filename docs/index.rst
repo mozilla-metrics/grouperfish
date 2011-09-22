@@ -16,7 +16,7 @@ Contents:
    architecture
    installation
    rest_api
-   configuration
+   usage
    filters
    batch_system
    transforms

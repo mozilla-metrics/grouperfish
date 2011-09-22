@@ -40,13 +40,12 @@ cluster documents in the same language together.
 Storage
 -------
 
-The storage system stores everything
-It stores everything that is inserted into Grouperfish and
-makes it available for retrieval.
-Under the hood, the Bagheera_ component is
+The storage system stores that is inserted into Grouperfish and makes it
+available for retrieval. Under the hood, the Bagheera_ component is
 used to manage storage, indexing and caching.
 
 .. _Bagheera: https://github.com/mozilla-metrics/bagheera
+
 
 The Batch System
 ----------------
@@ -65,7 +64,8 @@ Queries help the batch system determine which documents to process.
 In Grouperfish, a query is represented as a JSON-document that conforms to the
 ElasticSearch `Query DSL`_.
 Internally, all stored documents are indexed by ElasticSearch,
-and each query is actually processed by ElasticSearch itself.
+and each query is actually processed only by ElasticSearch itself (and not by
+Grouperfish).
 
 .. _`Query DSL`: http://www.elasticsearch.org/guide/reference/query-dsl/
 
@@ -79,10 +79,9 @@ They can be implemented in arbitrary technologies and programming languages,
 e.g. using the hadoop Map/Reduce, as long as they can be setup and executed on
 a Unix-like platform.
 
-Other than the batch system and the REST service,
-transforms are not aware of things such as queries or namespaces.
-They act only based on data that is immediately presented to them by the
-system.
+Other than the batch system and the REST service, transforms are not aware of
+things such as queries or namespaces. They act only based on data that is
+immediately presented to them by the system.
 
 .. seealso:: :ref:`transforms`
 
@@ -97,18 +96,25 @@ When the batch process is triggered for a namespace:
 
 * The system uses the first query to get all matching documents from
   ElasticSearch.
-  It exports this first set of documents into HDFS for the
-  transform to use (*TODO: Only HDFS? --- can't we also configure things to run
-  locally when hadoop is not available/needed?*).
 
-* The system also puts the transform parameters
-  (from the transform configuration)
+  It exports this first set of documents to a file system, as input to the
+  transform. Transforms run either
+
+  - *locally*, working in a directory on a locally mounted file system
+
+  - or *distributed*, that is, managed by Hadoop
+
+    Such transforms are working in an HDFS directory.
+
+
+* The system also puts the *transform parameters*
+  (from the transform's configuration)
   into a place where the transform can use them.
 
-* Finally,
-  the transform is launched and receives the location of the source
+* Finally, the transform is launched and receives the location of the source
   documents and of the configuration as a parameter.
-  If it succeeds, the generated result is put into storage.
+
+  If such a *batch run* succeeds, the generated result is put into storage.
 
 * These steps are repeated for all other combinations of query and transform
   configuration.

@@ -56,6 +56,7 @@ Result Consumer
     Some user/software that gets the generated results.
 
 Admin
-    A user who configures which subsets of documents to transform, and how.
+    A user who configures which subsets of documents to transform, but also
+    how and when to do that.
 
 
