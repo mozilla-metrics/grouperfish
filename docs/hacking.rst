@@ -18,17 +18,20 @@ Maven
 JDK 6
     Java 6 Standard Edition should work fine.
 
+Git & Mercurial
+    To get the Grouperfish source and dependencies.
+
 Sphinx
     For documentation.  Best installed by running
 
-::
+    ::
 
         easy_install Sphinx
 
 The Source
     To obtain the (latest) source using **git**:
 
-::
+    ::
 
         > git clone git://github.com/mozilla-metrics/grouperfish.git
         > cd grouperfish
@@ -44,14 +47,15 @@ Building it:
     > ./install --package   # Creates grouperfish-$VERSION.tar.gz
 
 When building, you might get Maven warnings due to expressions in the
-``'version'`` field, which can be ignored.
+``'version'`` field, which can be safely ignored.
 
 Coding Style
 ------------
 
-In general, consistency with existing surrounding code / module is more
-important for a patch than adherence to these rules (local consistency over
-global consistency).
+In general, consistency with existing surrounding code / the current module is
+more important for a patch than adherence to the rules listed here (local
+consistency wins over global consistency).
+
 Wrap text (documentation, doc comments) and Python at 80 columns, everything
 else (especially Java) at 120.
 
@@ -72,7 +76,8 @@ Java
     * No ``static`` fields without ``final``.
 
     For Java projects (service, transforms, filters), *Maven* is encouraged as
-    the build-tool (but not required).
+    the build-tool (but not required). To edit  source files using Eclipse,
+    the ``m2eclipse`` plugin can be used.
 
 Python
     Follow `PEP 8`_
@@ -133,18 +138,20 @@ when creating a grouperfish tarball.
     install*
     ...
     service/
-       install*
-       pom.xml
-       ...
+        install*
+        pom.xml
+        ...
     tools/
-       webui/
-          index.html
-          ...
-       ...
+        firefox_input/
+            ...
+        webui/
+            index.html
+            ...
+        ...
     transforms/
-       coclustering/
-          install*
-          ...
+        coclustering/
+            install*
+            ...
 
 
 The Build Tree
@@ -169,11 +176,14 @@ components (other binaries should go to the respective subfolder).
             ...
         lib/
             grouperfish-service.jar
+            ...
         transforms/
             coclustering/
                 coclustering*
                 ...
         tools/
+            firefox_input/
+                ...
             webui/
                 index.html
                 ...
@@ -187,8 +197,13 @@ The Service Sub-Project
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``service/`` folder in the source tree contains the REST and batch
-drivers. It is the code that is run when you "start" Grouperfish, and which
-launches filters and transforms as needed.
+system implementation. It is the code that is run when you "start"
+Grouperfish, and which launches filters and transforms as needed.
+
+The service is started using ``bin/grouperfish``. For development, the
+alternative ``bin/littlefish`` is useful, which can be called directly from
+the source tree (after an ``mvn compile`` or the equivalent eclipse build),
+without packaging the service as a jar first.
 
 It is organized into some basic shared packages, and three *modules* which
 expose interfaces and components to be configured and replaced independent of
@@ -262,8 +277,8 @@ Guice imports are mostly used...
 
 * where it is bootstrapped
 
-* and in REST resources that are instantiated by `jersey-guice`_
+* and in REST resources that are instantiated by `jersey-guice`__
 
-.. _`jersey-guice`:
+.. __:
    http://jersey.java.net/nonav/apidocs/1.1.0-ea/contribs/jersey-guice/
 
