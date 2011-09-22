@@ -18,7 +18,7 @@ import org.apache.pig.data.Tuple;
 
 public class VWStorage extends StoreFunc {
 
-    private static final Logger LOG = Logger.getLogger(DocumentVectorStorage.class);
+    private static final Logger LOG = Logger.getLogger(VWStorage.class);
     
     private static final String PIPE = "|";
     private static final String SPACE = " ";
@@ -49,8 +49,9 @@ public class VWStorage extends StoreFunc {
     @SuppressWarnings("unchecked")
     @Override
     public void putNext(Tuple tuple) throws IOException {
+        String docId = (String)tuple.get(0);
+        StringBuilder sb = new StringBuilder(docId + PIPE + SPACE);
         Tuple vectorTuple = (Tuple)tuple.get(1);
-        StringBuilder sb = new StringBuilder(PIPE + SPACE);
         int vectorSize = vectorTuple.size();
         for (int i=0; i < vectorSize; i++) {
             Object o = vectorTuple.get(i);
