@@ -90,7 +90,8 @@ package() {
     version="$(cat ./project/VERSION)"
     clean "${what}"
     build --package "${what}"
-    tar czf "grouperfish-${version}.tar.gz" ./build
+    mv ./build "./grouperfish-${version}"
+    tar czf "grouperfish-${version}.tar.gz" "./grouperfish-${version}"
 }
 
 case "${cmd}" in
