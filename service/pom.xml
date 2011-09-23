@@ -165,6 +165,7 @@
 
     <build>
         <finalName>grouperfish-service</finalName>
+
         <plugins>
 
             <!-- Test-NG based unit tests -->
@@ -184,8 +185,7 @@
                 </configuration>
             </plugin>
 
-            <!-- mvn install
-                 - standard jar package with dependencies in local maven repo, for development/testing -->
+            <!-- mvn install - standard jar package with dependencies in local maven repo, for development/testing -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -203,31 +203,67 @@
                 </configuration>
             </plugin>
 
-            <!-- mvn dependency:build-classpath
-                 - no packaging: just use class files for rapid development 
-                 - used by bin/quickstart -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+
+                    <!-- no packaging: just use class files for rapid development - used by bin/quickstart -->
+                    <execution>
+                        <id>cp-classpath</id>
+                        <goals>
+                            <goal>build-classpath</goal>
+                        </goals>
+                        <phase>install</phase>
+                    </execution>
+
+                    <!-- Copy dependencies to create a distribution (used by ./install) -->
+                    <execution>
+                        <id>cp-deps</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <outputFile>${project.build.directory}/classpath</outputFile>
-                </configuration>
-            </plugin>
-
-            <!-- mvn dependency:copy-dependencies
-                 - Copy dependencies to create a distribution (used by ./install) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <goals>
-                    <goal>copy-dependencies</goal>
-                </goals>
-                <configuration>
                     <outputDirectory>${project.build.directory}/lib</outputDirectory>
                 </configuration>
             </plugin>
 
         </plugins>
+
+
+        <!-- Makes m2eclipse ignore unsupported plugin/goal combination. -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-dependency-plugin</artifactId>
+                                        <versionRange>[1.0.0,)</versionRange>
+                                        <goals>
+                                            <goal>copy-dependencies</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore />
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 
     </build>
 
