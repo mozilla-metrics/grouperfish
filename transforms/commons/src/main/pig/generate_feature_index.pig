@@ -1,5 +1,5 @@
 register './akela-0.2-SNAPSHOT.jar'
-register './grouperfish-transforms-commons-0.1-SNAPSHOT.jar'
+register './grouperfish-transforms-commons-0.1.0.jar'
 register './lib/lucene-core-3.1.0.jar'
 register './lib/lucene-analyzers-3.1.0.jar'
 

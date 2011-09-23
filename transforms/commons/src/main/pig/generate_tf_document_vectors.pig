@@ -1,5 +1,5 @@
 register './akela-0.2-SNAPSHOT.jar'
-register './grouperfish-transforms-commons-0.1-SNAPSHOT.jar'
+register './grouperfish-transforms-commons-0.1.0.jar'
 register './lib/lucene-core-3.1.0.jar'
 register './lib/lucene-analyzers-3.1.0.jar'
 
@@ -28,15 +28,15 @@ STORE feature_vectors INTO '$OUTPUT' USING com.mozilla.grouperfish.pig.storage.V
 
 /* Run VW LDA on this output */
 /*
-./vw 
+./vw
 */
 /* Run Mahout's Clustering on this output */
 /*
-/usr/lib/hadoop/bin/hadoop jar /usr/lib/mahout/mahout-core-0.5-job.jar org.apache.mahout.driver.MahoutDriver lda 
--i document-vectors-tf 
--o lda-out 
--ow 
--k 20 
+/usr/lib/hadoop/bin/hadoop jar /usr/lib/mahout/mahout-core-0.5-job.jar org.apache.mahout.driver.MahoutDriver lda
+-i document-vectors-tf
+-o lda-out
+-ow
+-k 20
 -v 12000
 -x 20
 */
