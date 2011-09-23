@@ -5,8 +5,8 @@ import static com.mozilla.grouperfish.base.ImmutableTools.immutable;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 import com.mozilla.grouperfish.base.Assert;
 
@@ -16,6 +16,14 @@ public abstract class NamedSource implements Serializable {
     private final String name;
     private final String source;
     private transient Map<String, ? extends Object> fields;
+
+    private static final TypeReference<Map<String, ? extends Object>> fieldsType =
+            new TypeReference<Map<String, ? extends Object>>() {};
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    private static final long serialVersionUID = 0;
+
 
     NamedSource(final String name, final String source) {
         Assert.nonNull(name, source);
@@ -33,13 +41,19 @@ public abstract class NamedSource implements Serializable {
         Assert.check(!name.isEmpty());
         this.name = name;
         this.fields = fields;
-        this.source = JSONObject.toJSONString(fields);
+        try {
+            this.source = mapper.writeValueAsString(fields);
+        }
+        catch (final Exception e) {
+            final String message = String.format(
+                    "Failed to encode fields as JSON for %s with name='%s'", getClass().getSimpleName(), name);
+            throw new IllegalArgumentException(message, e);
+        }
     }
 
     public String toString() {
         return String.format("[%s %s, source.length=%s]", getClass().getSimpleName(), name(), source().length());
     }
-
 
     public String name() {
         return name;
@@ -49,20 +63,19 @@ public abstract class NamedSource implements Serializable {
         return source;
     }
 
-    @SuppressWarnings("unchecked")
     public Map<String, ? extends Object> fields() {
         if (fields != null) return fields;
         try {
-            fields = immutable((Map<String, ? extends Object>) new JSONParser().parse(source()));
-        } catch (Exception e) {
-            String message = String.format("Failed to parse source for %s with id='%s'",
-                                           getClass().getSimpleName(), name);
-            Assert.unreachable(message, e);
+            final Map<String, ? extends Object> map = mapper.readValue(source, fieldsType);
+            fields = immutable(map);
+        }
+        catch (final Exception e) {
+            final String message = String.format(
+                    "Failed to parse source for %s with name='%s'", getClass().getSimpleName(), name);
+            throw new IllegalArgumentException(message, e);
         }
         Assert.check(fields instanceof Map);
         return fields;
     }
-
-    private static final long serialVersionUID = 0;
 
 }

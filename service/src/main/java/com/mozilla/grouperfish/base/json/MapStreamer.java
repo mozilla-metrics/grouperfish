@@ -7,7 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Map;
 
-import org.json.simple.JSONValue;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import com.mozilla.grouperfish.base.StreamTool;
 
@@ -20,6 +20,8 @@ public class MapStreamer {
 
     private final Map<String, String> map;
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     public MapStreamer(final Map<String, String> map) {
         this.map = map;
     }
@@ -29,7 +31,7 @@ public class MapStreamer {
         boolean first = true;
 
         writer.write('{');
-        for (final Map.Entry<String, String> items : map.entrySet()) {
+        for (final Map.Entry<String, String> item : map.entrySet()) {
             if (first) {
                 first = false;
             }
@@ -39,12 +41,10 @@ public class MapStreamer {
             }
 
             writer
-                .append('"')
-                .append(JSONValue.escape(items.getKey()))
-                .append('"')
+                .append(mapper.writeValueAsString(item.getKey()))
                 .append(':')
                 .append(' ')
-                .write(items.getValue());
+                .write(item.getValue());
         }
         writer.write('}');
         writer.flush();
